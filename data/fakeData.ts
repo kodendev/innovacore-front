@@ -1,4 +1,4 @@
-import { Ingredient } from "@/types/types";
+import { Ingredient, Supplier } from "@/types/types";
 
 export const initialIngredients: Ingredient[] = [
   {
@@ -69,7 +69,7 @@ export const initialIngredients: Ingredient[] = [
   },
 ];
 
-export const suppliers = [
+export const suppliers: Supplier[] = [
   {
     id: 1,
     name: "Carnicería Central",

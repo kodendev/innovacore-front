@@ -146,7 +146,7 @@ export default function InventarioPage() {
             </TabsContent>
 
             <TabsContent value="suppliers">
-              <SuppliersTab suppliers={suppliers} />
+              <SuppliersTab />
             </TabsContent>
 
             <TabsContent value="reports">
