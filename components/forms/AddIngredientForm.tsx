@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Ingredient } from "@/types/types";
+import { toast } from "sonner";
 
 export type NewIngredient = Omit<Ingredient, "id" | "status">;
 
@@ -38,6 +39,7 @@ export const AddIngredientForm = ({ onAdd }: AddIngredientFormProps) => {
       supplier: "",
       contact: "",
     });
+    toast.success(`Ingrediente ${formData.name} agregado exitosamente`);
   };
 
   return (

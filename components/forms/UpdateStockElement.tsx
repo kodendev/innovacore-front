@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Ingredient } from "@/types/types";
+import { toast } from "sonner";
 
 interface StockUpdateDialogProps {
   ingredient: Ingredient;
@@ -30,6 +31,7 @@ export function StockUpdateDialog({
   const handleUpdate = () => {
     onUpdate(ingredient.id, Number.parseFloat(newQuantity));
     setIsOpen(false);
+    toast.success(`Stock actualizado para ${ingredient.name}`);
   };
 
   return (
@@ -41,9 +43,9 @@ export function StockUpdateDialog({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Actualizar Stock - {ingredient.name}</DialogTitle>
+          <DialogTitle>Actualizar Stock - {ingredient?.name}</DialogTitle>
           <DialogDescription>
-            Stock actual: {ingredient.quantity} {ingredient.unit}
+            Stock actual: {ingredient?.quantity} {ingredient?.unit}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">

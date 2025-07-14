@@ -12,7 +12,7 @@ const fetchSuppliers = async (): Promise<Supplier[]> => {
 };
 export function useSuppliers() {
   return useQuery({
-    queryKey: ["ingredients"],
+    queryKey: ["suppliers"],
     queryFn: fetchSuppliers,
     staleTime: 0, // 5 minutos
   });

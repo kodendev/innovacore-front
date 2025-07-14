@@ -1,5 +1,4 @@
 // components/Tabs/SuppliersTab.tsx
-import { Supplier } from "@/types/types";
 import {
   Card,
   CardHeader,
@@ -13,16 +12,18 @@ import Spinner from "../spinners/Spinner";
 
 export const SuppliersTab = () => {
   const { data, isLoading } = useSuppliers();
+
+  console.log(data);
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {isLoading && <Spinner isLoading={isLoading} />}
       {data &&
-        data.map((supplier) => (
+        data?.map((supplier) => (
           <Card key={supplier.id}>
             <CardHeader>
               <CardTitle>{supplier.name}</CardTitle>
               <CardDescription>
-                Productos: {supplier.products.join(", ")}
+                Productos: {supplier?.products.join(", ")}
               </CardDescription>
             </CardHeader>
             <CardContent>
