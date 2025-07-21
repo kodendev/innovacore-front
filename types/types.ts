@@ -1,3 +1,4 @@
+import { Package } from "lucide-react";
 export interface Ingredient {
   id: number;
   name: string;
@@ -10,7 +11,17 @@ export interface Ingredient {
   status: StockStatus;
 }
 
-export type StockStatus = "ok" | "low" | "critical";
+export interface Product {
+  name: string;
+  description: string;
+  sale_price: number;
+  cost_price: number;
+  barcode: string;
+  active: boolean;
+  stock: number;
+}
+
+export type StockStatus = "Activo" | "Inactivo";
 
 export interface Supplier {
   id: number;

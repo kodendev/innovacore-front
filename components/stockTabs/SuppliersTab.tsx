@@ -9,9 +9,14 @@ import {
 import { Phone } from "lucide-react";
 import { useSuppliers } from "@/hooks/tanstack/useSuppliers";
 import Spinner from "../spinners/Spinner";
+import { Button } from "../ui/button";
 
 export const SuppliersTab = () => {
   const { data, isLoading } = useSuppliers();
+
+  const handleEditSupplier = (supplierId: number) => {
+    console.log(`Edit supplier with ID: ${supplierId}`);
+  };
 
   console.log(data);
   return (
@@ -22,6 +27,7 @@ export const SuppliersTab = () => {
           <Card key={supplier.id}>
             <CardHeader>
               <CardTitle>{supplier.name}</CardTitle>
+
               <CardDescription>
                 Productos: {supplier?.products.join(", ")}
               </CardDescription>
@@ -33,6 +39,12 @@ export const SuppliersTab = () => {
                   <span>{supplier.contact}</span>
                 </div>
                 <div className="text-sm text-gray-600">{supplier.email}</div>
+                <Button
+                  className="p-4 mt-4 bg-green-500"
+                  onClick={() => handleEditSupplier(supplier.id)}
+                >
+                  Editar Proveedor
+                </Button>
               </div>
             </CardContent>
           </Card>

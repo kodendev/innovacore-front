@@ -1,10 +1,10 @@
 import { Package, Calendar, Phone } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Ingredient, StockStatus } from "@/types/types";
-import { StockUpdateDialog } from "@/components/forms/UpdateStockElement";
-import { useIngredients } from "@/hooks/tanstack/useIngredients";
+import { Ingredient } from "@/types/types";
+import { useProducts } from "@/hooks/tanstack/useProducts";
 import { ClipLoader } from "react-spinners";
+import { getBadgeLabel, getBadgeVariant } from "@/utils/badge_variants";
 
 interface Props {
   ingredients?: Ingredient[];
@@ -12,7 +12,9 @@ interface Props {
 }
 
 export const InventoryTab = ({ onUpdate }: Props) => {
-  const { data, isLoading } = useIngredients();
+  const { data, isLoading } = useProducts();
+
+  console.log(data);
 
   return (
     <>
@@ -24,7 +26,7 @@ export const InventoryTab = ({ onUpdate }: Props) => {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {data?.map((ingredient) => (
           <Card
-            key={ingredient.id}
+            key={ingredient.name}
             className="hover:shadow-lg transition-shadow"
           >
             <CardHeader>
@@ -33,8 +35,14 @@ export const InventoryTab = ({ onUpdate }: Props) => {
                   <Package className="h-5 w-5" />
                   {ingredient.name}
                 </span>
-                <Badge variant={getBadgeVariant(ingredient.status)}>
-                  {getBadgeLabel(ingredient.status)}
+                <Badge
+                  variant={getBadgeVariant(
+                    ingredient.active === true ? "Activo" : "Inactivo"
+                  )}
+                >
+                  {getBadgeLabel(
+                    ingredient.active === true ? "Activo" : "Inactivo"
+                  )}
                 </Badge>
               </CardTitle>
             </CardHeader>
@@ -42,29 +50,38 @@ export const InventoryTab = ({ onUpdate }: Props) => {
               <div className="space-y-3">
                 <InfoRow
                   label="Stock actual:"
-                  value={`${ingredient.quantity} ${ingredient.unit}`}
+                  value={`${ingredient.stock} kg`}
                 />
                 <InfoRow
                   label="Stock mínimo:"
-                  value={`${ingredient.minStock} ${ingredient.unit}`}
+                  value={`${ingredient.stock} kg`}
                 />
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <Calendar className="h-4 w-4" />
-                  <span>Vence: {ingredient.expiry}</span>
+                  <span>Vence: 25/07/2025</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Calendar className="h-4 w-4" />
+                  <span>Precio de costo : {ingredient.cost_price}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Calendar className="h-4 w-4" />
+                  <span>Precio de venta : {ingredient.sale_price}</span>
                 </div>
                 <div className="text-sm">
-                  <div className="font-medium">{ingredient.supplier}</div>
+                  <div className="font-medium">Mayorista SRL</div>
                   <div className="flex items-center gap-1 text-gray-600">
                     <Phone className="h-3 w-3" />
-                    {ingredient.contact}
+                    2364621198
                   </div>
                 </div>
-                <div className="flex gap-2 pt-2">
+                {/* Actualizacion de stock (integrar UPDATE) */}
+                {/* <div className="flex gap-2 pt-2">
                   <StockUpdateDialog
                     ingredient={ingredient}
                     onUpdate={onUpdate}
                   />
-                </div>
+                </div> */}
               </div>
             </CardContent>
           </Card>
@@ -80,25 +97,3 @@ const InfoRow = ({ label, value }: { label: string; value: string }) => (
     <span className="font-semibold text-lg">{value}</span>
   </div>
 );
-
-const getBadgeVariant = (status: StockStatus) => {
-  switch (status) {
-    case "critical":
-      return "destructive";
-    case "low":
-      return "secondary";
-    default:
-      return "default";
-  }
-};
-
-const getBadgeLabel = (status: StockStatus) => {
-  switch (status) {
-    case "critical":
-      return "Crítico";
-    case "low":
-      return "Bajo";
-    default:
-      return "OK";
-  }
-};
