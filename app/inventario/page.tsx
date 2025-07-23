@@ -35,40 +35,15 @@ export default function InventarioPage() {
     useState<Ingredient[]>(initialIngredients);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
-  const addIngredient = (newIngredient: NewIngredient) => {
-    const id = Math.max(...ingredients.map((i) => i.id)) + 1;
-    const status =
-      newIngredient.quantity <= newIngredient.minStock
-        ? newIngredient.quantity <= newIngredient.minStock * 0.5
-          ? "critical"
-          : "low"
-        : "ok";
-
-    setIngredients((prev) => [...prev, { ...newIngredient, id, status }]);
-    setIsAddDialogOpen(false);
-  };
-
   const updateStock = (id: number, newQuantity: number): void => {
-    setIngredients((prev) =>
-      prev.map((ingredient) => {
-        if (ingredient.id === id) {
-          const status =
-            newQuantity <= ingredient.minStock
-              ? newQuantity <= ingredient.minStock * 0.5
-                ? "critical"
-                : "low"
-              : "ok";
-          return { ...ingredient, quantity: newQuantity, status };
-        }
-        return ingredient;
-      })
-    );
+    console.log("Actualizando stock");
+    //EJECUTAR PUT CON NUEVO STOCK
   };
 
   const lowStockItems = ingredients.filter(
-    (i) => i.status === "low" || i.status === "critical"
+    (i) => i.status === "Activo" || i.status === "Inactivo"
   );
-  const criticalItems = ingredients.filter((i) => i.status === "critical");
+  const criticalItems = ingredients.filter((i) => i.status === "Inactivo");
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -88,9 +63,9 @@ export default function InventarioPage() {
             </div>
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="w-full sm:w-auto">
+                <Button className="w-full sm:w-auto bg-green-500">
                   <Plus className="h-4 w-4 mr-2" />
-                  Agregar Ingrediente
+                  Agregar producto
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
@@ -100,7 +75,7 @@ export default function InventarioPage() {
                     Ingrese los datos del nuevo ingrediente
                   </DialogDescription>
                 </DialogHeader>
-                <AddIngredientForm onAdd={addIngredient} />
+                <AddIngredientForm onClose={() => setIsAddDialogOpen(false)} />
               </DialogContent>
             </Dialog>
           </div>
