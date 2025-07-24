@@ -1,10 +1,14 @@
 import { Package, Calendar, Phone } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Ingredient } from "@/types/types";
+import { Ingredient, Product } from "@/types/types";
 import { useProducts } from "@/hooks/tanstack/useProducts";
 import { ClipLoader } from "react-spinners";
 import { getBadgeLabel, getBadgeVariant } from "@/utils/badge_variants";
+import { Button } from "../ui/button";
+import { useDeleteProduct } from "@/hooks/tanstack/useDeleteProduct";
+import { useState } from "react";
+import { ConfirmDialog } from "../pop-ups/ConfirmDialog";
 
 interface Props {
   ingredients?: Ingredient[];
@@ -13,9 +17,42 @@ interface Props {
 
 export const InventoryTab = ({ onUpdate }: Props) => {
   const { data, isLoading } = useProducts();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedIngredient, setSelectedIngredient] = useState<Product | null>(
+    null
+  );
+
+  const { mutate: deleteProduct, isPending } = useDeleteProduct();
+
+  const handleDeleteClick = (ingredient: Product) => {
+    setSelectedIngredient(ingredient);
+    setDialogOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (selectedIngredient) {
+      handleDeleteProductos(Number(selectedIngredient.id));
+      setDialogOpen(false);
+    }
+  };
+
+  const handleDeleteProductos = (id: number): void => {
+    console.log("Eliminando producto con ID:", id);
+    deleteProduct(id);
+    setDialogOpen(false);
+  };
 
   return (
     <>
+      <ConfirmDialog
+        open={dialogOpen}
+        onCancel={() => setDialogOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="¿Eliminar producto?"
+        description={`¿Estás seguro que querés eliminar "${selectedIngredient?.name}"?`}
+        confirmText="Sí, eliminar"
+        cancelText="Cancelar"
+      />
       {!data && (
         <div className="flex items-center justify-center h-full">
           <p className="text-gray-500">No hay ingredientes disponibles.</p>
@@ -80,12 +117,20 @@ export const InventoryTab = ({ onUpdate }: Props) => {
                     </div>
                   </div>
                   {/* Actualizacion de stock (integrar UPDATE) */}
-                  {/* <div className="flex gap-2 pt-2">
-                  <StockUpdateDialog
+                  <div className="flex gap-2 pt-2">
+                    {/* <StockUpdateDialog
                     ingredient={ingredient}
                     onUpdate={onUpdate}
-                  />
-                </div> */}
+                  /> */}
+                    <Button variant={"secondary"}>Editar</Button>
+                    <Button
+                      onClick={() => handleDeleteClick(ingredient)}
+                      disabled={isPending}
+                      variant={"destructive"}
+                    >
+                      Eliminar
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>

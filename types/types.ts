@@ -12,6 +12,7 @@ export interface Ingredient {
 }
 
 export interface Product {
+  id?: number | undefined;
   name: string;
   description: string;
   sale_price: number;

@@ -135,7 +135,7 @@ export const AddIngredientForm = ({ onClose }: Props) => {
         />
       </div>
       <Button type="submit" disabled={isPending} className="w-full">
-        Agregar Ingrediente
+        Agregar Producto
       </Button>
     </form>
   );
