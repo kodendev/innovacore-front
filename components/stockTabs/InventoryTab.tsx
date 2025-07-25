@@ -9,6 +9,7 @@ import { Button } from "../ui/button";
 import { useDeleteProduct } from "@/hooks/tanstack/useDeleteProduct";
 import { useState } from "react";
 import { ConfirmDialog } from "../pop-ups/ConfirmDialog";
+import { StockUpdateDialog } from "../forms/UpdateStockElement";
 
 interface Props {
   ingredients?: Ingredient[];
@@ -37,7 +38,6 @@ export const InventoryTab = ({ onUpdate }: Props) => {
   };
 
   const handleDeleteProductos = (id: number): void => {
-    console.log("Eliminando producto con ID:", id);
     deleteProduct(id);
     setDialogOpen(false);
   };
@@ -53,9 +53,11 @@ export const InventoryTab = ({ onUpdate }: Props) => {
         confirmText="Sí, eliminar"
         cancelText="Cancelar"
       />
-      {!data && (
-        <div className="flex items-center justify-center h-full">
-          <p className="text-gray-500">No hay ingredientes disponibles.</p>
+      {data?.length === 0 && (
+        <div className="flex items-center justify-center mt-4 h-full">
+          <p className="text-gray-500 text-xl">
+            No hay ingredientes disponibles.
+          </p>
         </div>
       )}
       {isLoading && (
@@ -118,11 +120,7 @@ export const InventoryTab = ({ onUpdate }: Props) => {
                   </div>
                   {/* Actualizacion de stock (integrar UPDATE) */}
                   <div className="flex gap-2 pt-2">
-                    {/* <StockUpdateDialog
-                    ingredient={ingredient}
-                    onUpdate={onUpdate}
-                  /> */}
-                    <Button variant={"secondary"}>Editar</Button>
+                    <StockUpdateDialog product={ingredient} />
                     <Button
                       onClick={() => handleDeleteClick(ingredient)}
                       disabled={isPending}
