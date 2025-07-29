@@ -27,6 +27,7 @@ import { InventoryTab } from "@/components/stockTabs/InventoryTab";
 import { SuppliersTab } from "@/components/stockTabs/SuppliersTab";
 import { ReportsTab } from "@/components/stockTabs/ReportsTab";
 import { AddIngredientForm } from "@/components/forms/AddIngredientForm";
+import MenuTab from "@/components/stockTabs/MenuTab";
 
 type NewIngredient = Omit<Ingredient, "id" | "status">;
 

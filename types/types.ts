@@ -31,3 +31,13 @@ export interface Supplier {
   contact: string;
   email: string;
 }
+
+// Tipado de menu individual
+export interface Menu {
+  id: number;
+  name: string;
+  price: number;
+  category: string;
+  ingredients: Ingredient[];
+  active: boolean;
+}
