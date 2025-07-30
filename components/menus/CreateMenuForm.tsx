@@ -14,7 +14,17 @@ import {
 import { Plus, Trash2 } from "lucide-react";
 import { availableIngredients } from "@/data/fakeData";
 
-export function CreateMenuForm({ initialData, onSubmit, isEditing = false }) {
+interface Props {
+  initialData?: any;
+  onSubmit: (data: any) => void;
+  isEditing?: boolean;
+}
+
+export function CreateMenuForm({
+  initialData,
+  onSubmit,
+  isEditing = false,
+}: Props) {
   const [formData, setFormData] = useState({
     name: initialData?.name || "",
     price: initialData?.price || "",

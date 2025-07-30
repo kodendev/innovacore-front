@@ -21,20 +21,20 @@ export default function MenusPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingMenu, setEditingMenu] = useState(null);
 
-  const addMenu = (newMenu) => {
+  const addMenu = (newMenu: any) => {
     const id = Math.max(...menus.map((m) => m.id)) + 1;
     setMenus((prev) => [...prev, { ...newMenu, id, active: true }]);
     setIsAddDialogOpen(false);
   };
 
-  const updateMenu = (updatedMenu) => {
+  const updateMenu = (updatedMenu: any) => {
     setMenus((prev) =>
       prev.map((menu) => (menu.id === updatedMenu.id ? updatedMenu : menu))
     );
     setEditingMenu(null);
   };
 
-  const toggleMenuStatus = (menuId) => {
+  const toggleMenuStatus = (menuId: any) => {
     setMenus((prev) =>
       prev.map((menu) =>
         menu.id === menuId ? { ...menu, active: !menu.active } : menu
@@ -42,7 +42,7 @@ export default function MenusPage() {
     );
   };
 
-  const deleteMenu = (menuId) => {
+  const deleteMenu = (menuId: any) => {
     setMenus((prev) => prev.filter((menu) => menu.id !== menuId));
   };
 

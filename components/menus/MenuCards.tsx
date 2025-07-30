@@ -15,7 +15,6 @@ import {
 import { Edit, Trash2 } from "lucide-react";
 import { Menu } from "@/types/types";
 import { Dispatch, SetStateAction } from "react";
-import { MenuForm } from "@/app/menus/page";
 import { CreateMenuForm } from "./CreateMenuForm";
 
 interface Props {

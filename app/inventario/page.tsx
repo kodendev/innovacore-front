@@ -28,6 +28,9 @@ import { SuppliersTab } from "@/components/stockTabs/SuppliersTab";
 import { ReportsTab } from "@/components/stockTabs/ReportsTab";
 import { AddIngredientForm } from "@/components/forms/AddIngredientForm";
 import MenuTab from "@/components/stockTabs/MenuTab";
+import StockPredictionsTab from "@/components/stockTabs/PredictionsTab";
+import SmartPredictionTab from "@/components/stockTabs/SmartPredictionsTab";
+import { ExpirationsTab } from "@/components/stockTabs/ExpirationsTab";
 
 type NewIngredient = Omit<Ingredient, "id" | "status">;
 
@@ -41,10 +44,10 @@ export default function InventarioPage() {
     //EJECUTAR PUT CON NUEVO STOCK
   };
 
-  const lowStockItems = ingredients.filter(
-    (i) => i.status === "Activo" || i.status === "Inactivo"
-  );
-  const criticalItems = ingredients.filter((i) => i.status === "Inactivo");
+  // const lowStockItems = ingredients.filter(
+  //   (i) => i.status === "Activo" || i.status === "Inactivo"
+  // );
+  // const criticalItems = ingredients.filter((i) => i.status === "Inactivo");
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -86,7 +89,7 @@ export default function InventarioPage() {
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           {/* Alerts */}
-          {criticalItems.length > 0 && (
+          {/* {criticalItems.length > 0 && (
             <Card className="mb-6 border-red-200 bg-red-50">
               <CardHeader>
                 <CardTitle className="text-red-800 flex items-center gap-2">
@@ -108,13 +111,19 @@ export default function InventarioPage() {
                 </div>
               </CardContent>
             </Card>
-          )}
+          )} */}
 
           <Tabs defaultValue="inventory" className="space-y-6">
             <TabsList>
               <TabsTrigger value="inventory">Inventario</TabsTrigger>
               <TabsTrigger value="suppliers">Proveedores</TabsTrigger>
-              <TabsTrigger value="reports">Reportes</TabsTrigger>
+              <TabsTrigger value="predictions">Predicción de stock</TabsTrigger>
+              <TabsTrigger value="smartPredictions">
+                Predicción inteligente
+              </TabsTrigger>
+              <TabsTrigger value="expirations">
+                Próximos vencimientos
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="inventory">
@@ -125,13 +134,25 @@ export default function InventarioPage() {
               <SuppliersTab />
             </TabsContent>
 
-            <TabsContent value="reports">
+            <TabsContent value="predictions">
+              <StockPredictionsTab />
+            </TabsContent>
+
+            <TabsContent value="smartPredictions">
+              <SmartPredictionTab />
+            </TabsContent>
+
+            <TabsContent value="expirations">
+              <ExpirationsTab />
+            </TabsContent>
+
+            {/* <TabsContent value="reports">
               <ReportsTab
                 ingredients={ingredients}
                 lowStockItems={lowStockItems}
                 criticalItems={criticalItems}
               />
-            </TabsContent>
+            </TabsContent> */}
           </Tabs>
         </div>
       </main>
