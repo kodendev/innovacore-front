@@ -4,7 +4,7 @@ import axios from "axios";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
-const fetchProducts = async (): Promise<Product[]> => {
+export const fetchProducts = async (): Promise<Product[]> => {
   try {
     const response = await axios.get<Product[]>(`${BASE_URL}/products`);
     return response.data;

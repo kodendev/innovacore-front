@@ -20,6 +20,7 @@ export interface Product {
   barcode: string;
   active: boolean;
   stock: number;
+  expirationDate?: string; // opcional si no todos tienen fecha de vencimiento
 }
 
 export type StockStatus = "Activo" | "Inactivo";
@@ -30,4 +31,14 @@ export interface Supplier {
   products: string[];
   contact: string;
   email: string;
+}
+
+// Tipado de menu individual
+export interface Menu {
+  id: number;
+  name: string;
+  price: number;
+  category: string;
+  ingredients: Ingredient[];
+  active: boolean;
 }
