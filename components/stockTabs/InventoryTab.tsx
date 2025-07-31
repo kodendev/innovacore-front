@@ -10,6 +10,8 @@ import { useDeleteProduct } from "@/hooks/tanstack/useDeleteProduct";
 import { useState } from "react";
 import { ConfirmDialog } from "../pop-ups/ConfirmDialog";
 import { StockUpdateDialog } from "../forms/UpdateStockElement";
+import { InfoRow } from "@/utils/info_row";
+import ProductsTable from "../tables/ProductsTable";
 
 interface Props {
   ingredients?: Ingredient[];
@@ -22,6 +24,8 @@ export const InventoryTab = ({ onUpdate }: Props) => {
   const [selectedIngredient, setSelectedIngredient] = useState<Product | null>(
     null
   );
+
+  const [componentView, setComponentView] = useState<"card" | "table">("card");
 
   const { mutate: deleteProduct, isPending } = useDeleteProduct();
 
@@ -40,6 +44,11 @@ export const InventoryTab = ({ onUpdate }: Props) => {
   const handleDeleteProductos = (id: number): void => {
     deleteProduct(id);
     setDialogOpen(false);
+  };
+
+  const handleSwitchView = () => {
+    setComponentView((prev) => (prev === "card" ? "table" : "card"));
+    console.log("Cambiando vista a ", componentView);
   };
 
   return (
@@ -65,9 +74,15 @@ export const InventoryTab = ({ onUpdate }: Props) => {
           <ClipLoader color="#123abc" loading={isLoading} size={50} />
         </div>
       )}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {data &&
-          data.map((ingredient) => (
+
+      <div className="flex justify-end items-end w-full mb-4">
+        <Button onClick={handleSwitchView}>Cambiar vista</Button>
+      </div>
+
+      {componentView === "card" ? (
+        // 📦 Vista tipo Card
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {data?.map((ingredient) => (
             <Card
               key={ingredient.name}
               className="hover:shadow-lg transition-shadow"
@@ -133,14 +148,64 @@ export const InventoryTab = ({ onUpdate }: Props) => {
               </CardContent>
             </Card>
           ))}
-      </div>
+        </div>
+      ) : (
+        // 📊 Vista tipo Tabla (una sola tabla para todos los ingredientes)
+        <div className="w-full overflow-x-auto">
+          <ProductsTable
+            data={data}
+            handleDeleteClick={handleDeleteClick}
+            isPending={isPending}
+          />
+          {/* <Table className="min-w-full table-auto border border-gray-200">
+            <TableHeader className="bg-gray-100">
+              <TableRow>
+                <TableHead>Nombre</TableHead>
+                <TableHead>Stock</TableHead>
+                <TableHead>Costo</TableHead>
+                <TableHead>Venta</TableHead>
+                <TableHead>Estado</TableHead>
+                <TableHead>Acciones</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y divide-gray-100 bg-white">
+              {data?.map((ingredient) => (
+                <TableRow key={ingredient.id}>
+                  <TableCell className="px-6 py-4">{ingredient.name}</TableCell>
+                  <TableCell className="px-6 py-4">
+                    {ingredient.stock} kg
+                  </TableCell>
+                  <TableCell className="px-6 py-4">
+                    {ingredient.cost_price}
+                  </TableCell>
+                  <TableCell className="px-6 py-4">
+                    {ingredient.sale_price}
+                  </TableCell>
+                  <TableCell className="px-6 py-4">
+                    <Badge
+                      variant={getBadgeVariant(
+                        ingredient.active ? "Activo" : "Inactivo"
+                      )}
+                    >
+                      {getBadgeLabel(ingredient.active ? "Activo" : "Inactivo")}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="px-6 py-4 space-x-2">
+                    <StockUpdateDialog product={ingredient} />
+                    <Button
+                      onClick={() => handleDeleteClick(ingredient)}
+                      disabled={isPending}
+                      variant="destructive"
+                    >
+                      Eliminar
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table> */}
+        </div>
+      )}
     </>
   );
 };
-
-const InfoRow = ({ label, value }: { label: string; value: string }) => (
-  <div className="flex justify-between items-center">
-    <span className="text-sm text-gray-600">{label}</span>
-    <span className="font-semibold text-lg">{value}</span>
-  </div>
-);
