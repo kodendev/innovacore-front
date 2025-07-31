@@ -46,7 +46,7 @@ const MenuCards = ({
           <CardTitle className="flex items-center justify-between">
             <span>{menu.name}</span>
             <div className="flex items-center gap-2">
-              <Badge variant={menu.active ? "default" : "secondary"}>
+              <Badge variant={menu.active ? "green" : "destructive"}>
                 {menu.active ? "Activo" : "Inactivo"}
               </Badge>
               <Badge variant="outline">${menu.price}</Badge>

@@ -86,10 +86,19 @@ export default function MenusPage() {
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="flex flex-row items-center gap-4">
-            <Button variant={"default"}>Desayuno</Button>
-            <Button variant={"default"}>Colaciones</Button>
-            <Button variant={"default"}>Cena</Button>
-            <Button variant={"default"}>Almuerzo</Button>
+            <select
+              className="bg-slate-200 p-2 rounded"
+              aria-placeholder="Filtrar por"
+              name=""
+              id=""
+            >
+              <option value="">Todos los menús</option>
+              <option value="active">Almuerzo</option>
+              <option value="inactive">Merienda</option>
+              <option value="inactive">Colaciones</option>
+              <option value="inactive">Desayuno</option>
+              <option value="inactive">Cena</option>
+            </select>
           </div>
 
           <div className="mt-4">

@@ -145,14 +145,6 @@ export default function InventarioPage() {
             <TabsContent value="expirations">
               <ExpirationsTab />
             </TabsContent>
-
-            {/* <TabsContent value="reports">
-              <ReportsTab
-                ingredients={ingredients}
-                lowStockItems={lowStockItems}
-                criticalItems={criticalItems}
-              />
-            </TabsContent> */}
           </Tabs>
         </div>
       </main>
