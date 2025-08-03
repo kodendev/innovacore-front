@@ -62,22 +62,23 @@ export const InventoryTab = ({ onUpdate }: Props) => {
         confirmText="Sí, eliminar"
         cancelText="Cancelar"
       />
-      {data?.length === 0 && (
+      {data?.length === 0 ? (
         <div className="flex items-center justify-center mt-4 h-full">
           <p className="text-gray-500 text-xl">
             No hay ingredientes disponibles.
           </p>
         </div>
+      ) : (
+        <div className="flex justify-end items-end w-full mb-4">
+          <Button onClick={handleSwitchView}>Cambiar vista</Button>
+        </div>
       )}
+
       {isLoading && (
         <div className="flex flex-col items-center justify-center col-span-1 md:col-span-2 xl:col-span-3 mt-20 h-full">
           <ClipLoader color="#123abc" loading={isLoading} size={50} />
         </div>
       )}
-
-      <div className="flex justify-end items-end w-full mb-4">
-        <Button onClick={handleSwitchView}>Cambiar vista</Button>
-      </div>
 
       {componentView === "card" ? (
         // 📦 Vista tipo Card
@@ -157,53 +158,6 @@ export const InventoryTab = ({ onUpdate }: Props) => {
             handleDeleteClick={handleDeleteClick}
             isPending={isPending}
           />
-          {/* <Table className="min-w-full table-auto border border-gray-200">
-            <TableHeader className="bg-gray-100">
-              <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Stock</TableHead>
-                <TableHead>Costo</TableHead>
-                <TableHead>Venta</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody className="divide-y divide-gray-100 bg-white">
-              {data?.map((ingredient) => (
-                <TableRow key={ingredient.id}>
-                  <TableCell className="px-6 py-4">{ingredient.name}</TableCell>
-                  <TableCell className="px-6 py-4">
-                    {ingredient.stock} kg
-                  </TableCell>
-                  <TableCell className="px-6 py-4">
-                    {ingredient.cost_price}
-                  </TableCell>
-                  <TableCell className="px-6 py-4">
-                    {ingredient.sale_price}
-                  </TableCell>
-                  <TableCell className="px-6 py-4">
-                    <Badge
-                      variant={getBadgeVariant(
-                        ingredient.active ? "Activo" : "Inactivo"
-                      )}
-                    >
-                      {getBadgeLabel(ingredient.active ? "Activo" : "Inactivo")}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="px-6 py-4 space-x-2">
-                    <StockUpdateDialog product={ingredient} />
-                    <Button
-                      onClick={() => handleDeleteClick(ingredient)}
-                      disabled={isPending}
-                      variant="destructive"
-                    >
-                      Eliminar
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table> */}
         </div>
       )}
     </>
