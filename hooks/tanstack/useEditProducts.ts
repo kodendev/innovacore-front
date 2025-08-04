@@ -24,7 +24,6 @@ export const editProduct = async ({
 };
 
 export const useUpdateProduct = () => {
-  console.log("USANDO HOOK useUpdateProduct");
   const queryClient = useQueryClient();
 
   return useMutation<Product, Error, UpdateProductInput>({

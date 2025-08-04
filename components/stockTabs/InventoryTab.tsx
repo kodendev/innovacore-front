@@ -10,6 +10,9 @@ import { useDeleteProduct } from "@/hooks/tanstack/useDeleteProduct";
 import { useState } from "react";
 import { ConfirmDialog } from "../pop-ups/ConfirmDialog";
 import { StockUpdateDialog } from "../forms/UpdateStockElement";
+import { InfoRow } from "@/utils/info_row";
+import ProductsTable from "../tables/ProductsTable";
+import { useComponentView } from "@/hooks/useComponentView";
 
 interface Props {
   ingredients?: Ingredient[];
@@ -22,6 +25,8 @@ export const InventoryTab = ({ onUpdate }: Props) => {
   const [selectedIngredient, setSelectedIngredient] = useState<Product | null>(
     null
   );
+
+  const { componentView, toggleView } = useComponentView();
 
   const { mutate: deleteProduct, isPending } = useDeleteProduct();
 
@@ -53,21 +58,27 @@ export const InventoryTab = ({ onUpdate }: Props) => {
         confirmText="Sí, eliminar"
         cancelText="Cancelar"
       />
-      {data?.length === 0 && (
-        <div className="flex items-center justify-center mt-4 h-full">
+      {data?.length === 0 ? (
+        <div className="flex items-center justify-center mt-4 h-[80vh]">
           <p className="text-gray-500 text-xl">
             No hay ingredientes disponibles.
           </p>
         </div>
+      ) : (
+        <div className="flex justify-end items-end w-full mb-4">
+          <Button onClick={toggleView}>Cambiar vista</Button>
+        </div>
       )}
+
       {isLoading && (
         <div className="flex flex-col items-center justify-center col-span-1 md:col-span-2 xl:col-span-3 mt-20 h-full">
           <ClipLoader color="#123abc" loading={isLoading} size={50} />
         </div>
       )}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {data &&
-          data.map((ingredient) => (
+
+      {componentView === "card" ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {data?.map((ingredient) => (
             <Card
               key={ingredient.name}
               className="hover:shadow-lg transition-shadow"
@@ -133,14 +144,17 @@ export const InventoryTab = ({ onUpdate }: Props) => {
               </CardContent>
             </Card>
           ))}
-      </div>
+        </div>
+      ) : (
+        // 📊 Vista tipo Tabla (una sola tabla para todos los ingredientes)
+        <div className="w-full overflow-x-auto">
+          <ProductsTable
+            data={data}
+            handleDeleteClick={handleDeleteClick}
+            isPending={isPending}
+          />
+        </div>
+      )}
     </>
   );
 };
-
-const InfoRow = ({ label, value }: { label: string; value: string }) => (
-  <div className="flex justify-between items-center">
-    <span className="text-sm text-gray-600">{label}</span>
-    <span className="font-semibold text-lg">{value}</span>
-  </div>
-);
