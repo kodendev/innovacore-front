@@ -22,9 +22,9 @@ const SuppliersTable = ({ data, handleDeleteClick, isPending }: Props) => {
       <TableHeader className="bg-gray-100">
         <TableRow>
           <TableHead>Nombre</TableHead>
-          <TableHead>Stock</TableHead>
-          <TableHead>Costo</TableHead>
-          <TableHead>Venta</TableHead>
+          <TableHead>Producto</TableHead>
+          <TableHead>Contacto</TableHead>
+          <TableHead>Correo</TableHead>
           <TableHead>Acciones</TableHead>
         </TableRow>
       </TableHeader>
@@ -50,15 +50,15 @@ const SuppliersTable = ({ data, handleDeleteClick, isPending }: Props) => {
             <TableCell className="px-6 py-4 space-x-2">
               <Button
                 onClick={() => handleDeleteClick(supplier.id)}
-                variant="destructive"
+                variant="secondary"
               >
-                Eliminar
+                Editar
               </Button>
               <Button
                 onClick={() => handleDeleteClick(supplier.id)}
-                variant="default"
+                variant="destructive"
               >
-                Editar
+                Eliminar
               </Button>
             </TableCell>
           </TableRow>
