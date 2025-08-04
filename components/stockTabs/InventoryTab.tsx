@@ -12,6 +12,7 @@ import { ConfirmDialog } from "../pop-ups/ConfirmDialog";
 import { StockUpdateDialog } from "../forms/UpdateStockElement";
 import { InfoRow } from "@/utils/info_row";
 import ProductsTable from "../tables/ProductsTable";
+import { useComponentView } from "@/hooks/useComponentView";
 
 interface Props {
   ingredients?: Ingredient[];
@@ -25,7 +26,7 @@ export const InventoryTab = ({ onUpdate }: Props) => {
     null
   );
 
-  const [componentView, setComponentView] = useState<"card" | "table">("card");
+  const { componentView, toggleView } = useComponentView();
 
   const { mutate: deleteProduct, isPending } = useDeleteProduct();
 
@@ -46,11 +47,6 @@ export const InventoryTab = ({ onUpdate }: Props) => {
     setDialogOpen(false);
   };
 
-  const handleSwitchView = () => {
-    setComponentView((prev) => (prev === "card" ? "table" : "card"));
-    console.log("Cambiando vista a ", componentView);
-  };
-
   return (
     <>
       <ConfirmDialog
@@ -63,14 +59,14 @@ export const InventoryTab = ({ onUpdate }: Props) => {
         cancelText="Cancelar"
       />
       {data?.length === 0 ? (
-        <div className="flex items-center justify-center mt-4 h-full">
+        <div className="flex items-center justify-center mt-4 h-[80vh]">
           <p className="text-gray-500 text-xl">
             No hay ingredientes disponibles.
           </p>
         </div>
       ) : (
         <div className="flex justify-end items-end w-full mb-4">
-          <Button onClick={handleSwitchView}>Cambiar vista</Button>
+          <Button onClick={toggleView}>Cambiar vista</Button>
         </div>
       )}
 
@@ -81,7 +77,6 @@ export const InventoryTab = ({ onUpdate }: Props) => {
       )}
 
       {componentView === "card" ? (
-        // 📦 Vista tipo Card
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {data?.map((ingredient) => (
             <Card

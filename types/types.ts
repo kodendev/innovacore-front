@@ -31,6 +31,8 @@ export interface Supplier {
   products: string[];
   contact: string;
   email: string;
+  active: boolean;
+  status: StockStatus;
 }
 
 // Tipado de menu individual

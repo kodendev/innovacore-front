@@ -121,6 +121,8 @@ export const suppliers: Supplier[] = [
     contact: "+54 11 1234-5678",
     email: "ventas@carniceriacentral.com",
     products: ["Carne", "Embutidos"],
+    active: true,
+    status: "Activo",
   },
   {
     id: 2,
@@ -128,6 +130,8 @@ export const suppliers: Supplier[] = [
     contact: "+54 11 2345-6789",
     email: "pedidos@verduleriasj.com",
     products: ["Papa", "Verduras", "Frutas"],
+    active: true,
+    status: "Activo",
   },
   {
     id: 3,
@@ -135,6 +139,8 @@ export const suppliers: Supplier[] = [
     contact: "+54 11 3456-7890",
     email: "comercial@lacteosv.com",
     products: ["Queso", "Leche", "Yogurt"],
+    active: true,
+    status: "Activo",
   },
   {
     id: 4,
@@ -142,6 +148,8 @@ export const suppliers: Supplier[] = [
     contact: "+54 11 4567-8901",
     email: "ventas@avicolanorte.com",
     products: ["Pollo", "Huevos"],
+    active: true,
+    status: "Activo",
   },
 ];
 
