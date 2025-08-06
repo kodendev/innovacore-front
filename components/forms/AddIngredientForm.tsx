@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Ingredient, Product } from "@/types/types";
 import { toast } from "sonner";
-import { useCreateProduct } from "@/hooks/tanstack/useCreateProducts";
+import { useCreateProduct } from "@/hooks/tanstack/products/useCreateProducts";
 import { QueryClient, useQueryClient } from "@tanstack/react-query";
 
 export type NewIngredient = Omit<Ingredient, "id" | "status">;

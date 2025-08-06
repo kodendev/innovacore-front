@@ -34,23 +34,21 @@ const MenuCards = ({
   updateMenu,
   toggleMenuStatus,
 }: Props) => {
+  console.log("Menus recibidos", menu);
   return (
     <div>
       <Card
         key={menu.id}
         className={`hover:shadow-lg transition-shadow ${
-          !menu.active ? "opacity-60" : ""
+          !menu.name ? "opacity-60" : ""
         }`}
       >
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
+          <CardTitle className="flex flex-col items-start gap-2 justify-between">
             <span>{menu.name}</span>
-            <div className="flex items-center gap-2">
-              <Badge variant={menu.active ? "green" : "destructive"}>
-                {menu.active ? "Activo" : "Inactivo"}
-              </Badge>
-              <Badge variant="outline">${menu.price}</Badge>
-            </div>
+            <span className="text-sm font-medium text-slate-500">
+              {menu.description}
+            </span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -58,12 +56,14 @@ const MenuCards = ({
             <div>
               <h4 className="font-medium mb-2">Ingredientes:</h4>
               <div className="space-y-1">
-                {menu.ingredients.map((ingredient, index) => (
+                {menu?.menuProducts?.map((ingredient, index) => (
                   <div key={index} className="flex justify-between text-sm">
-                    <span>{ingredient.name}</span>
+                    <span>
+                      {ingredient?.product?.name || "Producto no disponible"}
+                    </span>
                     <span>
                       {/* {ingredient.qty} */}
-                      {ingredient.unit}
+                      {ingredient.quantity || "No disponible"}
                     </span>
                   </div>
                 ))}
@@ -99,14 +99,6 @@ const MenuCards = ({
                   />
                 </DialogContent>
               </Dialog>
-
-              <Button
-                variant={menu.active ? "secondary" : "default"}
-                size="sm"
-                onClick={() => toggleMenuStatus(menu.id)}
-              >
-                {menu.active ? "Desactivar" : "Activar"}
-              </Button>
 
               <Button
                 variant="destructive"

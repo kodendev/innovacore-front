@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Ingredient, Product } from "@/types/types";
 import { toast } from "sonner";
-import { useUpdateProduct } from "@/hooks/tanstack/useEditProducts";
+import { useUpdateProduct } from "@/hooks/tanstack/products/useEditProducts";
 
 type Props = {
   product: Product;

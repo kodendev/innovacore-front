@@ -36,11 +36,53 @@ export interface Supplier {
 }
 
 // Tipado de menu individual
-export interface Menu {
+// Tipo para el producto dentro del menú (con relación al menú)
+export type MenuProduct = {
+  id: number;
+  quantity: number;
+  menuId: number;
+  product: Product;
+  productId: number;
+  createdAt: string;
+  updatedAt: string;
+};
+//Tipado de menu
+export type Menu = {
+  id: number;
+  quantity: number;
+  name: string;
+  description: string;
+  menuProducts?: MenuProduct[];
+};
+
+//Tipado de tipo de menu
+
+export type MenuType = {
   id: number;
   name: string;
-  price: number;
-  category: string;
-  ingredients: Ingredient[];
-  active: boolean;
-}
+};
+
+//Creacion de menus
+
+type MenuProductPayload = {
+  productId: number;
+  quantity: number;
+};
+
+export type CreateMenuPayload = {
+  quantity: number;
+  name: string;
+  description: string;
+  menuTypeId: number;
+  menuProducts: MenuProductPayload[];
+};
+
+export type CreateMenu = {
+  id: number;
+  quantity: number;
+  name: string;
+  description: string;
+  menuTypeId: number;
+  menuProducts: MenuProductPayload[];
+  // puedes agregar más campos si los tienes
+};

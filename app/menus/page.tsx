@@ -15,23 +15,17 @@ import Link from "next/link";
 import { initialMenus } from "@/data/fakeData";
 import MenuCards from "@/components/menus/MenuCards";
 import { CreateMenuForm } from "@/components/menus/CreateMenuForm";
+import { useMenus } from "@/hooks/tanstack/menus/useMenus";
 
 export default function MenusPage() {
   const [menus, setMenus] = useState(initialMenus);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingMenu, setEditingMenu] = useState(null);
 
-  const addMenu = (newMenu: any) => {
-    const id = Math.max(...menus.map((m) => m.id)) + 1;
-    setMenus((prev) => [...prev, { ...newMenu, id, active: true }]);
-    setIsAddDialogOpen(false);
-  };
+  const { data, isLoading, error, isPending } = useMenus();
 
   const updateMenu = (updatedMenu: any) => {
-    setMenus((prev) =>
-      prev.map((menu) => (menu.id === updatedMenu.id ? updatedMenu : menu))
-    );
-    setEditingMenu(null);
+    console.log("Editando menú:", updatedMenu);
   };
 
   const toggleMenuStatus = (menuId: any) => {
@@ -43,7 +37,7 @@ export default function MenusPage() {
   };
 
   const deleteMenu = (menuId: any) => {
-    setMenus((prev) => prev.filter((menu) => menu.id !== menuId));
+    console.log("Eliminando menú con ID:", menuId);
   };
 
   return (
@@ -76,7 +70,7 @@ export default function MenusPage() {
                     Configure los ingredientes y precio del nuevo menú
                   </DialogDescription>
                 </DialogHeader>
-                <CreateMenuForm onSubmit={addMenu} />
+                <CreateMenuForm onClose={() => setIsAddDialogOpen(false)} />
               </DialogContent>
             </Dialog>
           </div>
@@ -103,7 +97,7 @@ export default function MenusPage() {
 
           <div className="mt-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {menus.map((menu) => (
+              {data?.map((menu) => (
                 <MenuCards
                   key={menu.id}
                   menu={menu}
