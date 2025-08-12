@@ -28,6 +28,7 @@ export default function MenusPage() {
     console.log("Editando menú:", updatedMenu);
   };
 
+  //Actualizar el menu
   const toggleMenuStatus = (menuId: any) => {
     setMenus((prev) =>
       prev.map((menu) =>
@@ -97,17 +98,18 @@ export default function MenusPage() {
 
           <div className="mt-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {data?.map((menu) => (
-                <MenuCards
-                  key={menu.id}
-                  menu={menu}
-                  setEditingMenu={setEditingMenu}
-                  editingMenu={editingMenu}
-                  updateMenu={updateMenu}
-                  toggleMenuStatus={toggleMenuStatus}
-                  deleteMenu={deleteMenu}
-                />
-              ))}
+              {data &&
+                data.map((menu) => (
+                  <MenuCards
+                    key={menu.id}
+                    menu={menu}
+                    setEditingMenu={setEditingMenu}
+                    editingMenu={editingMenu}
+                    updateMenu={updateMenu}
+                    toggleMenuStatus={toggleMenuStatus}
+                    deleteMenu={deleteMenu}
+                  />
+                ))}
             </div>
           </div>
         </div>

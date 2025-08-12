@@ -2,7 +2,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +15,7 @@ import { Edit, Trash2 } from "lucide-react";
 import { Menu } from "@/types/types";
 import { Dispatch, SetStateAction } from "react";
 import { CreateMenuForm } from "./CreateMenuForm";
+import { UpdateMenuForm } from "./UpdateMenuForm";
 
 interface Props {
   menu: Menu;
@@ -34,7 +34,6 @@ const MenuCards = ({
   updateMenu,
   toggleMenuStatus,
 }: Props) => {
-  console.log("Menus recibidos", menu);
   return (
     <div>
       <Card
@@ -92,11 +91,12 @@ const MenuCards = ({
                       Modifique los datos del menú
                     </DialogDescription>
                   </DialogHeader>
-                  <CreateMenuForm
-                    initialData={editingMenu}
-                    onSubmit={updateMenu}
-                    isEditing={true}
-                  />
+                  {editingMenu && (
+                    <UpdateMenuForm
+                      initialData={editingMenu}
+                      onClose={() => setEditingMenu(null)}
+                    />
+                  )}
                 </DialogContent>
               </Dialog>
 

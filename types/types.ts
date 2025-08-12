@@ -53,6 +53,7 @@ export type Menu = {
   name: string;
   description: string;
   menuProducts?: MenuProduct[];
+  active: boolean;
 };
 
 //Tipado de tipo de menu
