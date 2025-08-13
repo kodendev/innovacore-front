@@ -12,29 +12,28 @@ import {
 } from "@/components/ui/dialog";
 import { Plus, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { initialMenus } from "@/data/fakeData";
 import MenuCards from "@/components/menus/MenuCards";
 import { CreateMenuForm } from "@/components/menus/CreateMenuForm";
 import { useMenus } from "@/hooks/tanstack/menus/useMenus";
+import { useMenuType } from "@/hooks/tanstack/menus/useMenuType";
 
 export default function MenusPage() {
-  const [menus, setMenus] = useState(initialMenus);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingMenu, setEditingMenu] = useState(null);
+  const [selectedType, setSelectedType] = useState<number | 0>(0);
 
-  const { data, isLoading, error, isPending } = useMenus();
+  const { data: menus, isLoading, error, isPending } = useMenus();
+  const { data: menuType } = useMenuType();
 
-  const updateMenu = (updatedMenu: any) => {
-    console.log("Editando menú:", updatedMenu);
-  };
+  const filteredMenus =
+    selectedType === 0
+      ? menus ?? []
+      : menus?.filter((menu) => menu.menuTypeId === selectedType) ?? [];
 
-  //Actualizar el menu
-  const toggleMenuStatus = (menuId: any) => {
-    setMenus((prev) =>
-      prev.map((menu) =>
-        menu.id === menuId ? { ...menu, active: !menu.active } : menu
-      )
-    );
+  console.log("menus filtrados", filteredMenus);
+
+  const toggleMenuStatus = (menuId: number) => {
+    console.log("Cambiando estado del menú con ID:", menuId);
   };
 
   const deleteMenu = (menuId: any) => {
@@ -83,34 +82,44 @@ export default function MenusPage() {
           <div className="flex flex-row items-center gap-4">
             <select
               className="bg-slate-200 p-2 rounded"
-              aria-placeholder="Filtrar por"
-              name=""
-              id=""
+              aria-label="Filtrar por tipo de menú"
+              value={selectedType}
+              onChange={(e) =>
+                setSelectedType(e.target.value ? Number(e.target.value) : 0)
+              }
             >
-              <option value="">Todos los menús</option>
-              <option value="active">Almuerzo</option>
-              <option value="inactive">Merienda</option>
-              <option value="inactive">Colaciones</option>
-              <option value="inactive">Desayuno</option>
-              <option value="inactive">Cena</option>
+              <option value={0}>Todos los tipos</option>
+              {menuType?.map((type) => (
+                <option key={type.id} value={type.id}>
+                  {type.name}
+                </option>
+              ))}
             </select>
           </div>
 
           <div className="mt-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {data &&
-                data.map((menu) => (
-                  <MenuCards
-                    key={menu.id}
-                    menu={menu}
-                    setEditingMenu={setEditingMenu}
-                    editingMenu={editingMenu}
-                    updateMenu={updateMenu}
-                    toggleMenuStatus={toggleMenuStatus}
-                    deleteMenu={deleteMenu}
-                  />
-                ))}
-            </div>
+            {filteredMenus.length === 0 ? (
+              <p className="text-center text-xl text-gray-500 mt-20">
+                No hay menús creados en este tipo.
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {isLoading && <p>Cargando menús...</p>}
+                {error && <p>Error al cargar menús</p>}
+                {!isLoading &&
+                  !error &&
+                  filteredMenus?.map((menu) => (
+                    <MenuCards
+                      key={menu.id}
+                      menu={menu}
+                      setEditingMenu={setEditingMenu}
+                      editingMenu={editingMenu}
+                      toggleMenuStatus={toggleMenuStatus}
+                      deleteMenu={deleteMenu}
+                    />
+                  ))}
+              </div>
+            )}
           </div>
         </div>
       </main>

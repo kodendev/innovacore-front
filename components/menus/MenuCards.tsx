@@ -22,7 +22,6 @@ interface Props {
   setEditingMenu: Dispatch<SetStateAction<null>>;
   editingMenu: null;
   deleteMenu: (menuId: number) => void;
-  updateMenu: (menu: Menu) => void;
   toggleMenuStatus: (menuId: number) => void;
 }
 
@@ -31,14 +30,13 @@ const MenuCards = ({
   setEditingMenu,
   editingMenu,
   deleteMenu,
-  updateMenu,
   toggleMenuStatus,
 }: Props) => {
   return (
     <div>
       <Card
         key={menu.id}
-        className={`hover:shadow-lg transition-shadow ${
+        className={`hover:shadow-lg transition-shadow  ${
           !menu.name ? "opacity-60" : ""
         }`}
       >
@@ -52,7 +50,7 @@ const MenuCards = ({
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div>
+            <div className=" h-[100px]">
               <h4 className="font-medium mb-2">Ingredientes:</h4>
               <div className="space-y-1">
                 {menu?.menuProducts?.map((ingredient, index) => (
