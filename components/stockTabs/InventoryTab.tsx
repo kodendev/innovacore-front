@@ -129,7 +129,7 @@ export const InventoryTab = ({ onUpdate }: Props) => {
                       2364621198
                     </div>
                   </div>
-                  {/* Actualizacion de stock (integrar UPDATE) */}
+                  {/* Actualizacion de stock  */}
                   <div className="flex gap-2 pt-2">
                     <StockUpdateDialog product={ingredient} />
                     <Button

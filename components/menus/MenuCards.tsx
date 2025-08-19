@@ -2,35 +2,20 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-
-import { Edit, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { Menu } from "@/types/types";
-import { Dispatch, SetStateAction } from "react";
-import { CreateMenuForm } from "./CreateMenuForm";
-import { UpdateMenuForm } from "./UpdateMenuForm";
+
+import { MenuUpdateDialog } from "./MenuUpdateDialog";
 
 interface Props {
   menu: Menu;
-  setEditingMenu: Dispatch<SetStateAction<null>>;
-  editingMenu: null;
   deleteMenu: (menuId: number) => void;
-  toggleMenuStatus: (menuId: number) => void;
 }
 
 const MenuCards = ({
   menu,
-  setEditingMenu,
-  editingMenu,
+
   deleteMenu,
-  toggleMenuStatus,
 }: Props) => {
   return (
     <div>
@@ -68,35 +53,7 @@ const MenuCards = ({
             </div>
 
             <div className="flex gap-2">
-              <Dialog
-                open={editingMenu?.id === menu.id}
-                onOpenChange={(open) => !open && setEditingMenu(null)}
-              >
-                <DialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setEditingMenu(menu)}
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Editar
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>Editar Menú</DialogTitle>
-                    <DialogDescription>
-                      Modifique los datos del menú
-                    </DialogDescription>
-                  </DialogHeader>
-                  {editingMenu && (
-                    <UpdateMenuForm
-                      initialData={editingMenu}
-                      onClose={() => setEditingMenu(null)}
-                    />
-                  )}
-                </DialogContent>
-              </Dialog>
+              <MenuUpdateDialog menu={menu} />
 
               <Button
                 variant="destructive"

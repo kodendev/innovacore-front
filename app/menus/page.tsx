@@ -16,6 +16,8 @@ import MenuCards from "@/components/menus/MenuCards";
 import { CreateMenuForm } from "@/components/menus/CreateMenuForm";
 import { useMenus } from "@/hooks/tanstack/menus/useMenus";
 import { useMenuType } from "@/hooks/tanstack/menus/useMenuType";
+import { useComponentView } from "@/hooks/useComponentView";
+import MenusTable from "@/components/tables/MenuTable";
 
 export default function MenusPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -25,12 +27,12 @@ export default function MenusPage() {
   const { data: menus, isLoading, error, isPending } = useMenus();
   const { data: menuType } = useMenuType();
 
+  const { componentView, toggleView } = useComponentView();
+
   const filteredMenus =
     selectedType === 0
       ? menus ?? []
       : menus?.filter((menu) => menu.menuTypeId === selectedType) ?? [];
-
-  console.log("menus filtrados", filteredMenus);
 
   const toggleMenuStatus = (menuId: number) => {
     console.log("Cambiando estado del menú con ID:", menuId);
@@ -79,7 +81,7 @@ export default function MenusPage() {
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <div className="flex flex-row items-center gap-4">
+          <div className="flex flex-row items-center w-full justify-between gap-4">
             <select
               className="bg-slate-200 p-2 rounded"
               aria-label="Filtrar por tipo de menú"
@@ -95,6 +97,9 @@ export default function MenusPage() {
                 </option>
               ))}
             </select>
+            <Button variant={"default"} onClick={toggleView}>
+              Cambiar vista
+            </Button>
           </div>
 
           <div className="mt-4">
@@ -103,22 +108,25 @@ export default function MenusPage() {
                 No hay menús creados en este tipo.
               </p>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {isLoading && <p>Cargando menús...</p>}
-                {error && <p>Error al cargar menús</p>}
-                {!isLoading &&
-                  !error &&
-                  filteredMenus?.map((menu) => (
-                    <MenuCards
-                      key={menu.id}
-                      menu={menu}
-                      setEditingMenu={setEditingMenu}
-                      editingMenu={editingMenu}
-                      toggleMenuStatus={toggleMenuStatus}
-                      deleteMenu={deleteMenu}
-                    />
-                  ))}
-              </div>
+              <>
+                {componentView === "card" ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {isLoading && <p>Cargando menús...</p>}
+                    {error && <p>Error al cargar menús</p>}
+                    {!isLoading &&
+                      !error &&
+                      filteredMenus?.map((menu) => (
+                        <MenuCards
+                          key={menu.id}
+                          menu={menu}
+                          deleteMenu={deleteMenu}
+                        />
+                      ))}
+                  </div>
+                ) : (
+                  <MenusTable isPending={isPending} data={filteredMenus} />
+                )}
+              </>
             )}
           </div>
         </div>
