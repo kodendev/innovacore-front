@@ -12,6 +12,7 @@ export interface Ingredient {
 }
 
 export interface Product {
+  id?: number | undefined;
   name: string;
   description: string;
   sale_price: number;
@@ -19,6 +20,7 @@ export interface Product {
   barcode: string;
   active: boolean;
   stock: number;
+  expirationDate?: string; // opcional si no todos tienen fecha de vencimiento
 }
 
 export type StockStatus = "Activo" | "Inactivo";
@@ -29,4 +31,60 @@ export interface Supplier {
   products: string[];
   contact: string;
   email: string;
+  active: boolean;
+  status: StockStatus;
 }
+
+// Tipado de menu individual
+// Tipo para el producto dentro del menú (con relación al menú)
+export type MenuProduct = {
+  id: number;
+  quantity: number;
+  menuId: number;
+  product: Product;
+  productId: number;
+  createdAt: string;
+  updatedAt: string;
+};
+//Tipado de menu
+export type Menu = {
+  id: number;
+  quantity: number;
+  name: string;
+  description: string;
+  menuProducts?: MenuProduct[];
+  active: boolean;
+  menuTypeId: number;
+};
+
+//Tipado de tipo de menu
+
+export type MenuType = {
+  id: number;
+  name: string;
+};
+
+//Creacion de menus
+
+type MenuProductPayload = {
+  productId: number;
+  quantity: number;
+};
+
+export type CreateMenuPayload = {
+  quantity: number;
+  name: string;
+  description: string;
+  menuTypeId: number;
+  menuProducts: MenuProductPayload[];
+};
+
+export type CreateMenu = {
+  id: number;
+  quantity: number;
+  name: string;
+  description: string;
+  menuTypeId: number;
+  menuProducts: MenuProductPayload[];
+  // puedes agregar más campos si los tienes
+};

@@ -1,7 +1,22 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Users, Package, ShoppingCart, TrendingUp, AlertTriangle, Bed } from "lucide-react"
-import Link from "next/link"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Users,
+  Package,
+  ShoppingCart,
+  TrendingUp,
+  AlertTriangle,
+  Bed,
+} from "lucide-react";
+import Link from "next/link";
+
+import { IoFastFood } from "react-icons/io5";
 
 export default function Dashboard() {
   return (
@@ -10,7 +25,9 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">Sistema Cocina Sanatorio</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Sistema Cocina Sanatorio
+              </h1>
             </div>
             <div className="text-sm text-gray-500">Dashboard Principal</div>
           </div>
@@ -23,7 +40,9 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Pacientes Activos</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Pacientes Activos
+                </CardTitle>
                 <Bed className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -34,7 +53,9 @@ export default function Dashboard() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Ventas Hoy</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Ventas Hoy
+                </CardTitle>
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -45,18 +66,24 @@ export default function Dashboard() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Items Stock Bajo</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Items Stock Bajo
+                </CardTitle>
                 <AlertTriangle className="h-4 w-4 text-orange-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-orange-500">5</div>
-                <p className="text-xs text-muted-foreground">Requieren reposición</p>
+                <p className="text-xs text-muted-foreground">
+                  Requieren reposición
+                </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Menús Servidos</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Menús Servidos
+                </CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -67,7 +94,7 @@ export default function Dashboard() {
           </div>
 
           {/* Main Modules */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <Card className="hover:shadow-lg transition-shadow flex flex-col h-full">
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2 text-lg">
@@ -80,9 +107,15 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent className="pt-0 flex flex-col flex-1">
                 <div className="space-y-2 mb-6 flex-1">
-                  <div className="text-sm text-gray-600">• Asignación de menús por habitación/cama</div>
-                  <div className="text-sm text-gray-600">• Control de dietas especiales</div>
-                  <div className="text-sm text-gray-600">• Historial de comidas servidas</div>
+                  <div className="text-sm text-gray-600">
+                    • Asignación de menús por habitación/cama
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    • Control de dietas especiales
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    • Historial de comidas servidas
+                  </div>
                 </div>
                 <Link href="/camas" className="mt-auto">
                   <Button className="w-full">Gestionar Camas</Button>
@@ -102,9 +135,15 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent className="pt-0 flex flex-col flex-1">
                 <div className="space-y-2 mb-6 flex-1">
-                  <div className="text-sm text-gray-600">• Gestión de ingredientes y cantidades</div>
-                  <div className="text-sm text-gray-600">• Control de vencimientos</div>
-                  <div className="text-sm text-gray-600">• Gestión de proveedores</div>
+                  <div className="text-sm text-gray-600">
+                    • Gestión de ingredientes y cantidades
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    • Control de vencimientos
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    • Gestión de proveedores
+                  </div>
                 </div>
                 <Link href="/inventario" className="mt-auto">
                   <Button className="w-full">Ver Inventario</Button>
@@ -124,12 +163,44 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent className="pt-0 flex flex-col flex-1">
                 <div className="space-y-2 mb-6 flex-1">
-                  <div className="text-sm text-gray-600">• Crear órdenes de menús</div>
+                  <div className="text-sm text-gray-600">
+                    • Crear órdenes de menús
+                  </div>
                   <div className="text-sm text-gray-600">• Procesar pagos</div>
-                  <div className="text-sm text-gray-600">• Historial de ventas</div>
+                  <div className="text-sm text-gray-600">
+                    • Historial de ventas
+                  </div>
                 </div>
                 <Link href="/punto-venta" className="mt-auto">
                   <Button className="w-full">Abrir POS</Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-shadow flex flex-col h-full">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <IoFastFood size={24} className="text-red-500" />
+                  Gestión de menús
+                </CardTitle>
+                <CardDescription className="text-sm leading-relaxed">
+                  Creación y visualización de menús del día
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0 flex flex-col flex-1">
+                <div className="space-y-2 mb-6 flex-1">
+                  <div className="text-sm text-gray-600">
+                    • Crear nuevos menús
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    • Editar existentes
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    • Visualización y filtros
+                  </div>
+                </div>
+                <Link href="/menus" className="mt-auto">
+                  <Button className="w-full">Ver menús</Button>
                 </Link>
               </CardContent>
             </Card>
@@ -140,7 +211,9 @@ export default function Dashboard() {
             <Card>
               <CardHeader>
                 <CardTitle>Acciones Rápidas</CardTitle>
-                <CardDescription>Tareas frecuentes del día a día</CardDescription>
+                <CardDescription>
+                  Tareas frecuentes del día a día
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -171,5 +244,5 @@ export default function Dashboard() {
         </div>
       </main>
     </div>
-  )
+  );
 }

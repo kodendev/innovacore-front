@@ -27,6 +27,10 @@ import { InventoryTab } from "@/components/stockTabs/InventoryTab";
 import { SuppliersTab } from "@/components/stockTabs/SuppliersTab";
 import { ReportsTab } from "@/components/stockTabs/ReportsTab";
 import { AddIngredientForm } from "@/components/forms/AddIngredientForm";
+import MenuTab from "@/components/stockTabs/MenuTab";
+import StockPredictionsTab from "@/components/stockTabs/PredictionsTab";
+import SmartPredictionTab from "@/components/stockTabs/SmartPredictionsTab";
+import { ExpirationsTab } from "@/components/stockTabs/ExpirationsTab";
 
 type NewIngredient = Omit<Ingredient, "id" | "status">;
 
@@ -35,40 +39,15 @@ export default function InventarioPage() {
     useState<Ingredient[]>(initialIngredients);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
-  const addIngredient = (newIngredient: NewIngredient) => {
-    const id = Math.max(...ingredients.map((i) => i.id)) + 1;
-    const status =
-      newIngredient.quantity <= newIngredient.minStock
-        ? newIngredient.quantity <= newIngredient.minStock * 0.5
-          ? "critical"
-          : "low"
-        : "ok";
-
-    setIngredients((prev) => [...prev, { ...newIngredient, id, status }]);
-    setIsAddDialogOpen(false);
-  };
-
   const updateStock = (id: number, newQuantity: number): void => {
-    setIngredients((prev) =>
-      prev.map((ingredient) => {
-        if (ingredient.id === id) {
-          const status =
-            newQuantity <= ingredient.minStock
-              ? newQuantity <= ingredient.minStock * 0.5
-                ? "critical"
-                : "low"
-              : "ok";
-          return { ...ingredient, quantity: newQuantity, status };
-        }
-        return ingredient;
-      })
-    );
+    console.log("Actualizando stock");
+    //EJECUTAR PUT CON NUEVO STOCK
   };
 
-  const lowStockItems = ingredients.filter(
-    (i) => i.status === "low" || i.status === "critical"
-  );
-  const criticalItems = ingredients.filter((i) => i.status === "critical");
+  // const lowStockItems = ingredients.filter(
+  //   (i) => i.status === "Activo" || i.status === "Inactivo"
+  // );
+  // const criticalItems = ingredients.filter((i) => i.status === "Inactivo");
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -88,9 +67,9 @@ export default function InventarioPage() {
             </div>
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="w-full sm:w-auto">
+                <Button className="w-full sm:w-auto bg-green-500">
                   <Plus className="h-4 w-4 mr-2" />
-                  Agregar Ingrediente
+                  Agregar producto
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
@@ -100,7 +79,7 @@ export default function InventarioPage() {
                     Ingrese los datos del nuevo ingrediente
                   </DialogDescription>
                 </DialogHeader>
-                <AddIngredientForm onAdd={addIngredient} />
+                <AddIngredientForm onClose={() => setIsAddDialogOpen(false)} />
               </DialogContent>
             </Dialog>
           </div>
@@ -110,7 +89,7 @@ export default function InventarioPage() {
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           {/* Alerts */}
-          {criticalItems.length > 0 && (
+          {/* {criticalItems.length > 0 && (
             <Card className="mb-6 border-red-200 bg-red-50">
               <CardHeader>
                 <CardTitle className="text-red-800 flex items-center gap-2">
@@ -132,13 +111,19 @@ export default function InventarioPage() {
                 </div>
               </CardContent>
             </Card>
-          )}
+          )} */}
 
           <Tabs defaultValue="inventory" className="space-y-6">
             <TabsList>
               <TabsTrigger value="inventory">Inventario</TabsTrigger>
               <TabsTrigger value="suppliers">Proveedores</TabsTrigger>
-              <TabsTrigger value="reports">Reportes</TabsTrigger>
+              <TabsTrigger value="predictions">Predicción de stock</TabsTrigger>
+              <TabsTrigger value="smartPredictions">
+                Predicción inteligente
+              </TabsTrigger>
+              <TabsTrigger value="expirations">
+                Próximos vencimientos
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="inventory">
@@ -149,12 +134,16 @@ export default function InventarioPage() {
               <SuppliersTab />
             </TabsContent>
 
-            <TabsContent value="reports">
-              <ReportsTab
-                ingredients={ingredients}
-                lowStockItems={lowStockItems}
-                criticalItems={criticalItems}
-              />
+            <TabsContent value="predictions">
+              <StockPredictionsTab />
+            </TabsContent>
+
+            <TabsContent value="smartPredictions">
+              <SmartPredictionTab />
+            </TabsContent>
+
+            <TabsContent value="expirations">
+              <ExpirationsTab />
             </TabsContent>
           </Tabs>
         </div>
