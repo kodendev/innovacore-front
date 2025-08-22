@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/table";
 import { Menu } from "@/types/types";
 import { MenuUpdateDialog } from "../menus/MenuUpdateDialog";
+import { Badge } from "../ui/badge";
+import { getBadgeLabel, getBadgeVariant } from "@/utils/badge_variants";
 
 interface Props {
   data: Menu[] | undefined;
@@ -26,6 +28,7 @@ const MenusTable = ({ data, isPending }: Props) => {
             <TableHead>Nombre</TableHead>
             <TableHead>Descripción</TableHead>
             <TableHead>Ingredientes</TableHead>
+            <TableHead>Estado</TableHead>
             <TableHead>Acciones</TableHead>
           </TableRow>
         </TableHeader>
@@ -35,7 +38,26 @@ const MenusTable = ({ data, isPending }: Props) => {
               <TableCell>{row.name}</TableCell>
               <TableCell>{row.description}</TableCell>
               <TableCell>
-                {row.menuProducts?.map((p) => p.product.name).join(", ")}
+                {row.menuProducts
+                  ?.slice(0, 2)
+                  .map((p) => p.product.name)
+                  .join(", ")}
+                ({row.quantity})
+                {row?.menuProducts && row.menuProducts.length > 3 && (
+                  <div className="text-sm text-slate-500">
+                    +{row.menuProducts.length - 2} más
+                  </div>
+                )}
+              </TableCell>
+              <TableCell>
+                {" "}
+                <Badge
+                  variant={getBadgeVariant(
+                    row.active === true ? "Activo" : "Inactivo"
+                  )}
+                >
+                  {getBadgeLabel(row.active === true ? "Activo" : "Inactivo")}
+                </Badge>
               </TableCell>
               <TableCell>
                 <MenuUpdateDialog menu={row} />
