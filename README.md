@@ -1,51 +1,33 @@
-Aplicación desarrollada con Next.js
-, diseñada para ser rápida, escalable y optimizada para producción.
+# 📦 Next.js App
 
-🚀 Tecnologías utilizadas
+Aplicación desarrollada con [Next.js](https://nextjs.org/), diseñada para ser rápida, escalable y optimizada para producción.  
 
-Next.js
- - Framework de React para SSR/SSG
+## 🚀 Tecnologías utilizadas
 
-React
- - Librería para construir interfaces de usuario
+- [Next.js](https://nextjs.org/) - Framework de React para SSR/SSG  
+- [React](https://reactjs.org/) - Librería para construir interfaces de usuario  
+- [TypeScript](https://www.typescriptlang.org/) _(opcional, si lo usás)_  
+- [TailwindCSS](https://tailwindcss.com/) _(opcional, si lo usás)_  
+- [Axios / Fetch API] - Para consumo de APIs  
+- [ESLint & Prettier] - Linter y formateo de código  
 
-TypeScript
- (opcional, si lo usás)
+## 📂 Estructura del proyecto
 
-TailwindCSS
- (opcional, si lo usás)
-
-.
-├── public/            # Archivos estáticos
-├── src/
-│   ├── components/    # Componentes reutilizables
-│   ├── pages/         # Rutas de la app (Next.js routing)
-│   ├── styles/        # Estilos globales
-│   ├── utils/         # Funciones/helpers
-│   └── hooks/         # Custom hooks
-├── package.json
-└── README.md
-
-
-git clone https://github.com/usuario/nombre-del-proyecto.git
-cd nombre-del-proyecto
-
-Instalar dependencias
-
+INSTALAR PAQUETES
 npm install
 # o
 yarn install
 # o
 pnpm install
 
-Ejecutar modo de desarroll
-
+BUILD LOCAL PARA DESARROLLO
 npm run dev
 
-Build para producción:
+BUILD PARA PRODUCCIÓN
 
 npm run build
 npm start
+
 
 
 
