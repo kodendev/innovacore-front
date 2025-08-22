@@ -1,30 +1,44 @@
-# Sanatorio kitchen app
+git clone https://github.com/usuario/nombre-del-proyecto.git
+cd nombre-del-proyecto
+Instalar dependencias:
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
+bash
+Copiar
+Editar
+npm install
+# o
+yarn install
+# o
+pnpm install
+Ejecutar en desarrollo:
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/leasabus-projects/v0-sanatorio-kitchen-app)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/mqVSQSTMc05)
+bash
+Copiar
+Editar
+npm run dev
+Abrir en el navegador:
+👉 http://localhost:3000
 
-## Overview
+Build para producción:
 
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
+bash
+Copiar
+Editar
+npm run build
+npm start
+🧪 Scripts disponibles
+dev → Inicia el servidor en desarrollo
 
-## Deployment
+build → Compila la app para producción
 
-Your project is live at:
+start → Inicia el servidor en modo producción
 
-**[https://vercel.com/leasabus-projects/v0-sanatorio-kitchen-app](https://vercel.com/leasabus-projects/v0-sanatorio-kitchen-app)**
+lint → Corre ESLint para detectar errores
 
-## Build your app
+🌐 Deploy
+La aplicación puede ser desplegada fácilmente en Vercel (recomendado por ser la plataforma oficial de Next.js) o en cualquier servidor que soporte Node.js.
 
-Continue building your app on:
-
-**[https://v0.dev/chat/projects/mqVSQSTMc05](https://v0.dev/chat/projects/mqVSQSTMc05)**
-
-## How It Works
-
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+bash
+Copiar
+Editar
+vercel
