@@ -4,200 +4,193 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Plus, Trash2 } from "lucide-react";
-import { availableIngredients } from "@/data/fakeData";
+import { useMenuType } from "@/hooks/tanstack/menus/useMenuType";
+import { useCreateMenu } from "@/hooks/tanstack/menus/useCreateMenu";
+import { CreateMenuPayload } from "@/types/types";
+import { useProducts } from "@/hooks/tanstack/products/useProducts";
+import { toast } from "sonner";
 
-interface Props {
-  initialData?: any;
-  onSubmit: (data: any) => void;
-  isEditing?: boolean;
-}
+type CreateMenuFormProps = {
+  onClose: () => void;
+};
 
-export function CreateMenuForm({
-  initialData,
-  onSubmit,
-  isEditing = false,
-}: Props) {
-  const [formData, setFormData] = useState({
-    name: initialData?.name || "",
-    price: initialData?.price || "",
-    category: initialData?.category || "",
-    ingredients: initialData?.ingredients || [],
-  });
-
-  const [newIngredient, setNewIngredient] = useState({
+export function CreateMenuForm({ onClose }: CreateMenuFormProps) {
+  const [formData, setFormData] = useState<CreateMenuPayload>({
+    quantity: 1,
     name: "",
-    qty: "",
-    unit: "g",
+    description: "",
+    menuTypeId: 0,
+    menuProducts: [],
   });
+  const [selectedProductId, setSelectedProductId] = useState<number>(0);
+  const [selectedQuantity, setSelectedQuantity] = useState<number>(1);
 
-  const handleSubmit = (e) => {
+  const { data: menuTypes, isLoading: loadingMenuTypes } = useMenuType();
+  const { data: getProducts } = useProducts();
+
+  // const { data: createMenu } = useCreateMenu();
+  const createMenuMutation = useCreateMenu();
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (
-      formData.name &&
-      formData.price &&
-      formData.category &&
-      formData.ingredients.length > 0
-    ) {
-      onSubmit({
-        ...formData,
-        price: Number.parseFloat(formData.price),
-        ...(isEditing && { id: initialData.id }),
-      });
+    if (formData.menuTypeId === 0) {
+      toast.error("Selecciona un tipo de menú");
+      return;
     }
-  };
 
-  const addIngredient = () => {
-    if (newIngredient.name && newIngredient.qty) {
-      setFormData((prev) => ({
-        ...prev,
-        ingredients: [
-          ...prev.ingredients,
-          {
-            ...newIngredient,
-            qty: Number.parseFloat(newIngredient.qty),
-          },
-        ],
-      }));
-      setNewIngredient({ name: "", qty: "", unit: "g" });
+    if (formData.menuProducts.length === 0) {
+      toast.error("Agrega al menos un producto al menú");
     }
-  };
 
-  const removeIngredient = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      ingredients: prev.ingredients.filter((_, i) => i !== index),
-    }));
+    console.log("Valores enviados", formData);
+    // Lanzar mutación de creación
+    createMenuMutation.mutate(formData, {
+      onSuccess: () => {
+        onClose(); // Cerrar modal al crear
+      },
+    });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="name">Nombre del Menú</Label>
-          <Input
-            id="name"
-            value={formData.name}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, name: e.target.value }))
-            }
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="price">Precio ($)</Label>
-          <Input
-            id="price"
-            type="number"
-            step="0.01"
-            value={formData.price}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, price: e.target.value }))
-            }
-            required
-          />
-        </div>
-      </div>
-
+    <form onSubmit={handleSubmit} className="space-y-6 p-4">
       <div>
-        <Label htmlFor="category">Categoría</Label>
+        <Label htmlFor="name">Nombre del Menú</Label>
         <Input
-          id="category"
-          value={formData.category}
+          id="name"
+          value={formData.name}
           onChange={(e) =>
-            setFormData((prev) => ({ ...prev, category: e.target.value }))
+            setFormData((prev) => ({ ...prev, name: e.target.value }))
           }
-          placeholder="ej: Principal, Ensalada, Postre"
           required
         />
       </div>
 
       <div>
-        <Label>Ingredientes</Label>
-        <div className="space-y-4">
-          {formData.ingredients.map((ingredient, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-            >
-              <span>
-                {ingredient.name} - {ingredient.qty}
-                {ingredient.unit}
-              </span>
-              <Button
-                type="button"
-                variant="destructive"
-                size="sm"
-                onClick={() => removeIngredient(index)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-
-          <div className="grid grid-cols-4 gap-2">
-            <Select
-              value={newIngredient.name}
-              onValueChange={(value) =>
-                setNewIngredient((prev) => ({ ...prev, name: value }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Ingrediente" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableIngredients.map((ingredient) => (
-                  <SelectItem key={ingredient.name} value={ingredient.name}>
-                    {ingredient.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Input
-              type="number"
-              step="0.1"
-              placeholder="Cantidad"
-              value={newIngredient.qty}
-              onChange={(e) =>
-                setNewIngredient((prev) => ({ ...prev, qty: e.target.value }))
-              }
-            />
-
-            <Select
-              value={newIngredient.unit}
-              onValueChange={(value) =>
-                setNewIngredient((prev) => ({ ...prev, unit: value }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="g">gramos</SelectItem>
-                <SelectItem value="kg">kilogramos</SelectItem>
-                <SelectItem value="u">unidades</SelectItem>
-                <SelectItem value="ml">mililitros</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Button type="button" onClick={addIngredient}>
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+        <Label htmlFor="description">Descripción</Label>
+        <Input
+          id="description"
+          value={formData.description}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, description: e.target.value }))
+          }
+          required
+        />
       </div>
 
-      <Button type="submit" className="w-full">
-        {isEditing ? "Actualizar Menú" : "Crear Menú"}
-      </Button>
+      <div className="gap-4 flex flex-row items-center justify-start">
+        <Label htmlFor="menuTypeId">Tipo de Menú:</Label>
+        <select
+          id="menuTypeId"
+          value={formData.menuTypeId}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              menuTypeId: Number(e.target.value),
+            }))
+          }
+          disabled={loadingMenuTypes}
+          required
+          className="border rounded px-2 py-1"
+        >
+          <option value={0}>Selecciona un tipo</option>
+          {menuTypes?.map((type) => (
+            <option key={type.id} value={type.id}>
+              {type.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="border p-3 rounded space-y-2">
+        <h3 className="font-semibold">Agregar productos al menú</h3>
+
+        <div className="flex gap-2 items-center">
+          <select
+            value={selectedProductId}
+            onChange={(e) => setSelectedProductId(Number(e.target.value))}
+            className="border px-2 py-1 rounded"
+          >
+            <option value={0}>Selecciona un producto</option>
+            {getProducts?.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.name}
+              </option>
+            ))}
+          </select>
+
+          <input
+            type="number"
+            min={1}
+            value={selectedQuantity}
+            onChange={(e) => setSelectedQuantity(Number(e.target.value))}
+            className="w-16 border px-2 py-1 rounded"
+          />
+
+          <Button
+            type="button"
+            onClick={() => {
+              if (!selectedProductId) return;
+
+              // Evitar duplicados
+              const exists = formData.menuProducts.some(
+                (p) => p.productId === selectedProductId
+              );
+              if (exists) return;
+
+              setFormData((prev) => ({
+                ...prev,
+                menuProducts: [
+                  ...prev.menuProducts,
+                  { productId: selectedProductId, quantity: selectedQuantity },
+                ],
+              }));
+
+              // Reset
+              setSelectedProductId(0);
+              setSelectedQuantity(1);
+            }}
+          >
+            Agregar
+          </Button>
+        </div>
+
+        {/* Listado de productos agregados */}
+        <ul className="space-y-1">
+          {formData.menuProducts.map((item) => {
+            const product = getProducts?.find((p) => p.id === item.productId);
+            return (
+              <li
+                key={item.productId}
+                className="flex justify-between items-center"
+              >
+                <span>
+                  {product?.name || "Producto eliminado"} (x{item.quantity})
+                </span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="text-red-600"
+                  onClick={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      menuProducts: prev.menuProducts.filter(
+                        (p) => p.productId !== item.productId
+                      ),
+                    }))
+                  }
+                >
+                  Quitar
+                </Button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      <Button type="submit">Crear Menú</Button>
+      {createMenuMutation.isError && (
+        <p className="text-red-600">Error creando menú</p>
+      )}
     </form>
   );
 }

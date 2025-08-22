@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useProducts } from "@/hooks/tanstack/useProducts";
+import { useProducts } from "@/hooks/tanstack/products/useProducts";
 import { mockProducts } from "@/data/fakeData";
 
 export function ExpirationsTab() {
