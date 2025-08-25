@@ -88,3 +88,20 @@ export type CreateMenu = {
   menuProducts: MenuProductPayload[];
   // puedes agregar más campos si los tienes
 };
+
+/**Login types */
+export type userTypes = {
+  id: number;
+  name: string;
+  users: [];
+  description: string;
+};
+
+export interface CreateUserTypes {
+  username: string;
+  password_hash: string;
+  partnerId: number;
+  userTypeId: number;
+  active: boolean;
+  email: string;
+}

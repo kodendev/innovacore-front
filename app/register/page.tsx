@@ -32,19 +32,33 @@ import {
   Phone,
   Building,
 } from "lucide-react";
+import { useUserTypes } from "@/hooks/tanstack/login/useGetUserType";
+import { useCreateUser } from "@/hooks/tanstack/login/useCreateUser";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { redirect } from "next/dist/server/api-utils";
 
 export default function RegistroPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { mutate: createUser, isPending } = useCreateUser();
+
   const [formData, setFormData] = useState({
-    nombre: "",
-    apellido: "",
-    email: "",
-    telefono: "",
-    rol: "",
-    password: "",
+    username: "",
+    password_hash: "",
     confirmPassword: "",
+    email: "",
+    rol: "", // viene del <Select />
   });
+
+  const { data: userTypes, isLoading, error } = useUserTypes();
+
+  const router = useRouter();
+
+  if (isLoading) return <p>Cargando tipos de usuario...</p>;
+  if (error) return <p>Ocurrió un error al cargar los tipos de usuario</p>;
+
+  console.log(userTypes);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -63,10 +77,34 @@ export default function RegistroPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Aquí iría la lógica de registro
-    console.log("Registro attempt:", formData);
-    // Redirigir al login
-    window.location.href = "/login";
+
+    createUser(
+      {
+        username: formData.username,
+        password_hash: formData.password_hash,
+        email: formData.email,
+        userTypeId: Number(formData.rol),
+        partnerId: 1,
+        active: true,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Usuario registrado correctamente 🎉");
+          setFormData({
+            username: "",
+            password_hash: "",
+            confirmPassword: "",
+            email: "",
+            rol: "",
+          });
+          router.push("/");
+        },
+
+        onError: () => {
+          toast.error("Error al registrar el usuario ❌");
+        },
+      }
+    );
   };
 
   return (
@@ -91,39 +129,21 @@ export default function RegistroPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Nombre y Apellido */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="nombre">Nombre</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input
-                      id="nombre"
-                      name="nombre"
-                      type="text"
-                      placeholder="Juan"
-                      value={formData.nombre}
-                      onChange={handleInputChange}
-                      className="pl-10"
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="apellido">Apellido</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input
-                      id="apellido"
-                      name="apellido"
-                      type="text"
-                      placeholder="Pérez"
-                      value={formData.apellido}
-                      onChange={handleInputChange}
-                      className="pl-10"
-                      required
-                    />
-                  </div>
+              {/* Nombre de usuario */}
+              <div className="space-y-2">
+                <Label htmlFor="username">Nombre de Usuario</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="username"
+                    name="username"
+                    type="text"
+                    placeholder="gonzalo123"
+                    value={formData.username}
+                    onChange={handleInputChange}
+                    className="pl-10"
+                    required
+                  />
                 </div>
               </div>
 
@@ -136,26 +156,8 @@ export default function RegistroPage() {
                     id="email"
                     name="email"
                     type="email"
-                    placeholder="tu@email.com"
+                    placeholder="correo@ejemplo.com"
                     value={formData.email}
-                    onChange={handleInputChange}
-                    className="pl-10"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Teléfono */}
-              <div className="space-y-2">
-                <Label htmlFor="telefono">Teléfono</Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    id="telefono"
-                    name="telefono"
-                    type="tel"
-                    placeholder="+54 11 1234-5678"
-                    value={formData.telefono}
                     onChange={handleInputChange}
                     className="pl-10"
                     required
@@ -173,15 +175,11 @@ export default function RegistroPage() {
                       <SelectValue placeholder="Selecciona tu rol" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="chef">Chef Principal</SelectItem>
-                      <SelectItem value="cocinero">Cocinero</SelectItem>
-                      <SelectItem value="administrador">
-                        Administrador
-                      </SelectItem>
-                      <SelectItem value="nutricionista">
-                        Nutricionista
-                      </SelectItem>
-                      <SelectItem value="supervisor">Supervisor</SelectItem>
+                      {userTypes?.map((ut) => (
+                        <SelectItem key={ut.id} value={String(ut.id)}>
+                          {ut.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -194,10 +192,10 @@ export default function RegistroPage() {
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
                     id="password"
-                    name="password"
+                    name="password_hash"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
-                    value={formData.password}
+                    value={formData.password_hash}
                     onChange={handleInputChange}
                     className="pl-10 pr-10"
                     required
@@ -251,7 +249,7 @@ export default function RegistroPage() {
 
               {/* Términos y condiciones */}
               <div className="flex items-center space-x-2">
-                <input
+                <Input
                   id="terms"
                   type="checkbox"
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
@@ -267,7 +265,7 @@ export default function RegistroPage() {
 
               {/* Botón de registro */}
               <Button type="submit" className="w-full">
-                Crear Cuenta
+                {isPending ? "Registrando..." : "Registrar"}
               </Button>
             </form>
 
