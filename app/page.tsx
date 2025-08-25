@@ -13,6 +13,7 @@ import {
   TrendingUp,
   AlertTriangle,
   Bed,
+  User,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -29,7 +30,13 @@ export default function Dashboard() {
                 Sistema Cocina Sanatorio
               </h1>
             </div>
-            <div className="text-sm text-gray-500">Dashboard Principal</div>
+            <Link
+              href={"login"}
+              className="text-sm flex flex-row items-center justify-center gap-4 text-gray-500 cursor-pointer"
+            >
+              <span>Mi cuenta</span>
+              {<User />}
+            </Link>
           </div>
         </div>
       </header>
