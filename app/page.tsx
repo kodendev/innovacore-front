@@ -1,3 +1,4 @@
+"use client";
 import {
   Card,
   CardContent,
@@ -18,8 +19,17 @@ import {
 import Link from "next/link";
 
 import { IoFastFood } from "react-icons/io5";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Dashboard() {
+  const { user, login, logout } = useAuth();
+
+  if (user) {
+    console.log(user.username);
+  }
+
+  console.log("USUARIO OBTENIDO", user?.username);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm border-b">
@@ -34,7 +44,7 @@ export default function Dashboard() {
               href={"login"}
               className="text-sm flex flex-row items-center justify-center gap-4 text-gray-500 cursor-pointer"
             >
-              <span>Mi cuenta</span>
+              <span>{user?.username}</span>
               {<User />}
             </Link>
           </div>

@@ -16,6 +16,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Eye, EyeOff, ChefHat, Mail, Lock } from "lucide-react";
+import { useLoginUser } from "@/hooks/tanstack/login/useLoginUser";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { decodeToken } from "@/utils/auth";
+import { LoginResponse } from "@/types/types";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -23,6 +28,10 @@ export default function LoginPage() {
     email: "",
     password: "",
   });
+
+  const { mutate: loginUser, isPending } = useLoginUser();
+
+  const router = useRouter();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -34,10 +43,29 @@ export default function LoginPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Aquí iría la lógica de autenticación
-    console.log("Login attempt:", formData);
-    // Redirigir al dashboard
-    window.location.href = "/";
+    loginUser(
+      {
+        email: formData.email,
+        password: formData.password,
+      },
+      {
+        onSuccess: (data) => {
+          const token = data.access_token;
+          localStorage.setItem("access_token", token);
+          const user = decodeToken(token);
+          toast.success("Usuario registrado correctamente 🎉");
+          setFormData({
+            email: "",
+            password: "",
+          });
+          router.push("/");
+        },
+
+        onError: () => {
+          toast.error("Credenciales incorrectas, intenta de nuevo.");
+        },
+      }
+    );
   };
 
   return (

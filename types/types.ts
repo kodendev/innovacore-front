@@ -105,3 +105,12 @@ export interface CreateUserTypes {
   active: boolean;
   email: string;
 }
+
+export interface LoginUserTypes {
+  email: string;
+  password: string;
+}
+
+export type LoginResponse = {
+  access_token: string;
+};

@@ -58,8 +58,6 @@ export default function RegistroPage() {
   if (isLoading) return <p>Cargando tipos de usuario...</p>;
   if (error) return <p>Ocurrió un error al cargar los tipos de usuario</p>;
 
-  console.log(userTypes);
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
