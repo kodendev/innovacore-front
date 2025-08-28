@@ -19,8 +19,7 @@ import { Eye, EyeOff, ChefHat, Mail, Lock } from "lucide-react";
 import { useLoginUser } from "@/hooks/tanstack/login/useLoginUser";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { decodeToken } from "@/utils/auth";
-import { LoginResponse } from "@/types/types";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -30,6 +29,8 @@ export default function LoginPage() {
   });
 
   const { mutate: loginUser, isPending } = useLoginUser();
+
+  const { login, user } = useAuth();
 
   const router = useRouter();
 
@@ -50,10 +51,8 @@ export default function LoginPage() {
       },
       {
         onSuccess: (data) => {
-          const token = data.access_token;
-          localStorage.setItem("access_token", token);
-          const user = decodeToken(token);
-          toast.success("Usuario registrado correctamente 🎉");
+          login(data.access_token);
+          toast.success(`!Bienvenido de nuevo!`);
           setFormData({
             email: "",
             password: "",

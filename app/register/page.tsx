@@ -48,7 +48,7 @@ export default function RegistroPage() {
     password_hash: "",
     confirmPassword: "",
     email: "",
-    rol: "", // viene del <Select />
+    rol: "",
   });
 
   const { data: userTypes, isLoading, error } = useUserTypes();
