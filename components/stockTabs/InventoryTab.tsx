@@ -13,6 +13,7 @@ import { StockUpdateDialog } from "../forms/UpdateStockElement";
 import { InfoRow } from "@/utils/info_row";
 import ProductsTable from "../tables/ProductsTable";
 import { useComponentView } from "@/hooks/useComponentView";
+import { getExpirationColor } from "@/utils/getExpirationBadge";
 
 export const InventoryTab = () => {
   const { data, isLoading } = useProducts();
@@ -107,7 +108,11 @@ export const InventoryTab = () => {
                   />
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Calendar className="h-4 w-4" />
-                    <span>Vence: {ingredient.expirationDate}</span>
+                    <span
+                      className={getExpirationColor(ingredient.expirationDate)}
+                    >
+                      Vence: {ingredient.expirationDate}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Calendar className="h-4 w-4" />

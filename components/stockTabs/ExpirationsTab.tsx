@@ -10,6 +10,7 @@ import {
 import { useProducts } from "@/hooks/tanstack/products/useProducts";
 import { mockProducts } from "@/data/fakeData";
 import { Badge } from "@/components/ui/badge"; // si usas shadcn/ui o similar
+import { getExpirationBadge } from "@/utils/getExpirationBadge";
 
 export function ExpirationsTab() {
   const { data: products, isLoading } = useProducts();
@@ -22,32 +23,6 @@ export function ExpirationsTab() {
     const dateB = new Date(b.expirationDate || "").getTime();
     return dateA - dateB;
   });
-
-  const getExpirationBadge = (daysLeft: number) => {
-    if (daysLeft < 0) {
-      return <Badge className="bg-gray-600 text-white">Producto vencido</Badge>;
-    }
-    if (daysLeft < 1) {
-      return <Badge className="bg-red-600 text-white">Vence hoy</Badge>;
-    }
-    if (daysLeft <= 7)
-      return (
-        <Badge className="bg-red-600 text-white">
-          Vence en {daysLeft} días
-        </Badge>
-      );
-    if (daysLeft <= 30)
-      return (
-        <Badge className="bg-yellow-500 text-white">
-          Vence en {daysLeft} días
-        </Badge>
-      );
-    return (
-      <Badge className="bg-green-600 text-white">
-        Vence en {daysLeft} días
-      </Badge>
-    );
-  };
 
   return (
     <div className="p-4">
@@ -72,22 +47,6 @@ export function ExpirationsTab() {
                 <TableCell>{format(expiration, "dd/MM/yyyy")}</TableCell>
                 <TableCell>{product.stock} Kg</TableCell>
                 <TableCell>{getExpirationBadge(daysLeft)}</TableCell>
-
-                {/* <TableCell>
-                  {daysLeft <= 7 ? (
-                    <Badge className="bg-red-600 text-white">
-                      Vence en {daysLeft} días
-                    </Badge>
-                  ) : daysLeft <= 30 ? (
-                    <Badge className="bg-yellow-500 text-white">
-                      Vence en {daysLeft} días
-                    </Badge>
-                  ) : (
-                    <Badge className="bg-green-600 text-white">
-                      Vence en {daysLeft} días
-                    </Badge>
-                  )}
-                </TableCell> */}
               </TableRow>
             );
           })}
