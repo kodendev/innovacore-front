@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/table";
 import { useProducts } from "@/hooks/tanstack/products/useProducts";
 import { mockProducts } from "@/data/fakeData";
+import { Badge } from "@/components/ui/badge"; // si usas shadcn/ui o similar
+import { getExpirationBadge } from "@/utils/getExpirationBadge";
 
 export function ExpirationsTab() {
   const { data: products, isLoading } = useProducts();
@@ -16,16 +18,11 @@ export function ExpirationsTab() {
   if (isLoading) return <p>Cargando productos...</p>;
 
   // Ordenar productos por vencimiento
-  const sortedProducts = [...mockProducts].sort((a, b) => {
+  const sortedProducts = [...(products || [])].sort((a, b) => {
     const dateA = new Date(a.expirationDate || "").getTime();
     const dateB = new Date(b.expirationDate || "").getTime();
     return dateA - dateB;
   });
-  const getColor = (daysLeft: number) => {
-    if (daysLeft <= 7) return "text-red-600";
-    if (daysLeft <= 30) return "text-yellow-500";
-    return "text-green-600";
-  };
 
   return (
     <div className="p-4">
@@ -40,7 +37,7 @@ export function ExpirationsTab() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedProducts.map((product) => {
+          {sortedProducts?.map((product) => {
             const expiration = parseISO(product.expirationDate || "");
             const daysLeft = differenceInDays(expiration, new Date());
 
@@ -49,9 +46,7 @@ export function ExpirationsTab() {
                 <TableCell>{product.name}</TableCell>
                 <TableCell>{format(expiration, "dd/MM/yyyy")}</TableCell>
                 <TableCell>{product.stock} Kg</TableCell>
-                <TableCell className={`font-bold ${getColor(daysLeft)}`}>
-                  {daysLeft} días
-                </TableCell>
+                <TableCell>{getExpirationBadge(daysLeft)}</TableCell>
               </TableRow>
             );
           })}

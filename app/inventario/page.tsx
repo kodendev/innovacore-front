@@ -9,7 +9,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -43,11 +42,6 @@ export default function InventarioPage() {
     console.log("Actualizando stock");
     //EJECUTAR PUT CON NUEVO STOCK
   };
-
-  // const lowStockItems = ingredients.filter(
-  //   (i) => i.status === "Activo" || i.status === "Inactivo"
-  // );
-  // const criticalItems = ingredients.filter((i) => i.status === "Inactivo");
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -88,31 +82,6 @@ export default function InventarioPage() {
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          {/* Alerts */}
-          {/* {criticalItems.length > 0 && (
-            <Card className="mb-6 border-red-200 bg-red-50">
-              <CardHeader>
-                <CardTitle className="text-red-800 flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5" />
-                  Stock Crítico
-                </CardTitle>
-                <CardDescription className="text-red-600">
-                  Los siguientes ingredientes requieren reposición urgente
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {criticalItems.map((item) => (
-                    <Badge key={item.id} variant="destructive">
-                      {item.name}: {item.quantity}
-                      {item.unit}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )} */}
-
           <Tabs defaultValue="inventory" className="space-y-6">
             <TabsList>
               <TabsTrigger value="inventory">Inventario</TabsTrigger>
@@ -127,7 +96,7 @@ export default function InventarioPage() {
             </TabsList>
 
             <TabsContent value="inventory">
-              <InventoryTab ingredients={ingredients} onUpdate={updateStock} />
+              <InventoryTab />
             </TabsContent>
 
             <TabsContent value="suppliers">

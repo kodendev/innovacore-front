@@ -13,13 +13,9 @@ import { StockUpdateDialog } from "../forms/UpdateStockElement";
 import { InfoRow } from "@/utils/info_row";
 import ProductsTable from "../tables/ProductsTable";
 import { useComponentView } from "@/hooks/useComponentView";
+import { getExpirationColor } from "@/utils/getExpirationBadge";
 
-interface Props {
-  ingredients?: Ingredient[];
-  onUpdate: (id: number, quantity: number) => void;
-}
-
-export const InventoryTab = ({ onUpdate }: Props) => {
+export const InventoryTab = () => {
   const { data, isLoading } = useProducts();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedIngredient, setSelectedIngredient] = useState<Product | null>(
@@ -112,7 +108,11 @@ export const InventoryTab = ({ onUpdate }: Props) => {
                   />
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Calendar className="h-4 w-4" />
-                    <span>Vence: 25/07/2025</span>
+                    <span
+                      className={getExpirationColor(ingredient.expirationDate!)}
+                    >
+                      Vence: {ingredient.expirationDate}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Calendar className="h-4 w-4" />
