@@ -137,7 +137,7 @@ export const AddIngredientForm = ({ onClose }: Props) => {
         />
       </div>
       <div>
-        <Label htmlFor="cost_pricec">Precio de costo</Label>
+        <Label htmlFor="cost_price">Precio de costo</Label>
         <Input
           placeholder="Ej: 100"
           id="cost_price"
@@ -146,6 +146,21 @@ export const AddIngredientForm = ({ onClose }: Props) => {
             setFormData((prev) => ({
               ...prev,
               cost_price: e.target.value,
+            }))
+          }
+          required
+        />
+      </div>
+      <div>
+        <Label htmlFor="barcode">Codigo de barras</Label>
+        <Input
+          placeholder="Ej: 12321221"
+          id="barcode"
+          value={formData.barcode}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              barcode: e.target.value,
             }))
           }
           required
