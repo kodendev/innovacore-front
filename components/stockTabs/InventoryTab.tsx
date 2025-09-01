@@ -14,6 +14,7 @@ import { InfoRow } from "@/utils/info_row";
 import ProductsTable from "../tables/ProductsTable";
 import { useComponentView } from "@/hooks/useComponentView";
 import { getExpirationColor } from "@/utils/getExpirationBadge";
+import { Input } from "../ui/input";
 
 export const InventoryTab = () => {
   const { data, isLoading } = useProducts();
@@ -43,8 +44,18 @@ export const InventoryTab = () => {
     setDialogOpen(false);
   };
 
+  const lowStockProducts = (data ?? []).filter((p) => p.isStockMin);
+
   return (
     <>
+      {lowStockProducts.length > 0 && (
+        <div className="mb-4 p-4 rounded-lg bg-yellow-100 border border-yellow-300 text-yellow-800">
+          ⚠️ Los siguientes productos tienen stock mínimo, por favor reponer:{" "}
+          <span className="font-semibold">
+            {lowStockProducts.map((p) => p.name).join(", ")}
+          </span>
+        </div>
+      )}
       <ConfirmDialog
         open={dialogOpen}
         onCancel={() => setDialogOpen(false)}
@@ -61,7 +72,8 @@ export const InventoryTab = () => {
           </p>
         </div>
       ) : (
-        <div className="flex justify-end items-end w-full mb-4">
+        <div className="flex justify-between items-end w-full mb-4">
+          <Input placeholder="Buscar Producto"></Input>
           <Button onClick={toggleView}>Cambiar vista</Button>
         </div>
       )}
@@ -103,9 +115,13 @@ export const InventoryTab = () => {
                     value={`${ingredient.stock} kg`}
                   />
                   <InfoRow
+                    className={
+                      ingredient.isStockMin ? "text-red-500 font-bold" : ""
+                    }
                     label="Stock mínimo:"
-                    value={`${ingredient.stock} kg`}
+                    value={`${ingredient?.minStock} kg`}
                   />
+
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Calendar className="h-4 w-4" />
                     <span

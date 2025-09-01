@@ -30,6 +30,7 @@ export function StockUpdateDialog({ product }: Props) {
     active: product.active,
     stock: product.stock,
     expirationDate: product.expirationDate,
+    minStock: product.minStock,
   });
   const { mutate: updateProduct, isPending } = useUpdateProduct();
 
@@ -130,6 +131,7 @@ export function StockUpdateDialog({ product }: Props) {
             <Input
               id="expirationDate"
               name="expirationDate"
+              type="date"
               value={formData.expirationDate}
               onChange={handleChange}
             />
@@ -141,6 +143,16 @@ export function StockUpdateDialog({ product }: Props) {
               name="stock"
               type="number"
               value={formData.stock}
+              onChange={handleChange}
+            />
+          </div>
+          <div>
+            <Label htmlFor="stock">Stock Mínimo</Label>
+            <Input
+              id="minStock"
+              name="minStock"
+              type="number"
+              value={formData.minStock}
               onChange={handleChange}
             />
           </div>
