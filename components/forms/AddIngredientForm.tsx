@@ -14,14 +14,16 @@ interface Props {
 }
 
 export const AddIngredientForm = ({ onClose }: Props) => {
-  const [formData, setFormData] = useState<Product>({
+  const [formData, setFormData] = useState({
     name: "",
     description: "",
-    sale_price: 0,
-    cost_price: 0,
+    sale_price: "",
+    cost_price: "",
     barcode: "",
     active: true,
-    stock: 0,
+    stock: "",
+    expirationDate: "",
+    minStock: "",
   });
 
   const queryClient = useQueryClient();
@@ -30,13 +32,19 @@ export const AddIngredientForm = ({ onClose }: Props) => {
     onSuccess: (data) => {
       toast.success(`Ingrediente ${data.name} agregado exitosamente`);
       queryClient.invalidateQueries({ queryKey: ["products"] });
-      onClose(); // <- cerrar modal
+      onClose();
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createProduct(formData);
+    createProduct({
+      ...formData,
+      minStock: parseFloat(formData.minStock),
+      stock: parseFloat(formData.stock),
+      sale_price: parseFloat(formData.sale_price),
+      cost_price: parseFloat(formData.cost_price),
+    });
   };
 
   return (
@@ -44,6 +52,7 @@ export const AddIngredientForm = ({ onClose }: Props) => {
       <div>
         <Label htmlFor="name">Nombre del Ingrediente</Label>
         <Input
+          placeholder="Ej: Tomate, Lechuga, Queso"
           id="name"
           value={formData.name}
           onChange={(e) =>
@@ -56,6 +65,7 @@ export const AddIngredientForm = ({ onClose }: Props) => {
         <div>
           <Label htmlFor="description">Descripción</Label>
           <Input
+            placeholder="Ej: Tomate fresco orgánico"
             id="description"
             type="string"
             value={formData.description}
@@ -68,67 +78,89 @@ export const AddIngredientForm = ({ onClose }: Props) => {
         <div>
           <Label htmlFor="stock">Stock KG</Label>
           <Input
+            placeholder="Ej: 50"
             id="stock"
             type="number"
             value={formData.stock}
             onChange={(e) =>
               setFormData((prev) => ({
                 ...prev,
-                stock: Number(e.target.value),
+                stock: e.target.value,
               }))
             }
             required
           />
         </div>
       </div>
-      {/* <div>
-          <Label htmlFor="minStock">Stock Mínimo</Label>
-          <Input
-            id="minStock"
-            type="number"
-            step="0.1"
-            value={formData.minStock}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, minStock: e.target.value }))
-            }
-            required
-          />
-        </div> */}
-      {/* <div>
-        <Label htmlFor="expiry">Fecha de Vencimiento</Label>
-        <Input
-          id="expiry"
-          type="date"
-          value={formData.expiry}
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, expiry: e.target.value }))
-          }
-          required
-        />
-      </div> */}
       <div>
-        <Label htmlFor="sale_price">Precio de venta</Label>
+        <Label htmlFor="minStock">Stock Mínimo</Label>
         <Input
-          id="sale_price"
-          value={formData.sale_price}
+          placeholder="Ej: 10"
+          id="minStock"
+          type="number"
+          value={formData.minStock}
           onChange={(e) =>
             setFormData((prev) => ({
               ...prev,
-              sale_price: Number(e.target.value),
+              minStock: e.target.value,
             }))
           }
           required
         />
       </div>
       <div>
-        <Label htmlFor="cost_pricec">Precio de costo</Label>
+        <Label htmlFor="expirationDate">Fecha de Vencimiento</Label>
         <Input
+          placeholder="Selecciona una fecha"
+          id="expirationDate"
+          type="date"
+          value={formData.expirationDate}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, expirationDate: e.target.value }))
+          }
+          required
+        />
+      </div>
+      <div>
+        <Label htmlFor="sale_price">Precio de venta</Label>
+        <Input
+          placeholder="Ej: 150"
+          id="sale_price"
+          value={formData.sale_price}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              sale_price: e.target.value,
+            }))
+          }
+          required
+        />
+      </div>
+      <div>
+        <Label htmlFor="cost_price">Precio de costo</Label>
+        <Input
+          placeholder="Ej: 100"
           id="cost_price"
           value={formData.cost_price}
           onChange={(e) =>
             setFormData((prev) => ({
               ...prev,
-              cost_price: Number(e.target.value),
+              cost_price: e.target.value,
+            }))
+          }
+          required
+        />
+      </div>
+      <div>
+        <Label htmlFor="barcode">Codigo de barras</Label>
+        <Input
+          placeholder="Ej: 12321221"
+          id="barcode"
+          value={formData.barcode}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              barcode: e.target.value,
             }))
           }
           required

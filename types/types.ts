@@ -20,7 +20,9 @@ export interface Product {
   barcode?: string;
   active: boolean;
   stock: number;
-  expirationDate?: string; // opcional si no todos tienen fecha de vencimiento
+  expirationDate?: string;
+  minStock?: number;
+  isStockMin?: boolean;
 }
 
 export type StockStatus = "Activo" | "Inactivo";
