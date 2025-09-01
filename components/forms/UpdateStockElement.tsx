@@ -29,6 +29,7 @@ export function StockUpdateDialog({ product }: Props) {
     barcode: product.barcode,
     active: product.active,
     stock: product.stock,
+    expirationDate: product.expirationDate,
   });
   const { mutate: updateProduct, isPending } = useUpdateProduct();
 
@@ -50,10 +51,10 @@ export function StockUpdateDialog({ product }: Props) {
     if (
       !formData.name.trim() ||
       !formData.description.trim() ||
-      !formData.barcode.trim() ||
       formData.sale_price <= 0 ||
       formData.cost_price <= 0 ||
-      formData.stock < 0
+      formData.stock < 0 ||
+      formData.expirationDate === null
     ) {
       toast.error("Por favor, completá todos los campos correctamente.");
       return;
@@ -120,6 +121,16 @@ export function StockUpdateDialog({ product }: Props) {
               id="barcode"
               name="barcode"
               value={formData.barcode}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="barcode">Fecha de vencimiento</Label>
+            <Input
+              id="expirationDate"
+              name="expirationDate"
+              value={formData.expirationDate}
               onChange={handleChange}
             />
           </div>

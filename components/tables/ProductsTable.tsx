@@ -32,6 +32,7 @@ const ProductsTable = ({ data, handleDeleteClick, isPending }: Props) => {
             <TableHead>Costo</TableHead>
             <TableHead>Venta</TableHead>
             <TableHead>Estado</TableHead>
+            <TableHead>Vencimiento</TableHead>
             <TableHead>Acciones</TableHead>
           </TableRow>
         </TableHeader>
@@ -54,6 +55,9 @@ const ProductsTable = ({ data, handleDeleteClick, isPending }: Props) => {
                 >
                   {getBadgeLabel(ingredient.active ? "Activo" : "Inactivo")}
                 </Badge>
+              </TableCell>
+              <TableCell className="px-6 py-4">
+                {ingredient.expirationDate}
               </TableCell>
               <TableCell className="px-6 py-4 space-x-2">
                 <StockUpdateDialog product={ingredient} />

@@ -17,7 +17,7 @@ export interface Product {
   description: string;
   sale_price: number;
   cost_price: number;
-  barcode: string;
+  barcode?: string;
   active: boolean;
   stock: number;
   expirationDate?: string; // opcional si no todos tienen fecha de vencimiento
