@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 export const getExpirationBadge = (daysLeft: number) => {
   if (daysLeft < 0) {
-    return <Badge className="bg-gray-600 text-white">Producto vencido</Badge>;
+    return <Badge className="bg-red-600 text-white">Producto vencido</Badge>;
   }
   if (daysLeft < 1) {
     return <Badge className="bg-red-600 text-white">Vence hoy</Badge>;
@@ -22,6 +22,8 @@ export const getExpirationBadge = (daysLeft: number) => {
 };
 
 export function getExpirationColor(expirationDate: string): string {
+  if (!expirationDate) return "text-gray-600"; // color neutro si no hay fecha
+
   const today = new Date();
   const expiration = new Date(expirationDate);
 

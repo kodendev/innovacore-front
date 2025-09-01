@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { StockUpdateDialog } from "../forms/UpdateStockElement";
 import { Button } from "../ui/button";
 import { getBadgeLabel, getBadgeVariant } from "@/utils/badge_variants";
+import { getExpirationColor } from "@/utils/getExpirationBadge";
 
 interface Props {
   data: Product[] | undefined;
@@ -56,7 +57,9 @@ const ProductsTable = ({ data, handleDeleteClick, isPending }: Props) => {
                   {getBadgeLabel(ingredient.active ? "Activo" : "Inactivo")}
                 </Badge>
               </TableCell>
-              <TableCell className="px-6 py-4">
+              <TableCell
+                className={getExpirationColor(ingredient.expirationDate!)}
+              >
                 {ingredient.expirationDate}
               </TableCell>
               <TableCell className="px-6 py-4 space-x-2">

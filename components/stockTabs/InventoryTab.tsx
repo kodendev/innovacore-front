@@ -109,7 +109,7 @@ export const InventoryTab = () => {
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Calendar className="h-4 w-4" />
                     <span
-                      className={getExpirationColor(ingredient.expirationDate)}
+                      className={getExpirationColor(ingredient.expirationDate!)}
                     >
                       Vence: {ingredient.expirationDate}
                     </span>
