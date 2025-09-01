@@ -1,3 +1,4 @@
+"use client";
 import {
   Card,
   CardContent,
@@ -13,12 +14,23 @@ import {
   TrendingUp,
   AlertTriangle,
   Bed,
+  User,
 } from "lucide-react";
 import Link from "next/link";
 
 import { IoFastFood } from "react-icons/io5";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function Dashboard() {
+  const { user, login, logout } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    logout();
+    router.push("/login");
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm border-b">
@@ -29,7 +41,16 @@ export default function Dashboard() {
                 Sistema Cocina Sanatorio
               </h1>
             </div>
-            <div className="text-sm text-gray-500">Dashboard Principal</div>
+
+            <div className="flex flex-row items-center gap-4">
+              <span className="text-sm flex flex-row items-center justify-center gap-4 text-gray-500 ">
+                Bienvenido, {user?.username}
+              </span>
+
+              <Button variant="destructive" onClick={handleLogout}>
+                Salir
+              </Button>
+            </div>
           </div>
         </div>
       </header>
