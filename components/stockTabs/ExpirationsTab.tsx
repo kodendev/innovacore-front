@@ -8,9 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useProducts } from "@/hooks/tanstack/products/useProducts";
-import { mockProducts } from "@/data/fakeData";
-import { Badge } from "@/components/ui/badge"; // si usas shadcn/ui o similar
-import { getExpirationBadge } from "@/utils/getExpirationBadge";
+import { Badge } from "../ui/badge";
 
 export function ExpirationsTab() {
   const { data: products, isLoading } = useProducts();
@@ -23,6 +21,34 @@ export function ExpirationsTab() {
     const dateB = new Date(b.expirationDate || "").getTime();
     return dateA - dateB;
   });
+
+  const getExpirationBadge = (daysLeft: number) => {
+    if (daysLeft < 0) {
+      return (
+        <Badge className="bg-[#c1121f] text-white">Producto vencido</Badge>
+      );
+    }
+    if (daysLeft < 1) {
+      return <Badge className="bg-red-600 text-white">Vence hoy</Badge>;
+    }
+    if (daysLeft <= 7)
+      return (
+        <Badge className="bg-red-600 text-white">
+          Vence en {daysLeft} días
+        </Badge>
+      );
+    if (daysLeft <= 30)
+      return (
+        <Badge className="bg-yellow-500 text-white">
+          Vence en {daysLeft} días
+        </Badge>
+      );
+    return (
+      <Badge className="bg-green-600 text-white">
+        Vence en {daysLeft} días
+      </Badge>
+    );
+  };
 
   return (
     <div className="p-4">

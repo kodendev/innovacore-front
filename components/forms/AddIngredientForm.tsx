@@ -2,10 +2,17 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Ingredient, Product } from "@/types/types";
+import { Ingredient } from "@/types/types";
 import { toast } from "sonner";
 import { useCreateProduct } from "@/hooks/tanstack/products/useCreateProducts";
-import { QueryClient, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 export type NewIngredient = Omit<Ingredient, "id" | "status">;
 
@@ -24,6 +31,8 @@ export const AddIngredientForm = ({ onClose }: Props) => {
     stock: "",
     expirationDate: "",
     minStock: "",
+    unit: "",
+    packSize: 0,
   });
 
   const queryClient = useQueryClient();
@@ -38,10 +47,18 @@ export const AddIngredientForm = ({ onClose }: Props) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    let finalStock = Number(formData.stock);
+
+    if (formData.unit === "pack" && formData.packSize) {
+      finalStock = Number(formData.stock) * Number(formData.packSize);
+    }
+
     createProduct({
       ...formData,
       minStock: parseFloat(formData.minStock),
-      stock: parseFloat(formData.stock),
+      // stock: parseFloat(formData.stock),
+      stock: finalStock,
       sale_price: parseFloat(formData.sale_price),
       cost_price: parseFloat(formData.cost_price),
     });
@@ -61,7 +78,7 @@ export const AddIngredientForm = ({ onClose }: Props) => {
           required
         />
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="w-full">
         <div>
           <Label htmlFor="description">Descripción</Label>
           <Input
@@ -75,23 +92,67 @@ export const AddIngredientForm = ({ onClose }: Props) => {
             required
           />
         </div>
+      </div>
+
+      <div>
         <div>
-          <Label htmlFor="stock">Stock KG</Label>
-          <Input
-            placeholder="Ej: 50"
-            id="stock"
-            type="number"
-            value={formData.stock}
-            onChange={(e) =>
-              setFormData((prev) => ({
-                ...prev,
-                stock: e.target.value,
-              }))
-            }
-            required
-          />
+          <Label htmlFor="stock">Stock</Label>
+          <div className="flex gap-2 items-center">
+            <Input
+              id="stock"
+              type="number"
+              placeholder="Ej: 50"
+              value={formData.stock}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  stock: e.target.value,
+                }))
+              }
+              required
+            />
+
+            {/* Selector de unidad */}
+            <Select
+              value={formData.unit || "kg"}
+              onValueChange={(value) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  unit: value,
+                }))
+              }
+            >
+              <SelectTrigger className="w-[120px]">
+                <SelectValue placeholder="Seleccionar" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="kg">Kg</SelectItem>
+                <SelectItem value="unidad">Unidad</SelectItem>
+                <SelectItem value="pack">Pack</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {formData.unit === "pack" && (
+              <div>
+                <Input
+                  id="packSize"
+                  type="number"
+                  placeholder="Ej: 12"
+                  value={formData.packSize || ""}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      packSize: parseInt(e.target.value) || 0,
+                    }))
+                  }
+                  required
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
       <div>
         <Label htmlFor="minStock">Stock Mínimo</Label>
         <Input
