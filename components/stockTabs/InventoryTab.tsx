@@ -40,6 +40,7 @@ export const InventoryTab = () => {
   };
 
   const handleDeleteProductos = (id: number): void => {
+    console.log("Id obtenido de producto a eliminar:", id);
     deleteProduct(id);
     setDialogOpen(false);
   };

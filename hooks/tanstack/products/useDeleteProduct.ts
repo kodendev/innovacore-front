@@ -1,5 +1,4 @@
 import axios from "axios";
-import { Product } from "@/types/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -19,7 +18,9 @@ export const useDeleteProduct = () => {
       queryClient.invalidateQueries({ queryKey: ["products"] }); // Refresca el listado
     },
     onError: () => {
-      toast.error("Error al eliminar el producto");
+      toast.error(
+        "Error al eliminar el producto , este producto está asociado a un menú"
+      );
     },
   });
 };
