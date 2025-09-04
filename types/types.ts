@@ -101,7 +101,7 @@ export type userTypes = {
 
 export interface CreateUserTypes {
   username: string;
-  password_hash: string;
+  password: string;
   partnerId: number;
   userTypeId: number;
   active: boolean;

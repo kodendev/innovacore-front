@@ -15,17 +15,27 @@ import ProductsTable from "../tables/ProductsTable";
 import { useComponentView } from "@/hooks/useComponentView";
 import { getExpirationColor } from "@/utils/getExpirationBadge";
 import { Input } from "../ui/input";
+import { useSearchProducts } from "@/hooks/tanstack/products/useSearchProducts";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export const InventoryTab = () => {
-  const { data, isLoading } = useProducts();
+  const { data: allProducts, isLoading: loadingAll } = useProducts();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedIngredient, setSelectedIngredient] = useState<Product | null>(
     null
   );
+  const [query, setQuery] = useState("");
+  const debouncedQuery = useDebounce(query, 400);
 
   const { componentView, toggleView } = useComponentView();
 
   const { mutate: deleteProduct, isPending } = useDeleteProduct();
+
+  const { data: searchResults, isLoading: loadingSearch } =
+    useSearchProducts(query);
+
+  const productsToShow: Product[] =
+    debouncedQuery.trim().length > 0 ? searchResults ?? [] : allProducts ?? [];
 
   const handleDeleteClick = (ingredient: Product) => {
     setSelectedIngredient(ingredient);
@@ -45,7 +55,7 @@ export const InventoryTab = () => {
     setDialogOpen(false);
   };
 
-  const lowStockProducts = (data ?? []).filter((p) => p.isStockMin);
+  const lowStockProducts = (productsToShow ?? []).filter((p) => p.isStockMin);
 
   return (
     <>
@@ -66,28 +76,32 @@ export const InventoryTab = () => {
         confirmText="Sí, eliminar"
         cancelText="Cancelar"
       />
-      {data?.length === 0 ? (
+      {searchResults?.length === 0 ? (
         <div className="flex items-center justify-center mt-4 h-[80vh]">
           <p className="text-gray-500 text-xl">
-            No hay ingredientes disponibles.
+            No hay ingredientes disponibles. hola
           </p>
         </div>
       ) : (
         <div className="flex justify-between items-end w-full mb-4">
-          <Input placeholder="Buscar Producto"></Input>
+          <Input
+            onChange={(e) => setQuery(e.target.value)}
+            value={query}
+            placeholder="Buscar Producto"
+          ></Input>
           <Button onClick={toggleView}>Cambiar vista</Button>
         </div>
       )}
 
-      {isLoading && (
+      {loadingAll && (
         <div className="flex flex-col items-center justify-center col-span-1 md:col-span-2 xl:col-span-3 mt-20 h-full">
-          <ClipLoader color="#123abc" loading={isLoading} size={50} />
+          <ClipLoader color="#123abc" loading={loadingAll} size={50} />
         </div>
       )}
 
       {componentView === "card" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {data?.map((ingredient) => (
+          {productsToShow?.map((ingredient) => (
             <Card
               key={ingredient.name}
               className="hover:shadow-lg transition-shadow"
@@ -166,7 +180,7 @@ export const InventoryTab = () => {
         // 📊 Vista tipo Tabla (una sola tabla para todos los ingredientes)
         <div className="w-full overflow-x-auto">
           <ProductsTable
-            data={data}
+            data={productsToShow || []}
             handleDeleteClick={handleDeleteClick}
             isPending={isPending}
           />

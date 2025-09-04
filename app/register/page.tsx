@@ -45,7 +45,7 @@ export default function RegistroPage() {
 
   const [formData, setFormData] = useState({
     username: "",
-    password_hash: "",
+    password: "",
     confirmPassword: "",
     email: "",
     rol: "",
@@ -79,7 +79,7 @@ export default function RegistroPage() {
     createUser(
       {
         username: formData.username,
-        password_hash: formData.password_hash,
+        password: formData.password,
         email: formData.email,
         userTypeId: Number(formData.rol),
         partnerId: 1,
@@ -90,7 +90,7 @@ export default function RegistroPage() {
           toast.success("Usuario registrado correctamente 🎉");
           setFormData({
             username: "",
-            password_hash: "",
+            password: "",
             confirmPassword: "",
             email: "",
             rol: "",
@@ -190,10 +190,10 @@ export default function RegistroPage() {
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
                     id="password"
-                    name="password_hash"
+                    name="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
-                    value={formData.password_hash}
+                    value={formData.password}
                     onChange={handleInputChange}
                     className="pl-10 pr-10"
                     required
