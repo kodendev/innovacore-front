@@ -116,3 +116,12 @@ export interface LoginUserTypes {
 export type LoginResponse = {
   access_token: string;
 };
+
+/**
+ * Categorias de productos
+ */
+
+export interface Category {
+  id: number;
+  name: string;
+}

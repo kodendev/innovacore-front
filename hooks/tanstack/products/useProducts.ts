@@ -4,20 +4,24 @@ import axios from "axios";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
-export const fetchProducts = async (): Promise<Product[]> => {
+export const fetchProducts = async (
+  categoryId?: number
+): Promise<Product[]> => {
   try {
-    const response = await axios.get<Product[]>(`${BASE_URL}/products`);
+    const response = await axios.get<Product[]>(`${BASE_URL}/products`, {
+      params: categoryId ? { categoryId } : {}, // <-- si existe, lo manda como query param
+    });
     return response.data;
   } catch (error) {
-    console.error("Error fetching ingredients:", error);
+    console.error("Error fetching products:", error);
     return [];
   }
 };
 
-export function useProducts() {
+export function useProducts(categoryId?: number) {
   return useQuery<Product[]>({
-    queryKey: ["products"],
-    queryFn: fetchProducts,
-    staleTime: 0, // o por ej. 5 * 60 * 1000 para 5 minutos
+    queryKey: ["products", categoryId], // <-- la cache depende del filtro
+    queryFn: () => fetchProducts(categoryId),
+    staleTime: 0,
   });
 }
