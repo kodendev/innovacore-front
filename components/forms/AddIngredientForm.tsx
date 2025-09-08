@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { useCategories } from "@/hooks/tanstack/products/useCategories";
 
 export type NewIngredient = Omit<Ingredient, "id" | "status">;
 
@@ -33,9 +34,12 @@ export const AddIngredientForm = ({ onClose }: Props) => {
     minStock: "",
     unit: "",
     packSize: 0,
+    categoryId: "",
   });
 
   const queryClient = useQueryClient();
+
+  const { data: categories } = useCategories();
 
   const { mutate: createProduct, isPending } = useCreateProduct({
     onSuccess: (data) => {
@@ -61,6 +65,7 @@ export const AddIngredientForm = ({ onClose }: Props) => {
       stock: finalStock,
       sale_price: parseFloat(formData.sale_price),
       cost_price: parseFloat(formData.cost_price),
+      categoryId: parseInt(formData.categoryId),
     });
   };
 
@@ -92,6 +97,30 @@ export const AddIngredientForm = ({ onClose }: Props) => {
             required
           />
         </div>
+      </div>
+
+      <div>
+        <Label htmlFor="name">Categoría</Label>
+        <Select
+          value={formData.categoryId}
+          onValueChange={(value) =>
+            setFormData((prev) => ({
+              ...prev,
+              categoryId: value,
+            }))
+          }
+        >
+          <SelectTrigger className="w-[120px]">
+            <SelectValue placeholder="Seleccionar Categoría" />
+          </SelectTrigger>
+          <SelectContent>
+            {categories?.map((categories) => (
+              <SelectItem key={categories.id} value={categories.id.toString()}>
+                {categories.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div>

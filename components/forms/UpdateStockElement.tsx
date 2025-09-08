@@ -14,6 +14,14 @@ import { Label } from "@/components/ui/label";
 import { Ingredient, Product } from "@/types/types";
 import { toast } from "sonner";
 import { useUpdateProduct } from "@/hooks/tanstack/products/useEditProducts";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { useCategories } from "@/hooks/tanstack/products/useCategories";
 
 type Props = {
   product: Product;
@@ -31,8 +39,11 @@ export function StockUpdateDialog({ product }: Props) {
     stock: product.stock,
     expirationDate: product.expirationDate,
     minStock: product.minStock,
+    categoryId: product.categoryId,
   });
   const { mutate: updateProduct, isPending } = useUpdateProduct();
+
+  const { data: categories } = useCategories();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -55,7 +66,8 @@ export function StockUpdateDialog({ product }: Props) {
       formData.sale_price <= 0 ||
       formData.cost_price <= 0 ||
       formData.stock < 0 ||
-      formData.expirationDate === null
+      formData.expirationDate === null ||
+      formData.categoryId === undefined
     ) {
       toast.error("Por favor, completá todos los campos correctamente.");
       return;
@@ -95,6 +107,33 @@ export function StockUpdateDialog({ product }: Props) {
               value={formData.description}
               onChange={handleChange}
             />
+          </div>
+
+          <div>
+            <Label htmlFor="categoryId">Categoría</Label>
+            <Select
+              value={formData.categoryId ? formData.categoryId.toString() : ""}
+              onValueChange={(value) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  categoryId: Number(value),
+                }))
+              }
+            >
+              <SelectTrigger className="w-[120px]">
+                <SelectValue placeholder="Seleccionar Categoría" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories?.map((categories) => (
+                  <SelectItem
+                    key={categories.id}
+                    value={categories.id.toString()}
+                  >
+                    {categories.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label htmlFor="sale_price">Precio de venta</Label>
