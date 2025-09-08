@@ -1,4 +1,3 @@
-import { Package } from "lucide-react";
 export interface Ingredient {
   id: number;
   name: string;
@@ -23,6 +22,7 @@ export interface Product {
   expirationDate?: string;
   minStock?: number;
   isStockMin?: boolean;
+  categoryId: number;
 }
 
 export type StockStatus = "Activo" | "Inactivo";
@@ -116,3 +116,12 @@ export interface LoginUserTypes {
 export type LoginResponse = {
   access_token: string;
 };
+
+/**
+ * Categorias de productos
+ */
+
+export interface Category {
+  id: number;
+  name: string;
+}

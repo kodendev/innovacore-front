@@ -1,7 +1,7 @@
 import { Package, Calendar, Phone } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Ingredient, Product } from "@/types/types";
+import { Product } from "@/types/types";
 import { useProducts } from "@/hooks/tanstack/products/useProducts";
 import { ClipLoader } from "react-spinners";
 import { getBadgeLabel, getBadgeVariant } from "@/utils/badge_variants";
@@ -17,23 +17,52 @@ import { getExpirationColor } from "@/utils/getExpirationBadge";
 import { Input } from "../ui/input";
 import { useSearchProducts } from "@/hooks/tanstack/products/useSearchProducts";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useCategories } from "@/hooks/tanstack/products/useCategories";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const InventoryTab = () => {
-  const { data: allProducts, isLoading: loadingAll } = useProducts();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedIngredient, setSelectedIngredient] = useState<Product | null>(
     null
   );
+  const [selectedCategory, setSelectedCategory] = useState<
+    string | undefined
+  >();
+  // Filtro de busqueda
   const [query, setQuery] = useState("");
+  //Temporizador para evitar muchas consultas a la api
   const debouncedQuery = useDebounce(query, 400);
 
+  const categoryIdNumber =
+    selectedCategory && selectedCategory !== "all"
+      ? Number(selectedCategory)
+      : undefined;
+
+  //Utilizacion de hook para obtener productos
+  const { data: allProducts, isLoading: loadingAll } =
+    useProducts(categoryIdNumber);
+
+  //Hook para cambiar vista de tabla a card
   const { componentView, toggleView } = useComponentView();
 
+  //Hook para eliminar producto
   const { mutate: deleteProduct, isPending } = useDeleteProduct();
 
+  //Hook para busqueda de productos
   const { data: searchResults, isLoading: loadingSearch } =
     useSearchProducts(query);
 
+  //Hook para obtener categorias
+  const { data: categories } = useCategories();
+
+  // Determinar qué productos mostrar según si hay una búsqueda activa
   const productsToShow: Product[] =
     debouncedQuery.trim().length > 0 ? searchResults ?? [] : allProducts ?? [];
 
@@ -79,17 +108,40 @@ export const InventoryTab = () => {
       {searchResults?.length === 0 ? (
         <div className="flex items-center justify-center mt-4 h-[80vh]">
           <p className="text-gray-500 text-xl">
-            No hay ingredientes disponibles. hola
+            No hay ingredientes disponibles.
           </p>
         </div>
       ) : (
-        <div className="flex justify-between items-end w-full mb-4">
-          <Input
-            onChange={(e) => setQuery(e.target.value)}
-            value={query}
-            placeholder="Buscar Producto"
-          ></Input>
-          <Button onClick={toggleView}>Cambiar vista</Button>
+        <div className="flex flex-col justify-between items-end w-full mb-4">
+          <div className="flex flex-row items-center w-full">
+            <Input
+              onChange={(e) => setQuery(e.target.value)}
+              value={query}
+              placeholder="Buscar Producto"
+            ></Input>
+            <Button onClick={toggleView}>Cambiar vista</Button>
+          </div>
+          <div className="flex items-start w-full mt-4">
+            <Select
+              value={selectedCategory}
+              onValueChange={(value) => setSelectedCategory(value)}
+              required
+            >
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="Filtros" />
+              </SelectTrigger>
+              <SelectContent>
+                <>
+                  <SelectItem value="all">Todos los productos</SelectItem>
+                  {categories?.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id.toString()}>
+                      {cat.name}
+                    </SelectItem>
+                  ))}
+                </>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       )}
 
