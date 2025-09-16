@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/table";
 import { Supplier } from "@/types/types";
 import { Button } from "../ui/button";
+import { Trash } from "lucide-react";
 
 interface Props {
   data: Supplier[] | undefined;
@@ -56,9 +57,15 @@ const SuppliersTable = ({ data, handleDeleteClick, isPending }: Props) => {
               </Button>
               <Button
                 onClick={() => handleDeleteClick(supplier.id)}
-                variant="destructive"
+                className="bg-green-500"
               >
-                Eliminar
+                Realizar Pedido
+              </Button>
+              <Button
+                onClick={() => handleDeleteClick(supplier.id)}
+                variant={"destructive"}
+              >
+                <Trash />
               </Button>
             </TableCell>
           </TableRow>

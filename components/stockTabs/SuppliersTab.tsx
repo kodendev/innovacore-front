@@ -6,12 +6,13 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { Phone } from "lucide-react";
+import { Delete, Phone, Trash } from "lucide-react";
 import { useSuppliers } from "@/hooks/tanstack/useSuppliers";
 import Spinner from "../spinners/Spinner";
 import { Button } from "../ui/button";
 import { useComponentView } from "@/hooks/useComponentView";
 import SuppliersTable from "../tables/SuppliersTable";
+import { Input } from "@/components/ui/input";
 
 export const SuppliersTab = () => {
   const { data, isLoading } = useSuppliers();
@@ -36,7 +37,17 @@ export const SuppliersTab = () => {
         </div>
       ) : (
         <div className="flex justify-end items-end w-full mb-4">
-          <Button onClick={toggleView}>Cambiar vista</Button>
+          <Input
+            onChange={(e) => console.log(e.target.value)}
+            value=""
+            placeholder="Buscar Proveedor"
+          ></Input>
+          <div className="flex flex-row items-center gap-1">
+            <Button className="bg-green-500" onClick={toggleView}>
+              Agregar proveedor
+            </Button>
+            <Button onClick={toggleView}>Cambiar vista</Button>
+          </div>
         </div>
       )}
 
@@ -47,7 +58,12 @@ export const SuppliersTab = () => {
             data?.map((supplier) => (
               <Card key={supplier.id}>
                 <CardHeader>
-                  <CardTitle>{supplier.name}</CardTitle>
+                  <div className="flex flex-row justify-between">
+                    <CardTitle>{supplier.name}</CardTitle>
+                    <Button className="cursor-pointe" variant="destructive">
+                      <Trash />
+                    </Button>
+                  </div>
 
                   <CardDescription>
                     Productos: {supplier?.products.join(", ")}
@@ -62,12 +78,21 @@ export const SuppliersTab = () => {
                     <div className="text-sm text-gray-600">
                       {supplier.email}
                     </div>
-                    <Button
-                      className="p-4 mt-4 bg-green-500"
-                      onClick={() => handleEditSupplier(supplier.id)}
-                    >
-                      Editar Proveedor
-                    </Button>
+                    <div className="flex flex-row gap-2">
+                      <Button
+                        className="p-4 mt-4 bg-green-500"
+                        onClick={() => handleEditSupplier(supplier.id)}
+                      >
+                        Realizar Pedido
+                      </Button>
+                      <Button
+                        className="p-4 mt-4 "
+                        variant={"secondary"}
+                        onClick={() => handleEditSupplier(supplier.id)}
+                      >
+                        Editar Proveedor
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
