@@ -30,6 +30,7 @@ import MenuTab from "@/components/stockTabs/MenuTab";
 import StockPredictionsTab from "@/components/stockTabs/PredictionsTab";
 import SmartPredictionTab from "@/components/stockTabs/SmartPredictionsTab";
 import { ExpirationsTab } from "@/components/stockTabs/ExpirationsTab";
+import StockMovements from "@/components/stockTabs/StockMovements";
 
 type NewIngredient = Omit<Ingredient, "id" | "status">;
 
@@ -93,6 +94,7 @@ export default function InventarioPage() {
               <TabsTrigger value="expirations">
                 Próximos vencimientos
               </TabsTrigger>
+              <TabsTrigger value="movements">Movimientos de stock</TabsTrigger>
             </TabsList>
 
             <TabsContent value="inventory">
@@ -113,6 +115,10 @@ export default function InventarioPage() {
 
             <TabsContent value="expirations">
               <ExpirationsTab />
+            </TabsContent>
+
+            <TabsContent value="movements">
+              <StockMovements />
             </TabsContent>
           </Tabs>
         </div>

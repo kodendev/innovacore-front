@@ -125,3 +125,22 @@ export interface Category {
   id: number;
   name: string;
 }
+
+/**
+ * Movimientos de stock
+ */
+export interface InventoryMovementResponse {
+  id: number;
+  product: {
+    id: number;
+    name: string;
+  };
+  user: {
+    id: number;
+    username: string;
+  };
+  quantity: number; // cantidad movida (+ ingreso, - egreso)
+  finalStock: number; // stock resultante después del movimiento
+  reason?: string; // motivo del movimiento
+  createdAt: string; // fecha del movimiento
+}
