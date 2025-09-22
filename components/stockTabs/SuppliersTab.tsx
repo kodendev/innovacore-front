@@ -13,9 +13,15 @@ import { Button } from "../ui/button";
 import { useComponentView } from "@/hooks/useComponentView";
 import SuppliersTable from "../tables/SuppliersTable";
 import { Input } from "@/components/ui/input";
+import { Supplier } from "@/types/types";
+import CreatePurchaseOrder from "../forms/CreatePurchaseOrder";
 
 export const SuppliersTab = () => {
   const { data, isLoading } = useSuppliers();
+
+  const handlePurchaseOrder = (supplierId: number) => {
+    console.log(`Create purchase order for supplier ID: ${supplierId}`);
+  };
 
   const handleEditSupplier = (supplierId: number) => {
     console.log(`Edit supplier with ID: ${supplierId}`);
@@ -55,7 +61,7 @@ export const SuppliersTab = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {isLoading && <Spinner isLoading={isLoading} />}
           {data &&
-            data?.map((supplier) => (
+            data?.map((supplier: Supplier) => (
               <Card key={supplier.id}>
                 <CardHeader>
                   <div className="flex flex-row justify-between">
@@ -79,12 +85,7 @@ export const SuppliersTab = () => {
                       {supplier.email}
                     </div>
                     <div className="flex flex-row gap-2">
-                      <Button
-                        className="p-4 mt-4 bg-green-500"
-                        onClick={() => handleEditSupplier(supplier.id)}
-                      >
-                        Realizar Pedido
-                      </Button>
+                      <CreatePurchaseOrder supplier={supplier} />
                       <Button
                         className="p-4 mt-4 "
                         variant={"secondary"}
