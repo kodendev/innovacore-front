@@ -19,6 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { useAuth } from "@/context/AuthContext";
+import { useCreatePurchase } from "@/hooks/tanstack/products/usePurchaseStock";
+import { toast } from "sonner";
 
 interface Props {
   supplier: Supplier;
@@ -33,9 +36,33 @@ const CreatePurchaseOrder = ({ supplier }: Props) => {
     supplierId: supplier.id,
   });
 
+  const { user } = useAuth();
+  console.log(user?.user_id);
+
+  const createPurchase = useCreatePurchase();
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Pedido creado:", formData);
+
+    const payload = {
+      userId: Number(user?.user_id),
+      products: [
+        {
+          productId: 1,
+          quantity: formData.quantity,
+        },
+      ],
+    };
+    createPurchase.mutate(payload, {
+      onSuccess: (data) => {
+        toast.success("Compra registrada con éxito");
+        setIsOpen(false);
+      },
+      onError: (error) => {
+        toast.error("Error registrando compra");
+        console.error("Error registrando compra ❌", error.message);
+      },
+    });
   };
   return (
     <div className="mt-4">
