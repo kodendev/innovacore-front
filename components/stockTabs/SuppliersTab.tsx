@@ -24,13 +24,22 @@ import {
 } from "@/components/ui/dialog";
 import { AddSupplierForm } from "../forms/AddSupplierForm";
 import { useProducts } from "@/hooks/tanstack/products/useProducts";
+import { useDeleteSupplier } from "@/hooks/tanstack/suppliers/useDeleteSupplier";
+import { Supplier } from "@/types/suppliers/supplierTypes";
+import { ConfirmDialog } from "../pop-ups/ConfirmDialog";
 
 export const SuppliersTab = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(
+    null
+  );
 
   const { data: suppliers, isLoading } = useSuppliers();
 
   const { data: products } = useProducts();
+
+  const deleteMutation = useDeleteSupplier();
 
   const handlePurchaseOrder = (supplierId: number) => {
     console.log(`Create purchase order for supplier ID: ${supplierId}`);
@@ -40,14 +49,38 @@ export const SuppliersTab = () => {
     console.log(`Edit supplier with ID: ${supplierId}`);
   };
 
+  const handleDeleteClick = (supplier: Supplier) => {
+    setSelectedSupplier(supplier);
+    setDialogOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (selectedSupplier) {
+      deleteMutation.mutate(selectedSupplier.id);
+    }
+    setDialogOpen(false);
+    setSelectedSupplier(null);
+  };
+
   const handleDeleteSupplier = (supplierId: number) => {
-    console.log(`Delete supplier with ID: ${supplierId}`);
+    return deleteMutation.mutate(supplierId);
   };
 
   const { componentView, toggleView } = useComponentView();
 
   return (
     <>
+      {selectedSupplier && (
+        <ConfirmDialog
+          open={dialogOpen}
+          onCancel={() => setDialogOpen(false)}
+          onConfirm={handleConfirmDelete}
+          title="¿Eliminar proveedor?"
+          description={`¿Estás seguro que querés eliminar "${selectedSupplier.name}"?`}
+          confirmText="Sí, eliminar"
+          cancelText="Cancelar"
+        />
+      )}
       {suppliers?.length === 0 ? (
         <div className="flex items-center justify-center mt-4 h-[80vh]">
           <p className="text-gray-500 text-xl">
@@ -92,7 +125,11 @@ export const SuppliersTab = () => {
                 <CardHeader>
                   <div className="flex flex-row justify-between">
                     <CardTitle>{supplier.name}</CardTitle>
-                    <Button className="cursor-pointer" variant="destructive">
+                    <Button
+                      onClick={() => handleDeleteClick(supplier)}
+                      className="cursor-pointer"
+                      variant="destructive"
+                    >
                       <Trash />
                     </Button>
                   </div>
@@ -135,7 +172,7 @@ export const SuppliersTab = () => {
         <div>
           <SuppliersTable
             data={suppliers}
-            handleDeleteClick={handleDeleteSupplier}
+            handleDeleteClick={handleDeleteClick}
             isPending={isLoading}
             key={suppliers?.length}
           />

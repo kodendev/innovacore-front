@@ -13,7 +13,7 @@ import { Supplier } from "@/types/suppliers/supplierTypes";
 
 interface Props {
   data: Supplier[] | undefined;
-  handleDeleteClick: (supplierId: number) => void;
+  handleDeleteClick: (supplier: Supplier) => void;
   isPending?: boolean;
 }
 
@@ -64,7 +64,7 @@ const SuppliersTable = ({ data, handleDeleteClick, isPending }: Props) => {
                 Realizar Pedido
               </Button>
               <Button
-                onClick={() => handleDeleteClick(supplier.id)}
+                onClick={() => handleDeleteClick(supplier)}
                 variant={"destructive"}
               >
                 <Trash />
