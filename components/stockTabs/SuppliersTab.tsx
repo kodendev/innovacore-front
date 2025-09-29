@@ -1,4 +1,3 @@
-// components/Tabs/SuppliersTab.tsx
 import {
   Card,
   CardHeader,
@@ -7,17 +6,19 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Delete, Phone, Trash } from "lucide-react";
-import { useSuppliers } from "@/hooks/tanstack/useSuppliers";
+import { useSuppliers } from "@/hooks/tanstack/suppliers/useSuppliers";
 import Spinner from "../spinners/Spinner";
 import { Button } from "../ui/button";
 import { useComponentView } from "@/hooks/useComponentView";
 import SuppliersTable from "../tables/SuppliersTable";
 import { Input } from "@/components/ui/input";
-import { Supplier } from "@/types/types";
 import CreatePurchaseOrder from "../forms/CreatePurchaseOrder";
+import { Supplier } from "@/types/suppliers/supplierTypes";
 
 export const SuppliersTab = () => {
-  const { data, isLoading } = useSuppliers();
+  const { data: suppliers, isLoading } = useSuppliers();
+
+  console.log("Suppliers obtenidos", suppliers);
 
   const handlePurchaseOrder = (supplierId: number) => {
     console.log(`Create purchase order for supplier ID: ${supplierId}`);
@@ -35,7 +36,7 @@ export const SuppliersTab = () => {
 
   return (
     <>
-      {data?.length === 0 ? (
+      {suppliers?.length === 0 ? (
         <div className="flex items-center justify-center mt-4 h-[80vh]">
           <p className="text-gray-500 text-xl">
             No hay proveedores disponibles.
@@ -60,26 +61,32 @@ export const SuppliersTab = () => {
       {componentView === "card" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {isLoading && <Spinner isLoading={isLoading} />}
-          {data &&
-            data?.map((supplier: Supplier) => (
+          {suppliers &&
+            suppliers.map((supplier) => (
               <Card key={supplier.id}>
                 <CardHeader>
                   <div className="flex flex-row justify-between">
                     <CardTitle>{supplier.name}</CardTitle>
-                    <Button className="cursor-pointe" variant="destructive">
+                    <Button className="cursor-pointer" variant="destructive">
                       <Trash />
                     </Button>
                   </div>
 
                   <CardDescription>
-                    Productos: {supplier?.products.join(", ")}
+                    Productos:{" "}
+                    {supplier.supplierProducts.length > 0
+                      ? supplier.supplierProducts
+                          .map((sp) => sp.product.name)
+                          .join(", ")
+                      : "Sin productos"}
                   </CardDescription>
                 </CardHeader>
+
                 <CardContent>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <Phone className="h-4 w-4" />
-                      <span>{supplier.contact}</span>
+                      <span>{supplier.phone}</span>
                     </div>
                     <div className="text-sm text-gray-600">
                       {supplier.email}
@@ -87,7 +94,7 @@ export const SuppliersTab = () => {
                     <div className="flex flex-row gap-2">
                       <CreatePurchaseOrder supplier={supplier} />
                       <Button
-                        className="p-4 mt-4 "
+                        className="p-4 mt-4"
                         variant={"secondary"}
                         onClick={() => handleEditSupplier(supplier.id)}
                       >
@@ -102,10 +109,10 @@ export const SuppliersTab = () => {
       ) : (
         <div>
           <SuppliersTable
-            data={data}
+            data={suppliers}
             handleDeleteClick={handleDeleteSupplier}
             isPending={isLoading}
-            key={data?.length}
+            key={suppliers?.length}
           />
         </div>
       )}

@@ -7,9 +7,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Supplier } from "@/types/types";
 import { Button } from "../ui/button";
 import { Trash } from "lucide-react";
+import { Supplier } from "@/types/suppliers/supplierTypes";
 
 interface Props {
   data: Supplier[] | undefined;
@@ -34,9 +34,11 @@ const SuppliersTable = ({ data, handleDeleteClick, isPending }: Props) => {
           <TableRow key={supplier.id}>
             <TableCell className="px-6 py-4">{supplier.name}</TableCell>
             <TableCell className="px-6 py-4">
-              {supplier?.products.join(", ")}
+              {supplier?.supplierProducts
+                .map((sp) => sp.product.name)
+                .join(", ")}
             </TableCell>
-            <TableCell className="px-6 py-4">{supplier?.contact}</TableCell>
+            <TableCell className="px-6 py-4">{supplier?.phone}</TableCell>
             <TableCell className="px-6 py-4">{supplier?.email}</TableCell>
 
             {/* <TableCell className="px-6 py-4">

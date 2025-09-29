@@ -10,7 +10,6 @@ import {
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
-import { Supplier } from "@/types/types";
 
 import {
   Select,
@@ -22,6 +21,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { useCreatePurchase } from "@/hooks/tanstack/products/usePurchaseStock";
 import { toast } from "sonner";
+import { Supplier } from "@/types/suppliers/supplierTypes";
 
 interface Props {
   supplier: Supplier;
@@ -91,12 +91,12 @@ const CreatePurchaseOrder = ({ supplier }: Props) => {
                   <SelectValue placeholder="Seleccionar Categoría" />
                 </SelectTrigger>
                 <SelectContent>
-                  {supplier.products.map((supplierProduct) => (
+                  {supplier.supplierProducts.map((supplierProduct) => (
                     <SelectItem
-                      key={supplierProduct}
+                      key={supplierProduct.id}
                       value={supplierProduct.toString()}
                     >
-                      {supplierProduct}
+                      {supplierProduct.product.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
