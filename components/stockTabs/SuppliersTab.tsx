@@ -5,7 +5,7 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { Delete, Phone, Trash } from "lucide-react";
+import { Phone, Plus, Trash } from "lucide-react";
 import { useSuppliers } from "@/hooks/tanstack/suppliers/useSuppliers";
 import Spinner from "../spinners/Spinner";
 import { Button } from "../ui/button";
@@ -13,12 +13,24 @@ import { useComponentView } from "@/hooks/useComponentView";
 import SuppliersTable from "../tables/SuppliersTable";
 import { Input } from "@/components/ui/input";
 import CreatePurchaseOrder from "../forms/CreatePurchaseOrder";
-import { Supplier } from "@/types/suppliers/supplierTypes";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { AddSupplierForm } from "../forms/AddSupplierForm";
+import { useProducts } from "@/hooks/tanstack/products/useProducts";
 
 export const SuppliersTab = () => {
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+
   const { data: suppliers, isLoading } = useSuppliers();
 
-  console.log("Suppliers obtenidos", suppliers);
+  const { data: products } = useProducts();
 
   const handlePurchaseOrder = (supplierId: number) => {
     console.log(`Create purchase order for supplier ID: ${supplierId}`);
@@ -50,9 +62,22 @@ export const SuppliersTab = () => {
             placeholder="Buscar Proveedor"
           ></Input>
           <div className="flex flex-row items-center gap-1">
-            <Button className="bg-green-500" onClick={toggleView}>
-              Agregar proveedor
-            </Button>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-green-500 flex items-center gap-2">
+                  <Plus className="h-4 w-4" /> Agregar proveedor
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
+                <DialogHeader>
+                  <DialogTitle>Agregar Nuevo Proveedor</DialogTitle>
+                </DialogHeader>
+                <AddSupplierForm
+                  products={products || []}
+                  onClose={() => setIsAddDialogOpen(false)}
+                />
+              </DialogContent>
+            </Dialog>
             <Button onClick={toggleView}>Cambiar vista</Button>
           </div>
         </div>

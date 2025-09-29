@@ -20,3 +20,16 @@ export interface Supplier {
   updatedAt: string;
   supplierProducts: SupplierProduct[];
 }
+
+export interface CreateSupplierProductDto {
+  productId: number;
+  costPrice: number;
+}
+
+export interface CreateSupplierDto {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  products: CreateSupplierProductDto[];
+}

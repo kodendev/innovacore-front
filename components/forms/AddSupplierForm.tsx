@@ -1,0 +1,156 @@
+import { useCreateSupplier } from "@/hooks/tanstack/suppliers/usecreateSupplier";
+import { CreateSupplierDto } from "@/types/suppliers/supplierTypes";
+import { Product } from "@/types/types";
+import { useState } from "react";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+
+interface AddSupplierFormProps {
+  products: Product[];
+  onClose: () => void;
+}
+
+export const AddSupplierForm: React.FC<AddSupplierFormProps> = ({
+  products,
+  onClose,
+}) => {
+  const [formData, setFormData] = useState<CreateSupplierDto>({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    products: [],
+  });
+
+  const createSupplierMutation = useCreateSupplier();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    createSupplierMutation.mutate(formData, {
+      onSuccess: () => {
+        onClose();
+      },
+    });
+  };
+
+  const handleAddProduct = (productId: number) => {
+    setFormData((prev) => {
+      if (prev.products.some((p) => p.productId === productId)) return prev;
+      return {
+        ...prev,
+        products: [...prev.products, { productId, costPrice: 0 }],
+      };
+    });
+  };
+
+  const handleCostPriceChange = (productId: number, costPrice: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      products: prev.products.map((p) =>
+        p.productId === productId ? { ...p, costPrice } : p
+      ),
+    }));
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Label htmlFor="name">Nombre del proveedor</Label>
+        <Input
+          id="name"
+          value={formData.name}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, name: e.target.value }))
+          }
+          required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="email">Email</Label>
+        <Input
+          id="email"
+          type="email"
+          value={formData.email}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, email: e.target.value }))
+          }
+          required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="phone">Teléfono</Label>
+        <Input
+          id="phone"
+          value={formData.phone}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, phone: e.target.value }))
+          }
+          required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="address">Dirección</Label>
+        <Input
+          id="address"
+          value={formData.address}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, address: e.target.value }))
+          }
+          required
+        />
+      </div>
+
+      <div>
+        <Label>Productos</Label>
+        <Select
+          value=""
+          onValueChange={(value) => handleAddProduct(Number(value))}
+        >
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Agregar Producto" />
+          </SelectTrigger>
+          <SelectContent>
+            {products.map((product) =>
+              product.id ? (
+                <SelectItem key={product.id} value={product?.id.toString()}>
+                  {product.name}
+                </SelectItem>
+              ) : null
+            )}
+          </SelectContent>
+        </Select>
+
+        {formData.products.map((sp) => (
+          <div key={sp.productId} className="flex items-center gap-2 mt-2">
+            <span>{products.find((p) => p.id === sp.productId)?.name}</span>
+            <Input
+              type="number"
+              value={sp.costPrice}
+              onChange={(e) =>
+                handleCostPriceChange(sp.productId, Number(e.target.value))
+              }
+              placeholder="Precio costo"
+              className="w-24"
+            />
+          </div>
+        ))}
+      </div>
+
+      <Button type="submit" className="w-full mt-4">
+        Crear Proveedor
+      </Button>
+    </form>
+  );
+};
