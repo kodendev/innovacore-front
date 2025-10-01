@@ -27,6 +27,9 @@ import { useProducts } from "@/hooks/tanstack/products/useProducts";
 import { useDeleteSupplier } from "@/hooks/tanstack/suppliers/useDeleteSupplier";
 import { Supplier } from "@/types/suppliers/supplierTypes";
 import { ConfirmDialog } from "../pop-ups/ConfirmDialog";
+import { useUpdateSupplier } from "@/hooks/tanstack/suppliers/useEditSupplier";
+import { toast } from "sonner";
+import { EditSupplierForm } from "../forms/EditSupplierForm";
 
 export const SuppliersTab = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -34,6 +37,7 @@ export const SuppliersTab = () => {
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(
     null
   );
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const { data: suppliers, isLoading } = useSuppliers();
 
@@ -41,12 +45,12 @@ export const SuppliersTab = () => {
 
   const deleteMutation = useDeleteSupplier();
 
+  const updateSupplierMutation = useUpdateSupplier();
+
+  const { componentView, toggleView } = useComponentView();
+
   const handlePurchaseOrder = (supplierId: number) => {
     console.log(`Create purchase order for supplier ID: ${supplierId}`);
-  };
-
-  const handleEditSupplier = (supplierId: number) => {
-    console.log(`Edit supplier with ID: ${supplierId}`);
   };
 
   const handleDeleteClick = (supplier: Supplier) => {
@@ -62,11 +66,10 @@ export const SuppliersTab = () => {
     setSelectedSupplier(null);
   };
 
-  const handleDeleteSupplier = (supplierId: number) => {
-    return deleteMutation.mutate(supplierId);
+  const handleEditSupplier = (supplier: Supplier) => {
+    setSelectedSupplier(supplier);
+    setIsEditDialogOpen(true);
   };
-
-  const { componentView, toggleView } = useComponentView();
 
   return (
     <>
@@ -80,6 +83,26 @@ export const SuppliersTab = () => {
           confirmText="Sí, eliminar"
           cancelText="Cancelar"
         />
+      )}
+
+      {selectedSupplier && (
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
+            <DialogHeader>
+              <DialogTitle>Editar proveedor</DialogTitle>
+            </DialogHeader>
+            <EditSupplierForm
+              supplier={selectedSupplier}
+              onClose={() => setIsEditDialogOpen(false)}
+              onUpdate={(updatedData) =>
+                updateSupplierMutation.mutate({
+                  id: selectedSupplier.id,
+                  data: updatedData,
+                })
+              }
+            />
+          </DialogContent>
+        </Dialog>
       )}
       {suppliers?.length === 0 ? (
         <div className="flex items-center justify-center mt-4 h-[80vh]">
@@ -158,7 +181,7 @@ export const SuppliersTab = () => {
                       <Button
                         className="p-4 mt-4"
                         variant={"secondary"}
-                        onClick={() => handleEditSupplier(supplier.id)}
+                        onClick={() => handleEditSupplier(supplier)}
                       >
                         Editar Proveedor
                       </Button>

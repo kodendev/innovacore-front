@@ -33,3 +33,10 @@ export interface CreateSupplierDto {
   address: string;
   products: CreateSupplierProductDto[];
 }
+
+export interface UpdateSupplierDto {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+}
