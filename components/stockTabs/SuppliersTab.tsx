@@ -30,6 +30,7 @@ import { ConfirmDialog } from "../pop-ups/ConfirmDialog";
 import { useUpdateSupplier } from "@/hooks/tanstack/suppliers/useEditSupplier";
 import { toast } from "sonner";
 import { EditSupplierForm } from "../forms/EditSupplierForm";
+import { useCreatePurchase } from "@/hooks/tanstack/products/usePurchaseStock";
 
 export const SuppliersTab = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);

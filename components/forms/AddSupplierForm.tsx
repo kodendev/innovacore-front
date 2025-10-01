@@ -13,6 +13,8 @@ import {
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+import { toast } from "sonner";
+import { Trash } from "lucide-react";
 
 interface AddSupplierFormProps {
   products: Product[];
@@ -35,6 +37,15 @@ export const AddSupplierForm: React.FC<AddSupplierFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const invalidProducts = formData.products.filter(
+      (p) => !p.costPrice || p.costPrice <= 0
+    );
+
+    if (invalidProducts.length > 0) {
+      toast.error("Todos los productos deben tener un precio de costo válido.");
+      return;
+    }
     createSupplierMutation.mutate(formData, {
       onSuccess: () => {
         onClose();
@@ -58,6 +69,13 @@ export const AddSupplierForm: React.FC<AddSupplierFormProps> = ({
       products: prev.products.map((p) =>
         p.productId === productId ? { ...p, costPrice } : p
       ),
+    }));
+  };
+
+  const handleRemoveProduct = (productId: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      products: prev.products.filter((p) => p.productId !== productId),
     }));
   };
 
@@ -135,8 +153,10 @@ export const AddSupplierForm: React.FC<AddSupplierFormProps> = ({
         {formData.products.map((sp) => (
           <div key={sp.productId} className="flex items-center gap-2 mt-2">
             <span>{products.find((p) => p.id === sp.productId)?.name}</span>
+            <Label className="ml-2 text-red-500">Precio Costo:</Label>
             <Input
               type="number"
+              min={1}
               value={sp.costPrice}
               onChange={(e) =>
                 handleCostPriceChange(sp.productId, Number(e.target.value))
@@ -144,6 +164,13 @@ export const AddSupplierForm: React.FC<AddSupplierFormProps> = ({
               placeholder="Precio costo"
               className="w-24"
             />
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => handleRemoveProduct(sp.productId)}
+            >
+              <Trash />
+            </Button>
           </div>
         ))}
       </div>

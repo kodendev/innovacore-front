@@ -31,25 +31,35 @@ const CreatePurchaseOrder = ({ supplier }: Props) => {
   console.log(supplier);
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
-    product: "",
+    productId: 0,
     quantity: 0,
+    price: 0,
     supplierId: supplier.id,
   });
 
   const { user } = useAuth();
-  console.log(user?.user_id);
 
   const createPurchase = useCreatePurchase();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    const selectedProduct = supplier.supplierProducts.find(
+      (sp) => sp.product?.id === formData.productId
+    );
+
+    if (!selectedProduct) {
+      toast.error("Producto inválido");
+      return;
+    }
+
     const payload = {
       userId: Number(user?.user_id),
       products: [
         {
-          productId: 1,
+          productId: formData.productId,
           quantity: formData.quantity,
+          price: selectedProduct.costPrice,
         },
       ],
     };
@@ -79,22 +89,26 @@ const CreatePurchaseOrder = ({ supplier }: Props) => {
             <div>
               <Label htmlFor="categoryId">Producto</Label>
               <Select
-                value={formData.product}
+                value={formData.productId?.toString() ?? ""}
                 onValueChange={(value) =>
                   setFormData((prev) => ({
                     ...prev,
-                    product: value,
+                    productId: Number(value), // guardamos el ID como número
                   }))
                 }
               >
-                <SelectTrigger className="w-[120px]">
-                  <SelectValue placeholder="Seleccionar Categoría" />
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Seleccionar Producto" />
                 </SelectTrigger>
                 <SelectContent>
                   {supplier.supplierProducts.map((supplierProduct) => (
                     <SelectItem
                       key={supplierProduct.id}
-                      value={supplierProduct.toString()}
+                      value={
+                        supplierProduct.product.id !== undefined
+                          ? supplierProduct.product.id.toString()
+                          : ""
+                      }
                     >
                       {supplierProduct.product.name}
                     </SelectItem>
