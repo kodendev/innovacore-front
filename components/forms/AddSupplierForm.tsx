@@ -52,7 +52,14 @@ export const AddSupplierForm: React.FC<AddSupplierFormProps> = ({
     }
     createSupplierMutation.mutate(formData, {
       onSuccess: () => {
+        toast.success("Proveedor creado con éxito.");
         onClose();
+      },
+      onError: (error: any) => {
+        // Si el backend devuelve el error con "response.data.message"
+        const errorMessage =
+          error?.response?.data?.message || "Ocurrió un error inesperado";
+        toast.error(errorMessage);
       },
     });
   };
