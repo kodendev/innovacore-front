@@ -44,6 +44,21 @@ const CreatePurchaseOrder = ({ supplier }: Props) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!formData.productId || formData.productId <= 0) {
+      toast.error("Debes seleccionar un producto válido");
+      return;
+    }
+
+    if (!formData.productId || formData.productId <= 0) {
+      toast.error("Debes seleccionar un producto válido");
+      return;
+    }
+
+    if (formData.quantity <= 0 || formData.quantity === 0) {
+      toast.error("La cantidad debe ser mayor a cero");
+      return;
+    }
+
     const selectedProduct = supplier.supplierProducts.find(
       (sp) => sp.product?.id === formData.productId
     );
@@ -64,13 +79,15 @@ const CreatePurchaseOrder = ({ supplier }: Props) => {
       ],
     };
     createPurchase.mutate(payload, {
-      onSuccess: (data) => {
-        toast.success("Compra registrada con éxito");
+      onSuccess: () => {
+        toast.success("Compra registrada con éxito ✅");
         setIsOpen(false);
       },
-      onError: (error) => {
-        toast.error("Error registrando compra");
-        console.error("Error registrando compra ❌", error.message);
+      onError: (error: any) => {
+        const message =
+          error?.response?.data?.message || "Error registrando compra ❌";
+        toast.error(message);
+        console.error("Error registrando compra ❌", error);
       },
     });
   };
@@ -133,8 +150,12 @@ const CreatePurchaseOrder = ({ supplier }: Props) => {
             </div>
           </div>
 
-          <Button onClick={handleSubmit} className="w-full">
-            Confirmar Pedido
+          <Button
+            onClick={handleSubmit}
+            className="w-full"
+            disabled={createPurchase.isPending}
+          >
+            {createPurchase.isPending ? "Procesando..." : "Confirmar Pedido"}
           </Button>
         </DialogContent>
       </Dialog>
