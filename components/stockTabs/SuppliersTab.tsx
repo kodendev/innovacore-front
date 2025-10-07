@@ -28,9 +28,10 @@ import { useDeleteSupplier } from "@/hooks/tanstack/suppliers/useDeleteSupplier"
 import { Supplier } from "@/types/suppliers/supplierTypes";
 import { ConfirmDialog } from "../pop-ups/ConfirmDialog";
 import { useUpdateSupplier } from "@/hooks/tanstack/suppliers/useEditSupplier";
-import { toast } from "sonner";
 import { EditSupplierForm } from "../forms/EditSupplierForm";
-import { useCreatePurchase } from "@/hooks/tanstack/products/usePurchaseStock";
+import { useSupplierSearch } from "@/hooks/tanstack/suppliers/useGetSupplierByName";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useFilteredSuppliers } from "@/hooks/filters/useFilteredSuppliers";
 
 export const SuppliersTab = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -39,6 +40,9 @@ export const SuppliersTab = () => {
     null
   );
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [searchedSupplier, setSearchedSupplier] = useState("");
+
+  const debouncedQuery = useDebounce(searchedSupplier, 400);
 
   const { data: suppliers, isLoading } = useSuppliers();
 
@@ -48,10 +52,12 @@ export const SuppliersTab = () => {
 
   const updateSupplierMutation = useUpdateSupplier();
 
+  const { data: searchSupplier } = useSupplierSearch(debouncedQuery);
+
   const { componentView, toggleView } = useComponentView();
 
-  const handlePurchaseOrder = (supplierId: number) => {
-    console.log(`Create purchase order for supplier ID: ${supplierId}`);
+  const handleSearchSupplier = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchedSupplier(e.target.value);
   };
 
   const handleDeleteClick = (supplier: Supplier) => {
@@ -71,6 +77,13 @@ export const SuppliersTab = () => {
     setSelectedSupplier(supplier);
     setIsEditDialogOpen(true);
   };
+
+  const displayedSuppliers = useFilteredSuppliers({
+    allSuppliers: suppliers || [],
+    searchSupplier,
+    debouncedQuery,
+    filters: { active: true },
+  });
 
   return (
     <>
@@ -105,46 +118,39 @@ export const SuppliersTab = () => {
           </DialogContent>
         </Dialog>
       )}
-      {suppliers?.length === 0 ? (
-        <div className="flex items-center justify-center mt-4 h-[80vh]">
-          <p className="text-gray-500 text-xl">
-            No hay proveedores disponibles.
-          </p>
+
+      <div className="flex justify-end items-end w-full mb-4">
+        <Input
+          onChange={(e) => handleSearchSupplier(e)}
+          value={searchedSupplier}
+          placeholder="Buscar Proveedor"
+        ></Input>
+        <div className="flex flex-row items-center gap-1">
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-green-500 flex items-center gap-2">
+                <Plus className="h-4 w-4" /> Agregar proveedor
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
+              <DialogHeader>
+                <DialogTitle>Agregar Nuevo Proveedor</DialogTitle>
+              </DialogHeader>
+              <AddSupplierForm
+                products={products || []}
+                onClose={() => setIsAddDialogOpen(false)}
+              />
+            </DialogContent>
+          </Dialog>
+          <Button onClick={toggleView}>Cambiar vista</Button>
         </div>
-      ) : (
-        <div className="flex justify-end items-end w-full mb-4">
-          <Input
-            onChange={(e) => console.log(e.target.value)}
-            value=""
-            placeholder="Buscar Proveedor"
-          ></Input>
-          <div className="flex flex-row items-center gap-1">
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-green-500 flex items-center gap-2">
-                  <Plus className="h-4 w-4" /> Agregar proveedor
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
-                <DialogHeader>
-                  <DialogTitle>Agregar Nuevo Proveedor</DialogTitle>
-                </DialogHeader>
-                <AddSupplierForm
-                  products={products || []}
-                  onClose={() => setIsAddDialogOpen(false)}
-                />
-              </DialogContent>
-            </Dialog>
-            <Button onClick={toggleView}>Cambiar vista</Button>
-          </div>
-        </div>
-      )}
+      </div>
 
       {componentView === "card" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {isLoading && <Spinner isLoading={isLoading} />}
-          {suppliers &&
-            suppliers.map((supplier) => (
+          {displayedSuppliers &&
+            displayedSuppliers.map((supplier) => (
               <Card key={supplier.id}>
                 <CardHeader>
                   <div className="flex flex-row justify-between">
@@ -195,7 +201,7 @@ export const SuppliersTab = () => {
       ) : (
         <div>
           <SuppliersTable
-            data={suppliers}
+            data={displayedSuppliers || []}
             handleDeleteClick={handleDeleteClick}
             isPending={isLoading}
             key={suppliers?.length}
