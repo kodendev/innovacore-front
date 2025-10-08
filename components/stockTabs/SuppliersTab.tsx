@@ -32,6 +32,15 @@ import { EditSupplierForm } from "../forms/EditSupplierForm";
 import { useSupplierSearch } from "@/hooks/tanstack/suppliers/useGetSupplierByName";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useFilteredSuppliers } from "@/hooks/filters/useFilteredSuppliers";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { useSuppliersByProducts } from "@/hooks/tanstack/suppliers/useSuppliersByProducts";
+import { Label } from "recharts";
 
 export const SuppliersTab = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -41,6 +50,9 @@ export const SuppliersTab = () => {
   );
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [searchedSupplier, setSearchedSupplier] = useState("");
+  const [selectedProductId, setSelectedProductId] = useState<number | null>(
+    null
+  );
 
   const debouncedQuery = useDebounce(searchedSupplier, 400);
 
@@ -51,6 +63,10 @@ export const SuppliersTab = () => {
   const deleteMutation = useDeleteSupplier();
 
   const updateSupplierMutation = useUpdateSupplier();
+
+  const { data: supplierProductsByProduct } = useSuppliersByProducts(
+    selectedProductId ? String(selectedProductId) : ""
+  );
 
   const { data: searchSupplier } = useSupplierSearch(debouncedQuery);
 
@@ -78,12 +94,27 @@ export const SuppliersTab = () => {
     setIsEditDialogOpen(true);
   };
 
+  const suppliersByProduct: Supplier[] =
+    supplierProductsByProduct?.map((sp: any) => sp.supplier) ?? [];
+
   const displayedSuppliers = useFilteredSuppliers({
-    allSuppliers: suppliers || [],
+    allSuppliers: suppliers,
     searchSupplier,
     debouncedQuery,
-    filters: { active: true },
+    filters: {
+      active: true,
+      productId: selectedProductId ?? undefined,
+    },
+    suppliersByProduct,
   });
+
+  if (!isLoading && displayedSuppliers.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-40 text-gray-500">
+        No se encontraron proveedores con los filtros aplicados.
+      </div>
+    );
+  }
 
   return (
     <>
@@ -146,8 +177,42 @@ export const SuppliersTab = () => {
         </div>
       </div>
 
-      {componentView === "card" ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <Select
+          value={selectedProductId !== null ? String(selectedProductId) : "ALL"}
+          onValueChange={(value) =>
+            setSelectedProductId(value === "ALL" ? null : Number(value))
+          }
+        >
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Filtrar por producto" />
+          </SelectTrigger>
+
+          <SelectContent>
+            <SelectItem value="ALL">
+              Todos los productos por proveedor
+            </SelectItem>
+
+            {products?.map(
+              (product) =>
+                product.id !== undefined && (
+                  <SelectItem key={product.id} value={product.id.toString()}>
+                    {product.name}
+                  </SelectItem>
+                )
+            )}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {isLoading ? (
+        <Spinner isLoading={isLoading} />
+      ) : displayedSuppliers.length === 0 ? (
+        <div className="flex justify-center items-center h-40 text-gray-500">
+          No se encontraron proveedores con los filtros aplicados.
+        </div>
+      ) : componentView === "card" ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
           {isLoading && <Spinner isLoading={isLoading} />}
           {displayedSuppliers &&
             displayedSuppliers.map((supplier) => (
