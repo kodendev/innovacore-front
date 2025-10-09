@@ -98,7 +98,7 @@ export const SuppliersTab = () => {
     supplierProductsByProduct?.map((sp: any) => sp.supplier) ?? [];
 
   const displayedSuppliers = useFilteredSuppliers({
-    allSuppliers: suppliers,
+    allSuppliers: suppliers ?? [],
     searchSupplier,
     debouncedQuery,
     filters: {
@@ -107,14 +107,6 @@ export const SuppliersTab = () => {
     },
     suppliersByProduct,
   });
-
-  if (!isLoading && displayedSuppliers.length === 0) {
-    return (
-      <div className="flex justify-center items-center h-40 text-gray-500">
-        No se encontraron proveedores con los filtros aplicados.
-      </div>
-    );
-  }
 
   return (
     <>
@@ -150,17 +142,52 @@ export const SuppliersTab = () => {
         </Dialog>
       )}
 
-      <div className="flex justify-end items-end w-full mb-4">
-        <Input
-          onChange={(e) => handleSearchSupplier(e)}
-          value={searchedSupplier}
-          placeholder="Buscar Proveedor"
-        ></Input>
-        <div className="flex flex-row items-center gap-1">
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
+        <div className="flex flex-col gap-2 w-full md:w-1/2">
+          <label className="text-sm text-gray-600 font-medium">
+            Buscar proveedor
+          </label>
+          <Input
+            onChange={(e) => handleSearchSupplier(e)}
+            value={searchedSupplier}
+            placeholder="Escribí un nombre..."
+          />
+        </div>
+
+        <div className="flex flex-col gap-2 w-full md:w-1/3">
+          <label className="text-sm text-gray-600 font-medium">
+            Filtrar por producto
+          </label>
+          <Select
+            value={
+              selectedProductId !== null ? String(selectedProductId) : "ALL"
+            }
+            onValueChange={(value) =>
+              setSelectedProductId(value === "ALL" ? null : Number(value))
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar producto" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">Todos los productos</SelectItem>
+              {products?.map(
+                (product) =>
+                  product.id !== undefined && (
+                    <SelectItem key={product.id} value={product.id.toString()}>
+                      {product.name}
+                    </SelectItem>
+                  )
+              )}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex flex-row items-center gap-2 self-start md:self-end">
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-green-500 flex items-center gap-2">
-                <Plus className="h-4 w-4" /> Agregar proveedor
+                <Plus className="h-4 w-4" /> Agregar
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
@@ -177,37 +204,20 @@ export const SuppliersTab = () => {
         </div>
       </div>
 
-      <div>
-        <Select
-          value={selectedProductId !== null ? String(selectedProductId) : "ALL"}
-          onValueChange={(value) =>
-            setSelectedProductId(value === "ALL" ? null : Number(value))
-          }
-        >
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Filtrar por producto" />
-          </SelectTrigger>
-
-          <SelectContent>
-            <SelectItem value="ALL">
-              Todos los productos por proveedor
-            </SelectItem>
-
-            {products?.map(
-              (product) =>
-                product.id !== undefined && (
-                  <SelectItem key={product.id} value={product.id.toString()}>
-                    {product.name}
-                  </SelectItem>
-                )
-            )}
-          </SelectContent>
-        </Select>
-      </div>
+      {(searchedSupplier.trim() !== "" || selectedProductId !== null) && (
+        <div className="text-xs text-gray-500 mt-1">
+          {searchedSupplier &&
+            `Filtrando por nombre de proveedor: "${searchedSupplier}"`}
+          {searchedSupplier && selectedProductId !== null && " • "}
+          {selectedProductId !== null &&
+            "Filtrando por producto ofrecido por proveedor"}
+        </div>
+      )}
 
       {isLoading ? (
         <Spinner isLoading={isLoading} />
-      ) : displayedSuppliers.length === 0 ? (
+      ) : displayedSuppliers.length === 0 &&
+        (searchedSupplier.trim() !== "" || selectedProductId !== null) ? (
         <div className="flex justify-center items-center h-40 text-gray-500">
           No se encontraron proveedores con los filtros aplicados.
         </div>
