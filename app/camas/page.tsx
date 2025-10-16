@@ -31,6 +31,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Bed, User, Clock, ArrowLeft, Plus, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { useRooms } from "@/hooks/tanstack/camas/useBeds";
+import { CreateRoomForm } from "@/components/camas/CreateRoomForm";
 
 const menus = [
   {
@@ -118,7 +119,6 @@ const initialOrders = [
 ];
 
 export default function CamasPage() {
-  // const [rooms, setRooms] = useState(initialRooms);
   const [orders, setOrders] = useState(initialOrders);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [selectedBed, setSelectedBed] = useState(null);
@@ -144,6 +144,23 @@ export default function CamasPage() {
                 Gestión de Camas
               </h1>
             </div>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nueva Habitación
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Crear Habitación</DialogTitle>
+                  <DialogDescription>
+                    Cree una nueva habitación o sala en el sistema
+                  </DialogDescription>
+                </DialogHeader>
+                <CreateRoomForm onClose={() => setIsDialogOpen(false)} />
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </header>
@@ -151,10 +168,13 @@ export default function CamasPage() {
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <Tabs defaultValue="camas" className="space-y-6">
-            <TabsList>
-              <TabsTrigger value="camas">Gestión de Camas</TabsTrigger>
-              <TabsTrigger value="ordenes">Órdenes de Pacientes</TabsTrigger>
-            </TabsList>
+            <div className="flex flex-row justify-between w-full">
+              <TabsList>
+                <TabsTrigger value="camas">Gestión de Camas</TabsTrigger>
+                <TabsTrigger value="ordenes">Órdenes de Pacientes</TabsTrigger>
+              </TabsList>
+              <Button>Cambiar vista</Button>
+            </div>
             <TabsContent value="camas">
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                 {beds?.map((room) => (
@@ -280,10 +300,14 @@ export default function CamasPage() {
                                     </div>
                                   )}
 
-                                  {bedMenu && (
+                                  {bedMenu ? (
                                     <div className="text-sm">
                                       <strong>Menú:</strong> {bedMenu.menu.name}
                                     </div>
+                                  ) : (
+                                    <Button variant={"outline"}>
+                                      Asignar menú
+                                    </Button>
                                   )}
                                 </div>
                               ) : (
