@@ -11,15 +11,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -28,10 +19,28 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bed, User, Clock, ArrowLeft, Plus, ShoppingCart } from "lucide-react";
+import {
+  Bed,
+  User,
+  Clock,
+  ArrowLeft,
+  Plus,
+  ShoppingCart,
+  MoreHorizontal,
+} from "lucide-react";
 import Link from "next/link";
 import { useRooms } from "@/hooks/tanstack/camas/useBeds";
 import { CreateRoomForm } from "@/components/camas/CreateRoomForm";
+import { FaPlusCircle } from "react-icons/fa";
+import { IoSettingsSharp } from "react-icons/io5";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@radix-ui/react-dropdown-menu";
+import { CreateBedForm } from "@/components/camas/beds/CreateBedForm";
+import { Room } from "@/types/camas/bedTypes";
 
 const menus = [
   {
@@ -124,9 +133,22 @@ export default function CamasPage() {
   const [selectedBed, setSelectedBed] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false);
+  const [isCreateRoomDialogOpen, setIsCreateRoomDialogOpen] = useState(false);
+  const [isBedDialogOpen, setIsBedDialogOpen] = useState(false);
+
+  const [activeRoom, setActiveRoom] = useState<Room | null>(null);
 
   const { data: beds } = useRooms();
-  console.log(beds);
+
+  const openBedDialog = (room: Room) => {
+    setActiveRoom(room);
+    setIsBedDialogOpen(true);
+  };
+
+  const openEditDialog = (room) => {
+    setActiveRoom(room);
+    // setIsEditDialogOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -144,6 +166,8 @@ export default function CamasPage() {
                 Gestión de Camas
               </h1>
             </div>
+
+            {/* Dialog de creacion de habitación */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button>
@@ -159,6 +183,20 @@ export default function CamasPage() {
                   </DialogDescription>
                 </DialogHeader>
                 <CreateRoomForm onClose={() => setIsDialogOpen(false)} />
+              </DialogContent>
+            </Dialog>
+
+            {/* Dialog de creacion de cama */}
+            <Dialog open={isBedDialogOpen} onOpenChange={setIsBedDialogOpen}>
+              <DialogContent className="max-w-2xl p-6 bg-white/90 backdrop-blur-md rounded-xl shadow-lg">
+                <DialogHeader>
+                  <DialogTitle>Crear Cama en {activeRoom?.name}</DialogTitle>
+                </DialogHeader>
+                <CreateBedForm
+                  roomId={activeRoom?.id ?? 0}
+                  roomName={activeRoom?.name ?? ""}
+                  onClose={() => setIsBedDialogOpen(false)}
+                />
               </DialogContent>
             </Dialog>
           </div>
@@ -186,7 +224,49 @@ export default function CamasPage() {
                       <CardTitle className="flex items-center gap-2">
                         <Bed className="h-5 w-5" />
                         {room.name}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              Acciones
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="end"
+                            className="bg-slate-200 mt-2 p-4 shadow-lg rounded-xl  text-sm gap-2 cursor-pointer font-medium"
+                          >
+                            <DropdownMenuItem
+                              className="px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 rounded-md cursor-pointer"
+                              onClick={() => openBedDialog(room)}
+                            >
+                              Asignar cama
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 rounded-md cursor-pointer"
+                              onClick={() => openEditDialog(room)}
+                            >
+                              Editar habitación
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        {/* DIALOGO EDITAR HABITACIÓN */}
+                        {/* <Dialog
+                          open={isEditDialogOpen}
+                          onOpenChange={setIsEditDialogOpen}
+                        >
+                          <DialogContent className="max-w-2xl">
+                            <DialogHeader>
+                              <DialogTitle>Editar Habitación</DialogTitle>
+                            </DialogHeader>
+                            <EditRoomForm
+                              room={activeRoom}
+                              onClose={() => setIsEditDialogOpen(false)}
+                            />
+                          </DialogContent>
+                        </Dialog> */}
                       </CardTitle>
+                      {/* DIALOGO CREAR CAMA */}
+
                       <CardDescription>
                         {
                           room.beds.filter(
