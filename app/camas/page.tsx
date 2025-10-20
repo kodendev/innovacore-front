@@ -41,6 +41,7 @@ import {
 } from "@radix-ui/react-dropdown-menu";
 import { CreateBedForm } from "@/components/camas/beds/CreateBedForm";
 import { Room } from "@/types/camas/bedTypes";
+import { EditRoomForm } from "@/components/camas/EditRoomForm";
 
 const menus = [
   {
@@ -135,6 +136,7 @@ export default function CamasPage() {
   const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false);
   const [isCreateRoomDialogOpen, setIsCreateRoomDialogOpen] = useState(false);
   const [isBedDialogOpen, setIsBedDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const [activeRoom, setActiveRoom] = useState<Room | null>(null);
 
@@ -145,9 +147,9 @@ export default function CamasPage() {
     setIsBedDialogOpen(true);
   };
 
-  const openEditDialog = (room) => {
+  const openEditDialog = (room: Room) => {
     setActiveRoom(room);
-    // setIsEditDialogOpen(true);
+    setIsEditDialogOpen(true);
   };
 
   return (
@@ -186,7 +188,26 @@ export default function CamasPage() {
               </DialogContent>
             </Dialog>
 
-            {/* Dialog de creacion de cama */}
+            {/* Dialog de edición de cama */}
+            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+              <DialogContent className="max-w-2xl p-6 bg-white/90 backdrop-blur-md rounded-xl shadow-lg">
+                <DialogHeader>
+                  <DialogTitle>
+                    Editar la habitación {activeRoom?.name}
+                  </DialogTitle>
+                </DialogHeader>
+
+                {activeRoom && (
+                  <EditRoomForm
+                    roomId={activeRoom.id}
+                    roomName={activeRoom.name}
+                    floor={activeRoom.floor}
+                    onClose={() => setIsEditDialogOpen(false)}
+                  />
+                )}
+              </DialogContent>
+            </Dialog>
+
             <Dialog open={isBedDialogOpen} onOpenChange={setIsBedDialogOpen}>
               <DialogContent className="max-w-2xl p-6 bg-white/90 backdrop-blur-md rounded-xl shadow-lg">
                 <DialogHeader>
@@ -265,7 +286,6 @@ export default function CamasPage() {
                           </DialogContent>
                         </Dialog> */}
                       </CardTitle>
-                      {/* DIALOGO CREAR CAMA */}
 
                       <CardDescription>
                         {
