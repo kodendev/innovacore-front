@@ -263,22 +263,6 @@ export default function CamasPage() {
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-
-                        {/* DIALOGO EDITAR HABITACIÓN */}
-                        {/* <Dialog
-                          open={isEditDialogOpen}
-                          onOpenChange={setIsEditDialogOpen}
-                        >
-                          <DialogContent className="max-w-2xl">
-                            <DialogHeader>
-                              <DialogTitle>Editar Habitación</DialogTitle>
-                            </DialogHeader>
-                            <EditRoomForm
-                              room={activeRoom}
-                              onClose={() => setIsEditDialogOpen(false)}
-                            />
-                          </DialogContent>
-                        </Dialog> */}
                       </CardTitle>
 
                       <CardDescription>
@@ -432,7 +416,7 @@ export default function CamasPage() {
                                       }}
                                     >
                                       {hasPatient
-                                        ? "Modificar"
+                                        ? "Editar Cama"
                                         : "Asignar Menú"}
                                     </Button>
                                   </DialogTrigger>
@@ -448,44 +432,6 @@ export default function CamasPage() {
                                     </DialogHeader>
                                   </DialogContent>
                                 </Dialog>
-
-                                {hasPatient && (
-                                  <Dialog
-                                    open={
-                                      isOrderDialogOpen &&
-                                      selectedRoom === room.id &&
-                                      selectedBed === bed.id
-                                    }
-                                    onOpenChange={setIsOrderDialogOpen}
-                                  >
-                                    <DialogTrigger asChild>
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="flex-1"
-                                        onClick={() => {
-                                          setSelectedRoom(room.id);
-                                          setSelectedBed(bed.id);
-                                          setIsOrderDialogOpen(true);
-                                        }}
-                                      >
-                                        <ShoppingCart className="h-3 w-3 mr-1" />
-                                        Nueva Orden
-                                      </Button>
-                                    </DialogTrigger>
-                                    <DialogContent className="max-w-md mx-4">
-                                      <DialogHeader>
-                                        <DialogTitle>
-                                          Nueva Orden - {room.name}, {bed.name}
-                                        </DialogTitle>
-                                        <DialogDescription>
-                                          Crear orden adicional para{" "}
-                                          {patient?.name}
-                                        </DialogDescription>
-                                      </DialogHeader>
-                                    </DialogContent>
-                                  </Dialog>
-                                )}
                               </div>
                             </div>
                           );
