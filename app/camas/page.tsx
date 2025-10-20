@@ -42,6 +42,7 @@ import {
 import { CreateBedForm } from "@/components/camas/beds/CreateBedForm";
 import { Room } from "@/types/camas/bedTypes";
 import { EditRoomForm } from "@/components/camas/EditRoomForm";
+import { GenericDialog } from "@/components/generals/GenericDialog";
 
 const menus = [
   {
@@ -170,56 +171,49 @@ export default function CamasPage() {
             </div>
 
             {/* Dialog de creacion de habitación */}
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
+            <GenericDialog
+              open={isDialogOpen}
+              onOpenChange={setIsDialogOpen}
+              title="Crear Habitación"
+              description="Cree una nueva habitación o sala en el sistema"
+              trigger={
                 <Button>
                   <Plus className="h-4 w-4 mr-2" />
                   Nueva Habitación
                 </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>Crear Habitación</DialogTitle>
-                  <DialogDescription>
-                    Cree una nueva habitación o sala en el sistema
-                  </DialogDescription>
-                </DialogHeader>
-                <CreateRoomForm onClose={() => setIsDialogOpen(false)} />
-              </DialogContent>
-            </Dialog>
+              }
+            >
+              <CreateRoomForm onClose={() => setIsDialogOpen(false)} />
+            </GenericDialog>
 
             {/* Dialog de edición de cama */}
-            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-              <DialogContent className="max-w-2xl p-6 bg-white/90 backdrop-blur-md rounded-xl shadow-lg">
-                <DialogHeader>
-                  <DialogTitle>
-                    Editar la habitación {activeRoom?.name}
-                  </DialogTitle>
-                </DialogHeader>
-
-                {activeRoom && (
-                  <EditRoomForm
-                    roomId={activeRoom.id}
-                    roomName={activeRoom.name}
-                    floor={activeRoom.floor}
-                    onClose={() => setIsEditDialogOpen(false)}
-                  />
-                )}
-              </DialogContent>
-            </Dialog>
-
-            <Dialog open={isBedDialogOpen} onOpenChange={setIsBedDialogOpen}>
-              <DialogContent className="max-w-2xl p-6 bg-white/90 backdrop-blur-md rounded-xl shadow-lg">
-                <DialogHeader>
-                  <DialogTitle>Crear Cama en {activeRoom?.name}</DialogTitle>
-                </DialogHeader>
-                <CreateBedForm
-                  roomId={activeRoom?.id ?? 0}
-                  roomName={activeRoom?.name ?? ""}
-                  onClose={() => setIsBedDialogOpen(false)}
+            <GenericDialog
+              open={isEditDialogOpen}
+              onOpenChange={setIsEditDialogOpen}
+              title={`Editar la habitación ${activeRoom?.name}`}
+            >
+              {activeRoom && (
+                <EditRoomForm
+                  roomId={activeRoom.id}
+                  roomName={activeRoom.name}
+                  floor={activeRoom.floor}
+                  onClose={() => setIsEditDialogOpen(false)}
                 />
-              </DialogContent>
-            </Dialog>
+              )}
+            </GenericDialog>
+
+            {/* Crear cama */}
+            <GenericDialog
+              open={isBedDialogOpen}
+              onOpenChange={setIsBedDialogOpen}
+              title={`Crear Cama en ${activeRoom?.name}`}
+            >
+              <CreateBedForm
+                roomId={activeRoom?.id ?? 0}
+                roomName={activeRoom?.name ?? ""}
+                onClose={() => setIsBedDialogOpen(false)}
+              />
+            </GenericDialog>
           </div>
         </div>
       </header>
