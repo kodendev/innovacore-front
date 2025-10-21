@@ -43,6 +43,7 @@ import { CreateBedForm } from "@/components/camas/beds/CreateBedForm";
 import { Room } from "@/types/camas/bedTypes";
 import { EditRoomForm } from "@/components/camas/EditRoomForm";
 import { GenericDialog } from "@/components/generals/GenericDialog";
+import BedEditModal from "@/components/camas/BedEditModal";
 
 const menus = [
   {
@@ -130,27 +131,35 @@ const initialOrders = [
 ];
 
 export default function CamasPage() {
-  const [orders, setOrders] = useState(initialOrders);
-  const [selectedRoom, setSelectedRoom] = useState(null);
-  const [selectedBed, setSelectedBed] = useState(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false);
-  const [isCreateRoomDialogOpen, setIsCreateRoomDialogOpen] = useState(false);
-  const [isBedDialogOpen, setIsBedDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [orders, setOrders] = useState(initialOrders); // si no lo usas, puedes eliminarlo
+  const [selectedRoom, setSelectedRoom] = useState<number | null>(null); // ID de la habitación seleccionada (para editar cama)
+  const [selectedBed, setSelectedBed] = useState<number | null>(null); // ID de la cama seleccionada (para editar cama)
+
+  const [isCreateRoomOpen, setIsCreateRoomOpen] = useState<boolean>(false); // crear habitación
+  const [isEditRoomOpen, setIsEditRoomOpen] = useState<boolean>(false); // editar habitación
+
+  // Estados separados para camas
+  const [isCreateBedOpen, setIsCreateBedOpen] = useState<boolean>(false); // crear cama
+  const [isEditBedOpen, setIsEditBedOpen] = useState<boolean>(false); // editar/editar cama (BedEditModal)
 
   const [activeRoom, setActiveRoom] = useState<Room | null>(null);
 
   const { data: beds } = useRooms();
 
+  //abre el dialog de crear cama
   const openBedDialog = (room: Room) => {
     setActiveRoom(room);
-    setIsBedDialogOpen(true);
+    // cerramos cualquier modal de edición por seguridad
+    setIsEditBedOpen(false);
+    setSelectedRoom(null);
+    setSelectedBed(null);
+    setIsCreateBedOpen(true);
   };
 
+  //edita la habitacion
   const openEditDialog = (room: Room) => {
     setActiveRoom(room);
-    setIsEditDialogOpen(true);
+    setIsEditRoomOpen(true);
   };
 
   return (
@@ -172,24 +181,24 @@ export default function CamasPage() {
 
             {/* Dialog de creacion de habitación */}
             <GenericDialog
-              open={isDialogOpen}
-              onOpenChange={setIsDialogOpen}
+              open={isCreateRoomOpen}
+              onOpenChange={(open) => setIsCreateRoomOpen(open)}
               title="Crear Habitación"
               description="Cree una nueva habitación o sala en el sistema"
               trigger={
-                <Button>
+                <Button onClick={() => setIsCreateRoomOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   Nueva Habitación
                 </Button>
               }
             >
-              <CreateRoomForm onClose={() => setIsDialogOpen(false)} />
+              <CreateRoomForm onClose={() => setIsCreateRoomOpen(false)} />
             </GenericDialog>
 
-            {/* Dialog de edición de cama */}
+            {/* Dialog de edición de habitacion */}
             <GenericDialog
-              open={isEditDialogOpen}
-              onOpenChange={setIsEditDialogOpen}
+              open={isEditRoomOpen}
+              onOpenChange={setIsEditRoomOpen}
               title={`Editar la habitación ${activeRoom?.name}`}
             >
               {activeRoom && (
@@ -197,21 +206,30 @@ export default function CamasPage() {
                   roomId={activeRoom.id}
                   roomName={activeRoom.name}
                   floor={activeRoom.floor}
-                  onClose={() => setIsEditDialogOpen(false)}
+                  onClose={() => setIsEditRoomOpen(false)}
                 />
               )}
             </GenericDialog>
 
-            {/* Crear cama */}
+            {/* Crear cama y asignar a la habitacion */}
             <GenericDialog
-              open={isBedDialogOpen}
-              onOpenChange={setIsBedDialogOpen}
-              title={`Crear Cama en ${activeRoom?.name}`}
+              open={isCreateBedOpen}
+              onOpenChange={(open) => {
+                setIsCreateBedOpen(open);
+                if (!open) {
+                  // limpiar estado cuando se cierre el modal de crear cama
+                  setActiveRoom(null);
+                }
+              }}
+              title={`Crear Cama en ${activeRoom?.name ?? ""}`}
             >
               <CreateBedForm
                 roomId={activeRoom?.id ?? 0}
                 roomName={activeRoom?.name ?? ""}
-                onClose={() => setIsBedDialogOpen(false)}
+                onClose={() => {
+                  setIsCreateBedOpen(false);
+                  setActiveRoom(null);
+                }}
               />
             </GenericDialog>
           </div>
@@ -398,11 +416,18 @@ export default function CamasPage() {
                               <div className="flex gap-2 mt-3">
                                 <Dialog
                                   open={
-                                    isDialogOpen &&
+                                    isEditBedOpen &&
                                     selectedRoom === room.id &&
                                     selectedBed === bed.id
                                   }
-                                  onOpenChange={setIsDialogOpen}
+                                  onOpenChange={(open) => {
+                                    setIsEditBedOpen(open);
+                                    if (!open) {
+                                      // limpiar selección al cerrar el diálogo de edición de cama
+                                      setSelectedRoom(null);
+                                      setSelectedBed(null);
+                                    }
+                                  }}
                                 >
                                   <DialogTrigger asChild>
                                     <Button
@@ -410,9 +435,12 @@ export default function CamasPage() {
                                       size="sm"
                                       className="flex-1"
                                       onClick={() => {
+                                        // al abrir edición, cerramos el modal de crear cama para evitar overlap
+                                        setIsCreateBedOpen(false);
+                                        setActiveRoom(null); // no necesitamos activeRoom cuando editamos una cama ya existente
                                         setSelectedRoom(room.id);
                                         setSelectedBed(bed.id);
-                                        setIsDialogOpen(true);
+                                        setIsEditBedOpen(true);
                                       }}
                                     >
                                       {hasPatient
@@ -420,14 +448,27 @@ export default function CamasPage() {
                                         : "Asignar Menú"}
                                     </Button>
                                   </DialogTrigger>
+
                                   <DialogContent className="max-w-md mx-4">
                                     <DialogHeader>
                                       <DialogTitle>
                                         Asignar Menú - {room.name}, {bed.name}
                                       </DialogTitle>
                                       <DialogDescription>
-                                        Selecciona el menú y horario para el
-                                        paciente
+                                        <BedEditModal
+                                          bed={bed}
+                                          roomName={room.name}
+                                          onClose={() => {
+                                            setIsEditBedOpen(false);
+                                            setSelectedRoom(null);
+                                            setSelectedBed(null);
+                                          }}
+                                          isOpen={
+                                            isEditBedOpen &&
+                                            selectedRoom === room.id &&
+                                            selectedBed === bed.id
+                                          }
+                                        />
                                       </DialogDescription>
                                     </DialogHeader>
                                   </DialogContent>
