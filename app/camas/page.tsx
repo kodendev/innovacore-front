@@ -19,20 +19,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Bed,
-  User,
-  Clock,
-  ArrowLeft,
-  Plus,
-  ShoppingCart,
-  MoreHorizontal,
-} from "lucide-react";
+import { Bed, User, ArrowLeft, Plus } from "lucide-react";
 import Link from "next/link";
 import { useRooms } from "@/hooks/tanstack/camas/useBeds";
 import { CreateRoomForm } from "@/components/camas/CreateRoomForm";
-import { FaPlusCircle } from "react-icons/fa";
-import { IoSettingsSharp } from "react-icons/io5";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,93 +36,7 @@ import { EditRoomForm } from "@/components/camas/EditRoomForm";
 import { GenericDialog } from "@/components/generals/GenericDialog";
 import BedEditModal from "@/components/camas/BedEditModal";
 
-const menus = [
-  {
-    id: 1,
-    name: "Pastel de Papa",
-    ingredients: [
-      { name: "Carne", qty: 300 },
-      { name: "Papa", qty: 200 },
-      { name: "Queso", qty: 50 },
-    ],
-  },
-  {
-    id: 2,
-    name: "Pollo Grillado",
-    ingredients: [
-      { name: "Pollo", qty: 250 },
-      { name: "Arroz", qty: 150 },
-      { name: "Verduras", qty: 100 },
-    ],
-  },
-  {
-    id: 3,
-    name: "Pescado al Horno",
-    ingredients: [
-      { name: "Pescado", qty: 200 },
-      { name: "Papa", qty: 150 },
-      { name: "Limón", qty: 20 },
-    ],
-  },
-  {
-    id: 4,
-    name: "Ensalada César",
-    ingredients: [
-      { name: "Lechuga", qty: 100 },
-      { name: "Pollo", qty: 150 },
-      { name: "Queso", qty: 30 },
-    ],
-  },
-  {
-    id: 5,
-    name: "Milanesa",
-    ingredients: [
-      { name: "Carne", qty: 200 },
-      { name: "Pan rallado", qty: 50 },
-      { name: "Huevo", qty: 1 },
-    ],
-  },
-];
-
-const bebidas = [
-  { id: 101, name: "Agua Mineral" },
-  { id: 102, name: "Gaseosa 500ml" },
-  { id: 103, name: "Jugo Natural" },
-  { id: 104, name: "Café" },
-  { id: 105, name: "Té" },
-];
-
-const initialOrders = [
-  {
-    id: 1,
-    room: 101,
-    bed: 1,
-    patient: "Juan Pérez",
-    items: [
-      { name: "Pastel de Papa", qty: 1 },
-      { name: "Agua Mineral", qty: 1 },
-    ],
-    time: "12:30",
-    status: "servido",
-    type: "paciente",
-  },
-  {
-    id: 2,
-    room: 102,
-    bed: 1,
-    patient: "Carlos López",
-    items: [
-      { name: "Pescado al Horno", qty: 1 },
-      { name: "Té", qty: 1 },
-    ],
-    time: "13:00",
-    status: "pendiente",
-    type: "paciente",
-  },
-];
-
 export default function CamasPage() {
-  const [orders, setOrders] = useState(initialOrders); // si no lo usas, puedes eliminarlo
   const [selectedRoom, setSelectedRoom] = useState<number | null>(null); // ID de la habitación seleccionada (para editar cama)
   const [selectedBed, setSelectedBed] = useState<number | null>(null); // ID de la cama seleccionada (para editar cama)
 
@@ -149,7 +54,6 @@ export default function CamasPage() {
   //abre el dialog de crear cama
   const openBedDialog = (room: Room) => {
     setActiveRoom(room);
-    // cerramos cualquier modal de edición por seguridad
     setIsEditBedOpen(false);
     setSelectedRoom(null);
     setSelectedBed(null);
@@ -443,34 +347,36 @@ export default function CamasPage() {
                                         setIsEditBedOpen(true);
                                       }}
                                     >
-                                      {hasPatient
-                                        ? "Editar Cama"
-                                        : "Asignar Menú"}
+                                      Editar Cama
                                     </Button>
                                   </DialogTrigger>
-
                                   <DialogContent className="max-w-md mx-4">
                                     <DialogHeader>
                                       <DialogTitle>
-                                        Asignar Menú - {room.name}, {bed.name}
+                                        Editar Cama y Paciente
                                       </DialogTitle>
                                       <DialogDescription>
-                                        <BedEditModal
-                                          bed={bed}
-                                          roomName={room.name}
-                                          onClose={() => {
-                                            setIsEditBedOpen(false);
-                                            setSelectedRoom(null);
-                                            setSelectedBed(null);
-                                          }}
-                                          isOpen={
-                                            isEditBedOpen &&
-                                            selectedRoom === room.id &&
-                                            selectedBed === bed.id
-                                          }
-                                        />
+                                        Cama : {bed.name} - Paciente:{" "}
+                                        {patient?.name}
                                       </DialogDescription>
                                     </DialogHeader>
+
+                                    <div className="mt-4">
+                                      <BedEditModal
+                                        bed={bed}
+                                        roomName={room.name}
+                                        onClose={() => {
+                                          setIsEditBedOpen(false);
+                                          setSelectedRoom(null);
+                                          setSelectedBed(null);
+                                        }}
+                                        isOpen={
+                                          isEditBedOpen &&
+                                          selectedRoom === room.id &&
+                                          selectedBed === bed.id
+                                        }
+                                      />
+                                    </div>
                                   </DialogContent>
                                 </Dialog>
                               </div>
@@ -483,101 +389,101 @@ export default function CamasPage() {
                 ))}
               </div>
             </TabsContent>
-
-            <TabsContent value="ordenes">
-              <Card>
-                <CardHeader>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <CardTitle>Órdenes de Pacientes</CardTitle>
-                      <CardDescription>
-                        Listado de todas las órdenes realizadas para pacientes
-                        internados
-                      </CardDescription>
-                    </div>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button>
-                          <Plus className="h-4 w-4 mr-2" />
-                          Nueva Orden
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-md mx-4">
-                        <DialogHeader>
-                          <DialogTitle>Crear Nueva Orden</DialogTitle>
-                          <DialogDescription>
-                            Complete los datos para crear una orden para un
-                            paciente
-                          </DialogDescription>
-                        </DialogHeader>
-                        {/* <CreateNewOrderForm
-                          onCreateOrder={handleCreateNewOrder}
-                        /> */}
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {orders.map((order) => (
-                      <div
-                        key={order.id}
-                        className={`border rounded-lg p-4 transition-colors ${
-                          order.status === "servido"
-                            ? "bg-green-50 border-green-200"
-                            : "bg-orange-50 border-orange-200"
-                        }`}
-                      >
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <div className="font-medium">
-                              Orden #{order.id} - Habitación {order.room}, Cama{" "}
-                              {order.bed}
-                            </div>
-                            <div className="text-sm text-gray-600">
-                              Paciente: {order.patient} • {order.time}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge
-                              variant={
-                                order.status === "servido"
-                                  ? "default"
-                                  : "destructive"
-                              }
-                              className={
-                                order.status === "servido"
-                                  ? "bg-green-100 text-green-800 border-green-200"
-                                  : "bg-orange-100 text-orange-800 border-orange-200"
-                              }
-                            >
-                              {order.status === "servido"
-                                ? "✓ Servido"
-                                : "⏳ Pendiente"}
-                            </Badge>
-                            {order.status === "pendiente" && (
-                              <Button size="sm">Marcar Servido</Button>
-                            )}
-                          </div>
-                        </div>
-                        <div className="text-sm">
-                          <strong>Items:</strong>{" "}
-                          {order.items.map((item, index) => (
-                            <span key={index}>
-                              {item.name} x{item.qty}
-                              {index < order.items.length - 1 ? ", " : ""}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
           </Tabs>
         </div>
       </main>
     </div>
   );
 }
+
+// <TabsContent value="ordenes">
+//   <Card>
+//     <CardHeader>
+//       <div className="flex justify-between items-center">
+//         <div>
+//           <CardTitle>Órdenes de Pacientes</CardTitle>
+//           <CardDescription>
+//             Listado de todas las órdenes realizadas para pacientes
+//             internados
+//           </CardDescription>
+//         </div>
+//         <Dialog>
+//           <DialogTrigger asChild>
+//             <Button>
+//               <Plus className="h-4 w-4 mr-2" />
+//               Nueva Orden
+//             </Button>
+//           </DialogTrigger>
+//           <DialogContent className="max-w-md mx-4">
+//             <DialogHeader>
+//               <DialogTitle>Crear Nueva Orden</DialogTitle>
+//               <DialogDescription>
+//                 Complete los datos para crear una orden para un
+//                 paciente
+//               </DialogDescription>
+//             </DialogHeader>
+//             {/* <CreateNewOrderForm
+//               onCreateOrder={handleCreateNewOrder}
+//             /> */}
+//           </DialogContent>
+//         </Dialog>
+//       </div>
+//     </CardHeader>
+//     <CardContent>
+//       <div className="space-y-4">
+//         {orders.map((order) => (
+//           <div
+//             key={order.id}
+//             className={`border rounded-lg p-4 transition-colors ${
+//               order.status === "servido"
+//                 ? "bg-green-50 border-green-200"
+//                 : "bg-orange-50 border-orange-200"
+//             }`}
+//           >
+//             <div className="flex justify-between items-start mb-3">
+//               <div>
+//                 <div className="font-medium">
+//                   Orden #{order.id} - Habitación {order.room}, Cama{" "}
+//                   {order.bed}
+//                 </div>
+//                 <div className="text-sm text-gray-600">
+//                   Paciente: {order.patient} • {order.time}
+//                 </div>
+//               </div>
+//               <div className="flex items-center gap-2">
+//                 <Badge
+//                   variant={
+//                     order.status === "servido"
+//                       ? "default"
+//                       : "destructive"
+//                   }
+//                   className={
+//                     order.status === "servido"
+//                       ? "bg-green-100 text-green-800 border-green-200"
+//                       : "bg-orange-100 text-orange-800 border-orange-200"
+//                   }
+//                 >
+//                   {order.status === "servido"
+//                     ? "✓ Servido"
+//                     : "⏳ Pendiente"}
+//                 </Badge>
+//                 {order.status === "pendiente" && (
+//                   <Button size="sm">Marcar Servido</Button>
+//                 )}
+//               </div>
+//             </div>
+//             <div className="text-sm">
+//               <strong>Items:</strong>{" "}
+//               {order.items.map((item, index) => (
+//                 <span key={index}>
+//                   {item.name} x{item.qty}
+//                   {index < order.items.length - 1 ? ", " : ""}
+//                 </span>
+//               ))}
+//             </div>
+//           </div>
+//         ))}
+//       </div>
+//     </CardContent>
+//   </Card>
+// </TabsContent>
