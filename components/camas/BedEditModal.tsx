@@ -17,6 +17,7 @@ import { useUpdateBed } from "@/hooks/tanstack/camas/beds/useUpdateBed";
 import { useAssignBedMenu } from "@/hooks/tanstack/camas/beds/useAssignMenuToBed";
 import { useAssignPatientToBed } from "@/hooks/tanstack/camas/beds/useAssignPatientToBed";
 import { usePatients } from "@/hooks/tanstack/camas/patients/getPatients";
+import { Dialog } from "@/components/ui/dialog";
 
 type BedProps = {
   id: number;
@@ -49,6 +50,7 @@ export default function BedEditModal({
   const [isAssignPatientOpen, setIsAssignPatientOpen] = useState(false);
   const [selectedAssignPatient, setSelectedAssignPatient] =
     useState<string>("none");
+  const [isCreatePatientOpen, setIsCreatePatientOpen] = useState(false);
 
   const { data: patients, isLoading: patientsLoading } = usePatients();
   const assignPatientMut = useAssignPatientToBed();
