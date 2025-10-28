@@ -41,16 +41,11 @@ export default function PatientCreateForm({
         bedId: defaultBedId ?? values.bedId,
       });
 
-      // callback al padre para que pueda seleccionar el paciente recién creado
       onCreated?.(created);
-
-      // reset del form
       reset();
 
-      // cerrar el formulario de creación (si el padre lo desea)
       onClose?.();
     } catch (err) {
-      // El hook ya muestra toast; logueamos para debugging
       console.error("Error al crear paciente desde form:", err);
     }
   };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -35,6 +35,10 @@ import { Room } from "@/types/camas/bedTypes";
 import { EditRoomForm } from "@/components/camas/EditRoomForm";
 import { GenericDialog } from "@/components/generals/GenericDialog";
 import BedEditModal from "@/components/camas/BedEditModal";
+import { useConsumeBedMenu } from "@/hooks/tanstack/camas/beds/useConsumeBed";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function CamasPage() {
   const [selectedRoom, setSelectedRoom] = useState<number | null>(null); // ID de la habitación seleccionada (para editar cama)
@@ -47,9 +51,29 @@ export default function CamasPage() {
   const [isCreateBedOpen, setIsCreateBedOpen] = useState<boolean>(false); // crear cama
   const [isEditBedOpen, setIsEditBedOpen] = useState<boolean>(false); // editar/editar cama (BedEditModal)
 
+  const [servedBedIds, setServedBedIds] = useState<Set<number>>(new Set());
+
+  //Estados para diálogos de consumo de menú
   const [activeRoom, setActiveRoom] = useState<Room | null>(null);
+  const [consumeConfirmOpen, setConsumeConfirmOpen] = useState(false);
+  const [consumeTarget, setConsumeTarget] = useState<{
+    bedId: number;
+    bedMenuId: number;
+    menuName: string;
+    patientName?: string | null;
+    quantity?: number;
+  } | null>(null);
+
+  const queryClient = useQueryClient();
 
   const { data: beds } = useRooms();
+
+  const consumeMut = useConsumeBedMenu();
+
+  const { user } = useAuth();
+  const currentUserId = user?.user_id ?? 0;
+
+  const isConsuming = consumeMut.isPending;
 
   //abre el dialog de crear cama
   const openBedDialog = (room: Room) => {
@@ -66,8 +90,128 @@ export default function CamasPage() {
     setIsEditRoomOpen(true);
   };
 
+  const openConsumeConfirm = ({
+    bedId,
+    bedMenuId,
+    menuName,
+    patientName,
+    quantity = 1,
+  }: {
+    bedId: number;
+    bedMenuId: number;
+    menuName: string;
+    patientName?: string | null;
+    quantity?: number;
+  }) => {
+    setConsumeTarget({ bedId, bedMenuId, menuName, patientName, quantity });
+    setConsumeConfirmOpen(true);
+  };
+
+  const handleConfirmConsume = async () => {
+    if (!consumeTarget) return;
+    try {
+      const response = await consumeMut.mutateAsync({
+        bedMenuId: Number(consumeTarget.bedMenuId),
+        quantity: consumeTarget.quantity ?? 1,
+        userId: Number(currentUserId),
+        bedId: Number(consumeTarget.bedId),
+      });
+
+      const affectedBedId =
+        response && typeof (response as any).bedId === "number"
+          ? (response as any).bedId
+          : consumeTarget.bedId;
+      // feedback inmediato: marcar la cama como servida localmente
+      setServedBedIds((prev) => {
+        const next = new Set(prev);
+        if (typeof affectedBedId === "number") next.add(affectedBedId);
+        return next;
+      });
+      // cerrar modal
+      setConsumeConfirmOpen(false);
+      setConsumeTarget(null);
+      queryClient.invalidateQueries({ queryKey: ["rooms"] });
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { status?: number; data?: any } };
+      if (axiosErr?.response?.status === 409) {
+        toast.error(
+          axiosErr.response.data?.message ??
+            "El menú ya fue marcado como servido"
+        );
+        queryClient.invalidateQueries({ queryKey: ["rooms"] });
+        setConsumeConfirmOpen(false);
+        setConsumeTarget(null);
+        return;
+      }
+
+      console.error("Error consumiendo bedMenu:", err);
+      toast.error("Error al consumir menú");
+    }
+  };
+
+  useEffect(() => {
+    if (!beds || !Array.isArray(beds)) return;
+
+    const newServed = new Set<number>();
+    beds.forEach((room) => {
+      room.beds?.forEach((bed) => {
+        const current =
+          (bed as any).currentBedMenu ?? (bed as any).bedMenus?.[0] ?? null;
+
+        if (current?.consumed) {
+          newServed.add(bed.id);
+        }
+      });
+    });
+
+    setServedBedIds(newServed);
+  }, [beds]);
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Confirmación de consumo */}
+      <Dialog open={consumeConfirmOpen} onOpenChange={setConsumeConfirmOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirmar consumo de menú</DialogTitle>
+          </DialogHeader>
+
+          <div className="py-2">
+            <p className="text-sm text-muted-foreground">
+              ¿Confirmás consumir el siguiente menú y descontar stock?
+            </p>
+
+            <div className="mt-4">
+              <div className="text-sm font-medium">Menú</div>
+              <div className="text-base mb-2">
+                {consumeTarget?.menuName ?? "-"}
+              </div>
+
+              <div className="text-sm font-medium">Paciente</div>
+              <div className="text-base mb-2">
+                {consumeTarget?.patientName ?? "Paciente no disponible"}
+              </div>
+
+              <div className="text-sm font-medium">Cantidad</div>
+              <div className="text-base">{consumeTarget?.quantity ?? 1}</div>
+            </div>
+          </div>
+
+          <footer className="flex justify-end gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => setConsumeConfirmOpen(false)}
+              disabled={isConsuming}
+            >
+              Cancelar
+            </Button>
+            <Button onClick={handleConfirmConsume} disabled={isConsuming}>
+              {isConsuming ? "Consumiendo..." : "Confirmar y marcar servido"}
+            </Button>
+          </footer>
+        </DialogContent>
+      </Dialog>
+
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-6 gap-4">
@@ -202,7 +346,8 @@ export default function CamasPage() {
                         {room.beds.map((bed) => {
                           const hasPatient = bed.patients?.length > 0;
                           const patient = hasPatient ? bed.patients[0] : null;
-                          const bedMenu = bed.bedMenus?.[0];
+                          const bedMenu =
+                            bed.currentBedMenu ?? bed.bedMenus?.[0] ?? null;
 
                           return (
                             <div
@@ -229,8 +374,27 @@ export default function CamasPage() {
                                   </Badge>
                                 </div>
 
-                                {hasPatient && (
-                                  <Button size="sm" variant="outline">
+                                {(servedBedIds.has(bed.id) ||
+                                  !!bed?.currentBedMenu?.consumed) && (
+                                  <Badge className="bg-green-500 text-white">
+                                    Servido
+                                  </Badge>
+                                )}
+
+                                {/* Botón Marcar Servido (si hay una asignación activa no consumida) */}
+                                {bedMenu && !bedMenu.consumed && (
+                                  <Button
+                                    onClick={() =>
+                                      openConsumeConfirm({
+                                        bedId: bed.id,
+                                        bedMenuId: Number(bedMenu.id),
+                                        menuName: bedMenu.menu?.name ?? "Menú",
+                                        patientName:
+                                          bed.patients?.[0]?.name ?? null,
+                                        quantity: bedMenu.quantity ?? 1,
+                                      })
+                                    }
+                                  >
                                     Marcar Servido
                                   </Button>
                                 )}
@@ -302,7 +466,8 @@ export default function CamasPage() {
 
                                   {bedMenu ? (
                                     <div className="text-sm">
-                                      <strong>Menú:</strong> {bedMenu.menu.name}
+                                      <strong>Menú:</strong>{" "}
+                                      {bedMenu.menu?.name}
                                     </div>
                                   ) : (
                                     <Button variant={"outline"}>
@@ -363,6 +528,7 @@ export default function CamasPage() {
 
                                     <div className="mt-4">
                                       <BedEditModal
+                                        currentUserId={Number(currentUserId)}
                                         bed={bed}
                                         roomName={room.name}
                                         onClose={() => {

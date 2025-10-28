@@ -14,6 +14,17 @@ export interface Patient {
   currentStatus: PatientStatus | null;
 }
 
+export interface Menu {
+  id: number;
+  quantity: number;
+  name: string;
+  description: string;
+  menuTypeId: number;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Representa el menú asignado a una cama
 export interface BedMenu {
   id: number;
@@ -22,25 +33,19 @@ export interface BedMenu {
   quantity: number;
   assignedAt: string;
   consumed: boolean;
-  menu: {
-    id: number;
-    quantity: number;
-    name: string;
-    description: string;
-    menuTypeId: number;
-    active: boolean;
-    createdAt: string;
-    updatedAt: string;
-  };
+  menu: Menu;
 }
 
 // Representa una cama dentro de una habitación
 export interface Bed {
   id: number;
   name: string;
-  status: string; // ejemplo: "disponible", "ocupada", etc.
+  status: string;
   roomId: number;
-  bedMenus: BedMenu[];
+  // historial (opcional): puede no venir en GET /rooms (UI)
+  bedMenus?: BedMenu[];
+  // currentBedMenu: la asignación "activa" que el backend devuelve para la UI
+  currentBedMenu?: BedMenu | null;
   patients: Patient[];
 }
 

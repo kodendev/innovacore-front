@@ -70,6 +70,7 @@ export default function BedEditModal({
       description: "",
       menuId: bed.bedMenus?.[0]?.menu?.id?.toString() ?? "none",
       quantity: 1,
+      userId: currentUserId ?? null,
     },
   });
 
@@ -152,7 +153,7 @@ export default function BedEditModal({
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* SECCIÓN: CAMA */}
             <section>
-              <h4 className="text-sm font-medium mb-3">Cama</h4>
+              <h4 className="text-md font-bold mb-3">Cama</h4>
               <div className="grid grid-cols-1 gap-3">
                 <div>
                   <Label className="text-black">Nombre de la cama</Label>
@@ -193,7 +194,7 @@ export default function BedEditModal({
             {/* SECCIÓN: PACIENTE */}
             {hasPatient ? (
               <section className="pt-4 border-t">
-                <h4 className="text-sm font-medium mb-3">
+                <h4 className="text-md font-bold mb-3">
                   Paciente: {patient?.name}
                 </h4>
 
@@ -367,7 +368,7 @@ export default function BedEditModal({
 
             {/* SECCIÓN: MENÚ */}
             <section className="pt-4 border-t">
-              <h4 className="text-sm font-medium mb-3">Menú</h4>
+              <h4 className="text-md font-bold mb-3">Menú</h4>
 
               <div className="grid grid-cols-1 gap-3">
                 <div>

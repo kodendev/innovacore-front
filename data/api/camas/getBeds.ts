@@ -4,7 +4,7 @@ import axios from "axios";
 
 export const getBeds = async (): Promise<Room[]> => {
   try {
-    const response = await axios.get<Room[]>(`${BASE_URL}/rooms/overview`);
+    const response = await axios.get<Room[]>(`${BASE_URL}/rooms`);
     return response.data;
   } catch (error) {
     console.error("Error al obtener camas:", error);
