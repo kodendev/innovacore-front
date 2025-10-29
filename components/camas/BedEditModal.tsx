@@ -17,7 +17,8 @@ import { useUpdateBed } from "@/hooks/tanstack/camas/beds/useUpdateBed";
 import { useAssignBedMenu } from "@/hooks/tanstack/camas/beds/useAssignMenuToBed";
 import { useAssignPatientToBed } from "@/hooks/tanstack/camas/beds/useAssignPatientToBed";
 import { usePatients } from "@/hooks/tanstack/camas/patients/getPatients";
-import { Dialog } from "@/components/ui/dialog";
+import { Badge } from "../ui/badge";
+import { useQueryClient } from "@tanstack/react-query";
 
 type BedProps = {
   id: number;
@@ -54,6 +55,8 @@ export default function BedEditModal({
 
   const { data: patients, isLoading: patientsLoading } = usePatients();
   const assignPatientMut = useAssignPatientToBed();
+
+  const queryClient = useQueryClient();
 
   const {
     register,
@@ -137,6 +140,8 @@ export default function BedEditModal({
           quantity: Number(values.quantity) || 1,
         });
       }
+
+      queryClient.invalidateQueries({ queryKey: ["rooms"] });
 
       onSuccess?.();
       onClose();

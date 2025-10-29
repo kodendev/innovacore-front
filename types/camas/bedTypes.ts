@@ -12,6 +12,7 @@ export interface Patient {
   age: number;
   diagnosis: string;
   currentStatus: PatientStatus | null;
+  needsReview?: boolean | null;
 }
 
 export interface Menu {

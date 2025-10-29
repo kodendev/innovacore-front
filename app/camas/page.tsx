@@ -121,7 +121,6 @@ export default function CamasPage() {
         response && typeof (response as any).bedId === "number"
           ? (response as any).bedId
           : consumeTarget.bedId;
-      // feedback inmediato: marcar la cama como servida localmente
       setServedBedIds((prev) => {
         const next = new Set(prev);
         if (typeof affectedBedId === "number") next.add(affectedBedId);
@@ -374,29 +373,17 @@ export default function CamasPage() {
                                   </Badge>
                                 </div>
 
+                                {patient?.needsReview && (
+                                  <Badge className="bg-amber-400 text-white">
+                                    Modificado
+                                  </Badge>
+                                )}
+
                                 {(servedBedIds.has(bed.id) ||
                                   !!bed?.currentBedMenu?.consumed) && (
                                   <Badge className="bg-green-500 text-white">
                                     Servido
                                   </Badge>
-                                )}
-
-                                {/* Botón Marcar Servido (si hay una asignación activa no consumida) */}
-                                {bedMenu && !bedMenu.consumed && (
-                                  <Button
-                                    onClick={() =>
-                                      openConsumeConfirm({
-                                        bedId: bed.id,
-                                        bedMenuId: Number(bedMenu.id),
-                                        menuName: bedMenu.menu?.name ?? "Menú",
-                                        patientName:
-                                          bed.patients?.[0]?.name ?? null,
-                                        quantity: bedMenu.quantity ?? 1,
-                                      })
-                                    }
-                                  >
-                                    Marcar Servido
-                                  </Button>
                                 )}
                               </div>
 
@@ -482,6 +469,24 @@ export default function CamasPage() {
                               )}
 
                               {/* Botones para acciones */}
+                              {/* Botón Marcar Servido (si hay una asignación activa no consumida) */}
+                              {bedMenu && !bedMenu.consumed && (
+                                <Button
+                                  className="flex-1 w-full mt-2"
+                                  onClick={() =>
+                                    openConsumeConfirm({
+                                      bedId: bed.id,
+                                      bedMenuId: Number(bedMenu.id),
+                                      menuName: bedMenu.menu?.name ?? "Menú",
+                                      patientName:
+                                        bed.patients?.[0]?.name ?? null,
+                                      quantity: bedMenu.quantity ?? 1,
+                                    })
+                                  }
+                                >
+                                  Marcar Menú Servido
+                                </Button>
+                              )}
                               <div className="flex gap-2 mt-3">
                                 <Dialog
                                   open={
@@ -561,95 +566,3 @@ export default function CamasPage() {
     </div>
   );
 }
-
-// <TabsContent value="ordenes">
-//   <Card>
-//     <CardHeader>
-//       <div className="flex justify-between items-center">
-//         <div>
-//           <CardTitle>Órdenes de Pacientes</CardTitle>
-//           <CardDescription>
-//             Listado de todas las órdenes realizadas para pacientes
-//             internados
-//           </CardDescription>
-//         </div>
-//         <Dialog>
-//           <DialogTrigger asChild>
-//             <Button>
-//               <Plus className="h-4 w-4 mr-2" />
-//               Nueva Orden
-//             </Button>
-//           </DialogTrigger>
-//           <DialogContent className="max-w-md mx-4">
-//             <DialogHeader>
-//               <DialogTitle>Crear Nueva Orden</DialogTitle>
-//               <DialogDescription>
-//                 Complete los datos para crear una orden para un
-//                 paciente
-//               </DialogDescription>
-//             </DialogHeader>
-//             {/* <CreateNewOrderForm
-//               onCreateOrder={handleCreateNewOrder}
-//             /> */}
-//           </DialogContent>
-//         </Dialog>
-//       </div>
-//     </CardHeader>
-//     <CardContent>
-//       <div className="space-y-4">
-//         {orders.map((order) => (
-//           <div
-//             key={order.id}
-//             className={`border rounded-lg p-4 transition-colors ${
-//               order.status === "servido"
-//                 ? "bg-green-50 border-green-200"
-//                 : "bg-orange-50 border-orange-200"
-//             }`}
-//           >
-//             <div className="flex justify-between items-start mb-3">
-//               <div>
-//                 <div className="font-medium">
-//                   Orden #{order.id} - Habitación {order.room}, Cama{" "}
-//                   {order.bed}
-//                 </div>
-//                 <div className="text-sm text-gray-600">
-//                   Paciente: {order.patient} • {order.time}
-//                 </div>
-//               </div>
-//               <div className="flex items-center gap-2">
-//                 <Badge
-//                   variant={
-//                     order.status === "servido"
-//                       ? "default"
-//                       : "destructive"
-//                   }
-//                   className={
-//                     order.status === "servido"
-//                       ? "bg-green-100 text-green-800 border-green-200"
-//                       : "bg-orange-100 text-orange-800 border-orange-200"
-//                   }
-//                 >
-//                   {order.status === "servido"
-//                     ? "✓ Servido"
-//                     : "⏳ Pendiente"}
-//                 </Badge>
-//                 {order.status === "pendiente" && (
-//                   <Button size="sm">Marcar Servido</Button>
-//                 )}
-//               </div>
-//             </div>
-//             <div className="text-sm">
-//               <strong>Items:</strong>{" "}
-//               {order.items.map((item, index) => (
-//                 <span key={index}>
-//                   {item.name} x{item.qty}
-//                   {index < order.items.length - 1 ? ", " : ""}
-//                 </span>
-//               ))}
-//             </div>
-//           </div>
-//         ))}
-//       </div>
-//     </CardContent>
-//   </Card>
-// </TabsContent>

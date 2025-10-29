@@ -9,6 +9,7 @@ export type Patient = {
   age?: number | null;
   gender?: string | null;
   diagnosis?: string | null;
+  needsReview?: boolean | null;
   currentStatus?: {
     id: number;
     statusType: string;
