@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Card,
   CardContent,
@@ -19,7 +19,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bed, User, ArrowLeft, Plus } from "lucide-react";
+import { Bed, User, ArrowLeft, Plus, Divide } from "lucide-react";
 import Link from "next/link";
 import { useRooms } from "@/hooks/tanstack/camas/useBeds";
 import { CreateRoomForm } from "@/components/camas/CreateRoomForm";
@@ -39,6 +39,8 @@ import { useConsumeBedMenu } from "@/hooks/tanstack/camas/beds/useConsumeBed";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { useComponentView } from "@/hooks/useComponentView";
+import RoomsTable from "@/components/camas/RoomsTable";
 
 export default function CamasPage() {
   const [selectedRoom, setSelectedRoom] = useState<number | null>(null); // ID de la habitación seleccionada (para editar cama)
@@ -74,6 +76,8 @@ export default function CamasPage() {
   const currentUserId = user?.user_id ?? 0;
 
   const isConsuming = consumeMut.isPending;
+
+  const { componentView, toggleView } = useComponentView();
 
   //abre el dialog de crear cama
   const openBedDialog = (room: Room) => {
@@ -148,6 +152,38 @@ export default function CamasPage() {
     }
   };
 
+  const handleEditBed = (roomId: number, bedId: number) => {
+    console.log("Abriendo editor de habitacion");
+    const roomObj = (beds ?? []).find((r) => r.id === roomId);
+    if (!roomObj) {
+      console.warn("Room no encontrada para id", roomId);
+      return;
+    }
+
+    const bedObj = (roomObj.beds ?? []).find((b) => b.id === bedId);
+    if (!bedObj) {
+      console.warn("Bed no encontrada para id", bedId, "en room", roomId);
+      return;
+    }
+
+    // Asegurate de setear el selectedRoom también
+    setActiveRoom(roomObj);
+    setSelectedRoom(roomId); // <--- esta línea faltaba
+    setSelectedBed(bedId);
+    setIsCreateBedOpen(false);
+    setIsEditBedOpen(true);
+  };
+
+  const handleOpenConsumeConfirm = (payload: {
+    bedId: number;
+    bedMenuId: number;
+    menuName: string;
+    patientName?: string | null;
+    quantity?: number;
+  }) => {
+    openConsumeConfirm(payload); // tu función existente que setea consumeTarget y abre modal
+  };
+
   useEffect(() => {
     if (!beds || !Array.isArray(beds)) return;
 
@@ -165,6 +201,21 @@ export default function CamasPage() {
 
     setServedBedIds(newServed);
   }, [beds]);
+
+  const bedToEdit = useMemo(() => {
+    if (!selectedRoom || !selectedBed) return null;
+    const roomObj = (beds ?? []).find((r) => r.id === selectedRoom);
+    return roomObj?.beds?.find((b) => b.id === selectedBed) ?? null;
+  }, [beds, selectedRoom, selectedBed]);
+
+  useEffect(() => {
+    console.log("Modal state debug:", {
+      isEditBedOpen,
+      selectedRoom,
+      selectedBed,
+      bedToEdit,
+    });
+  }, [isEditBedOpen, selectedRoom, selectedBed, bedToEdit]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -291,274 +342,300 @@ export default function CamasPage() {
                 <TabsTrigger value="camas">Gestión de Camas</TabsTrigger>
                 <TabsTrigger value="ordenes">Órdenes de Pacientes</TabsTrigger>
               </TabsList>
-              <Button>Cambiar vista</Button>
+              <Button onClick={toggleView}>Cambiar vista</Button>
             </div>
             <TabsContent value="camas">
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                {beds?.map((room) => (
-                  <Card
-                    key={room.id}
-                    className="hover:shadow-lg transition-shadow"
-                  >
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Bed className="h-5 w-5" />
-                        {room.name}
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm">
-                              Acciones
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            align="end"
-                            className="bg-slate-200 mt-2 p-4 shadow-lg rounded-xl  text-sm gap-2 cursor-pointer font-medium"
-                          >
-                            <DropdownMenuItem
-                              className="px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 rounded-md cursor-pointer"
-                              onClick={() => openBedDialog(room)}
+              {!beds || beds.length === 0 ? (
+                <div className="rounded-md p-6 bg-yellow-50 border border-yellow-200 text-center">
+                  <p className="text-base font-medium text-yellow-800">
+                    No existen habitaciones o salas creadas.
+                  </p>
+                  <p className="mt-2 text-sm text-yellow-700">
+                    Crea una nueva habitación para empezar a gestionar camas.
+                  </p>
+                  <div className="mt-4">
+                    <Button onClick={() => setIsCreateRoomOpen(true)}>
+                      Crear habitación
+                    </Button>
+                  </div>
+                </div>
+              ) : componentView === "card" ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {beds?.map((room) => (
+                    <Card
+                      key={room.id}
+                      className="hover:shadow-lg transition-shadow"
+                    >
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bed className="h-5 w-5" />
+                          {room.name}
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                Acciones
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              align="end"
+                              className="bg-slate-200 mt-2 p-4 shadow-lg rounded-xl  text-sm gap-2 cursor-pointer font-medium"
                             >
-                              Asignar cama
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 rounded-md cursor-pointer"
-                              onClick={() => openEditDialog(room)}
-                            >
-                              Editar habitación
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </CardTitle>
+                              <DropdownMenuItem
+                                className="px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 rounded-md cursor-pointer"
+                                onClick={() => openBedDialog(room)}
+                              >
+                                Asignar cama
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 rounded-md cursor-pointer"
+                                onClick={() => openEditDialog(room)}
+                              >
+                                Editar habitación
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </CardTitle>
 
-                      <CardDescription>
-                        {
-                          room.beds.filter(
-                            (b) => b.patients && b.patients.length > 0
-                          ).length
-                        }{" "}
-                        de {room.beds.length} camas ocupadas
-                      </CardDescription>
-                    </CardHeader>
+                        <CardDescription>
+                          {
+                            room.beds.filter(
+                              (b) => b.patients && b.patients.length > 0
+                            ).length
+                          }{" "}
+                          de {room.beds.length} camas ocupadas
+                        </CardDescription>
+                      </CardHeader>
 
-                    <CardContent>
-                      <div className="space-y-4">
-                        {room.beds.map((bed) => {
-                          const hasPatient = bed.patients?.length > 0;
-                          const patient = hasPatient ? bed.patients[0] : null;
-                          const bedMenu =
-                            bed.currentBedMenu ?? bed.bedMenus?.[0] ?? null;
+                      <CardContent>
+                        <div className="space-y-4">
+                          {room.beds.map((bed) => {
+                            const hasPatient = bed.patients?.length > 0;
+                            const patient = hasPatient ? bed.patients[0] : null;
+                            const bedMenu =
+                              bed.currentBedMenu ?? bed.bedMenus?.[0] ?? null;
 
-                          return (
-                            <div
-                              key={bed.id}
-                              className={`border rounded-lg p-4 transition-colors ${
-                                hasPatient
-                                  ? "bg-orange-50 border-orange-200"
-                                  : "bg-gray-50 border-gray-200"
-                              }`}
-                            >
-                              <div className="flex justify-between items-start mb-2">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium">
-                                    {bed.name}
-                                  </span>
-                                  <Badge
-                                    className={
-                                      hasPatient
-                                        ? "bg-orange-100 text-orange-800 border-orange-200"
-                                        : "bg-gray-100 text-gray-800 border-gray-200"
-                                    }
-                                  >
-                                    {hasPatient ? "Ocupada" : "Libre"}
-                                  </Badge>
-                                </div>
-
-                                {patient?.needsReview && (
-                                  <Badge className="bg-amber-400 text-white">
-                                    Modificado
-                                  </Badge>
-                                )}
-
-                                {(servedBedIds.has(bed.id) ||
-                                  !!bed?.currentBedMenu?.consumed) && (
-                                  <Badge className="bg-green-500 text-white">
-                                    Servido
-                                  </Badge>
-                                )}
-                              </div>
-
-                              {hasPatient ? (
-                                <div className="space-y-2">
-                                  <div className="flex items-center gap-2 text-sm">
-                                    <User className="h-4 w-4" />
-                                    <span>{patient?.name}</span>
+                            return (
+                              <div
+                                key={bed.id}
+                                className={`border rounded-lg p-4 transition-colors ${
+                                  hasPatient
+                                    ? "bg-orange-50 border-orange-200"
+                                    : "bg-gray-50 border-gray-200"
+                                }`}
+                              >
+                                <div className="flex justify-between items-start mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium">
+                                      {bed.name}
+                                    </span>
+                                    <Badge
+                                      className={
+                                        hasPatient
+                                          ? "bg-orange-100 text-orange-800 border-orange-200"
+                                          : "bg-gray-100 text-gray-800 border-gray-200"
+                                      }
+                                    >
+                                      {hasPatient ? "Ocupada" : "Libre"}
+                                    </Badge>
                                   </div>
 
-                                  {patient?.currentStatus ? (
-                                    <div className="space-y-2 text-sm">
-                                      <div className="flex items-center gap-2">
-                                        <strong>Diagnóstico:</strong>
-                                        <Badge>{patient.diagnosis}</Badge>
-                                      </div>
-                                      <div className="flex items-center gap-2">
-                                        <strong>Estado:</strong>
-                                        <Badge
-                                          className={
-                                            patient.currentStatus.statusType ===
-                                            "internacion"
-                                              ? "bg-blue-100 text-blue-800 border-blue-200"
-                                              : patient.currentStatus
-                                                  .statusType === "alta"
-                                              ? "bg-green-100 text-green-800 border-green-200"
-                                              : "bg-gray-100 text-gray-800 border-gray-200"
-                                          }
-                                        >
-                                          {patient.currentStatus.statusType.toUpperCase()}
-                                        </Badge>
-                                      </div>
-                                      <div className="flex items-center gap-2">
-                                        <strong>Dieta:</strong>
-                                        <Badge
-                                          className={
-                                            patient.currentStatus.dietType ===
-                                            "liquida"
-                                              ? "bg-cyan-100 text-cyan-800 border-cyan-200"
-                                              : patient.currentStatus
-                                                  .dietType === "blanda"
-                                              ? "bg-amber-100 text-amber-800 border-amber-200"
-                                              : "bg-emerald-100 text-emerald-800 border-emerald-200"
-                                          }
-                                        >
-                                          {patient.currentStatus.dietType?.toUpperCase()}
-                                        </Badge>
-                                      </div>
-
-                                      {patient.currentStatus.notes &&
-                                      patient.currentStatus.notes !==
-                                        "string" ? (
-                                        <p className="text-gray-500 italic">
-                                          {patient.currentStatus.notes}
-                                        </p>
-                                      ) : (
-                                        <p className="text-gray-400 italic">
-                                          No hay notas del paciente
-                                        </p>
-                                      )}
-                                    </div>
-                                  ) : (
-                                    <div className="text-sm text-gray-500">
-                                      <span> Cama libre</span>
-                                    </div>
+                                  {patient?.needsReview && (
+                                    <Badge className="bg-amber-400 text-white">
+                                      Modificado
+                                    </Badge>
                                   )}
 
-                                  {bedMenu ? (
-                                    <div className="text-sm">
-                                      <strong>Menú:</strong>{" "}
-                                      {bedMenu.menu?.name}
-                                    </div>
-                                  ) : (
-                                    <Button variant={"outline"}>
-                                      Asignar menú
-                                    </Button>
+                                  {(servedBedIds.has(bed.id) ||
+                                    !!bed?.currentBedMenu?.consumed) && (
+                                    <Badge className="bg-green-500 text-white">
+                                      Servido
+                                    </Badge>
                                   )}
                                 </div>
-                              ) : (
-                                <div className="text-sm text-gray-500">
-                                  Cama libre
-                                </div>
-                              )}
 
-                              {/* Botones para acciones */}
-                              {/* Botón Marcar Servido (si hay una asignación activa no consumida) */}
-                              {bedMenu && !bedMenu.consumed && (
-                                <Button
-                                  className="flex-1 w-full mt-2"
-                                  onClick={() =>
-                                    openConsumeConfirm({
-                                      bedId: bed.id,
-                                      bedMenuId: Number(bedMenu.id),
-                                      menuName: bedMenu.menu?.name ?? "Menú",
-                                      patientName:
-                                        bed.patients?.[0]?.name ?? null,
-                                      quantity: bedMenu.quantity ?? 1,
-                                    })
-                                  }
-                                >
-                                  Marcar Menú Servido
-                                </Button>
-                              )}
-                              <div className="flex gap-2 mt-3">
-                                <Dialog
-                                  open={
-                                    isEditBedOpen &&
-                                    selectedRoom === room.id &&
-                                    selectedBed === bed.id
-                                  }
-                                  onOpenChange={(open) => {
-                                    setIsEditBedOpen(open);
-                                    if (!open) {
-                                      // limpiar selección al cerrar el diálogo de edición de cama
-                                      setSelectedRoom(null);
-                                      setSelectedBed(null);
+                                {hasPatient ? (
+                                  <div className="space-y-2">
+                                    <div className="flex items-center gap-2 text-sm">
+                                      <User className="h-4 w-4" />
+                                      <span>{patient?.name}</span>
+                                    </div>
+
+                                    {patient?.currentStatus ? (
+                                      <div className="space-y-2 text-sm">
+                                        <div className="flex items-center gap-2">
+                                          <strong>Diagnóstico:</strong>
+                                          <Badge variant={"destructive"}>
+                                            {patient.diagnosis}
+                                          </Badge>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <strong>Estado:</strong>
+                                          <Badge
+                                            className={
+                                              patient.currentStatus
+                                                .statusType === "internacion"
+                                                ? "bg-blue-100 text-blue-800 border-blue-200"
+                                                : patient.currentStatus
+                                                    .statusType === "alta"
+                                                ? "bg-green-100 text-green-800 border-green-200"
+                                                : "bg-gray-100 text-gray-800 border-gray-200"
+                                            }
+                                          >
+                                            {patient.currentStatus.statusType.toUpperCase()}
+                                          </Badge>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <strong>Dieta:</strong>
+                                          <Badge
+                                            className={
+                                              patient.currentStatus.dietType ===
+                                              "liquida"
+                                                ? "bg-cyan-100 text-cyan-800 border-cyan-200"
+                                                : patient.currentStatus
+                                                    .dietType === "blanda"
+                                                ? "bg-amber-100 text-amber-800 border-amber-200"
+                                                : "bg-emerald-100 text-emerald-800 border-emerald-200"
+                                            }
+                                          >
+                                            {patient.currentStatus.dietType?.toUpperCase()}
+                                          </Badge>
+                                        </div>
+
+                                        {patient.currentStatus.notes &&
+                                        patient.currentStatus.notes !==
+                                          "string" ? (
+                                          <p className="text-gray-500 italic">
+                                            {patient.currentStatus.notes}
+                                          </p>
+                                        ) : (
+                                          <p className="text-gray-400 italic">
+                                            No hay notas del paciente
+                                          </p>
+                                        )}
+                                      </div>
+                                    ) : (
+                                      <div className="text-sm text-gray-500">
+                                        <span> Cama libre</span>
+                                      </div>
+                                    )}
+
+                                    {bedMenu ? (
+                                      <div className="text-sm">
+                                        <strong>Menú:</strong>{" "}
+                                        {bedMenu.menu?.name}
+                                      </div>
+                                    ) : (
+                                      <Button variant={"outline"}>
+                                        Asignar menú
+                                      </Button>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <div className="text-sm text-gray-500">
+                                    Cama libre
+                                  </div>
+                                )}
+
+                                {/* Botones para acciones */}
+                                {/* Botón Marcar Servido (si hay una asignación activa no consumida) */}
+                                {bedMenu && !bedMenu.consumed && (
+                                  <Button
+                                    className="flex-1 w-full mt-2"
+                                    onClick={() =>
+                                      openConsumeConfirm({
+                                        bedId: bed.id,
+                                        bedMenuId: Number(bedMenu.id),
+                                        menuName: bedMenu.menu?.name ?? "Menú",
+                                        patientName:
+                                          bed.patients?.[0]?.name ?? null,
+                                        quantity: bedMenu.quantity ?? 1,
+                                      })
                                     }
-                                  }}
-                                >
-                                  <DialogTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="flex-1"
-                                      onClick={() => {
-                                        // al abrir edición, cerramos el modal de crear cama para evitar overlap
-                                        setIsCreateBedOpen(false);
-                                        setActiveRoom(null); // no necesitamos activeRoom cuando editamos una cama ya existente
-                                        setSelectedRoom(room.id);
-                                        setSelectedBed(bed.id);
-                                        setIsEditBedOpen(true);
-                                      }}
-                                    >
-                                      Editar Cama
-                                    </Button>
-                                  </DialogTrigger>
-                                  <DialogContent className="max-w-md mx-4">
-                                    <DialogHeader>
-                                      <DialogTitle>
-                                        Editar Cama y Paciente
-                                      </DialogTitle>
-                                      <DialogDescription>
-                                        Cama : {bed.name} - Paciente:{" "}
-                                        {patient?.name}
-                                      </DialogDescription>
-                                    </DialogHeader>
-
-                                    <div className="mt-4">
-                                      <BedEditModal
-                                        currentUserId={Number(currentUserId)}
-                                        bed={bed}
-                                        roomName={room.name}
-                                        onClose={() => {
-                                          setIsEditBedOpen(false);
-                                          setSelectedRoom(null);
-                                          setSelectedBed(null);
+                                  >
+                                    Marcar Menú Servido
+                                  </Button>
+                                )}
+                                <div className="flex gap-2 mt-3">
+                                  <Dialog
+                                    open={
+                                      isEditBedOpen &&
+                                      selectedRoom === room.id &&
+                                      selectedBed === bed.id
+                                    }
+                                    onOpenChange={(open) => {
+                                      setIsEditBedOpen(open);
+                                      if (!open) {
+                                        // limpiar selección al cerrar el diálogo de edición de cama
+                                        setSelectedRoom(null);
+                                        setSelectedBed(null);
+                                      }
+                                    }}
+                                  >
+                                    <DialogTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="flex-1"
+                                        onClick={() => {
+                                          // al abrir edición, cerramos el modal de crear cama para evitar overlap
+                                          setIsCreateBedOpen(false);
+                                          setActiveRoom(null); // no necesitamos activeRoom cuando editamos una cama ya existente
+                                          setSelectedRoom(room.id);
+                                          setSelectedBed(bed.id);
+                                          setIsEditBedOpen(true);
                                         }}
-                                        isOpen={
-                                          isEditBedOpen &&
-                                          selectedRoom === room.id &&
-                                          selectedBed === bed.id
-                                        }
-                                      />
-                                    </div>
-                                  </DialogContent>
-                                </Dialog>
+                                      >
+                                        Editar Cama
+                                      </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-md mx-4">
+                                      <DialogHeader>
+                                        <DialogTitle>
+                                          Editar Cama y Paciente
+                                        </DialogTitle>
+                                        <DialogDescription>
+                                          Cama : {bed.name} - Paciente:{" "}
+                                          {patient?.name}
+                                        </DialogDescription>
+                                      </DialogHeader>
+
+                                      <div className="mt-4">
+                                        <BedEditModal
+                                          currentUserId={Number(currentUserId)}
+                                          bed={bed}
+                                          roomName={room.name}
+                                          onClose={() => {
+                                            setIsEditBedOpen(false);
+                                            setSelectedRoom(null);
+                                            setSelectedBed(null);
+                                          }}
+                                          isOpen={
+                                            isEditBedOpen &&
+                                            selectedRoom === room.id &&
+                                            selectedBed === bed.id
+                                          }
+                                        />
+                                      </div>
+                                    </DialogContent>
+                                  </Dialog>
+                                </div>
                               </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                            );
+                          })}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <RoomsTable
+                  rooms={beds ?? []}
+                  servedBedIds={servedBedIds}
+                  onOpenConsumeConfirm={handleOpenConsumeConfirm} // espera payload
+                  onAssignBed={(r) => openBedDialog(r as unknown as Room)}
+                  onEditRoom={(r) => openEditDialog(r as unknown as Room)}
+                />
+              )}
             </TabsContent>
           </Tabs>
         </div>

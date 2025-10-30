@@ -20,10 +20,10 @@ import { usePatients } from "@/hooks/tanstack/camas/patients/getPatients";
 import { Badge } from "../ui/badge";
 import { useQueryClient } from "@tanstack/react-query";
 
-type BedProps = {
+export type BedProps = {
   id: number;
   name?: string;
-  roomId?: number;
+  roomId?: number | null;
   status?: "disponible" | "ocupada" | "mantenimiento" | string;
   patients?: Array<{ id: number; name?: string }>;
   bedMenus?: Array<{ id: number; menu: { id: number; name: string } }>;
