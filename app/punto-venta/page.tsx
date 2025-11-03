@@ -1,11 +1,23 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -13,9 +25,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { ShoppingCart, Plus, Minus, CreditCard, DollarSign, ArrowLeft, Receipt } from "lucide-react"
-import Link from "next/link"
+} from "@/components/ui/dialog";
+import {
+  ShoppingCart,
+  Plus,
+  Minus,
+  CreditCard,
+  DollarSign,
+  ArrowLeft,
+  Receipt,
+} from "lucide-react";
+import Link from "next/link";
 
 const menus = [
   {
@@ -96,7 +116,7 @@ const menus = [
       { name: "Queso", qty: 30 },
     ],
   },
-]
+];
 
 const bebidas = [
   {
@@ -141,7 +161,7 @@ const bebidas = [
     price: 280,
     type: "bebida",
   },
-]
+];
 
 const initialSales = [
   {
@@ -193,66 +213,70 @@ const initialSales = [
     time: "14:00",
     customer: "Visitante",
   },
-]
+];
 
 export default function PuntoVentaPage() {
-  const [cart, setCart] = useState([])
-  const [sales, setSales] = useState(initialSales)
-  const [selectedMenuId, setSelectedMenuId] = useState("")
-  const [selectedBebidaId, setSelectedBebidaId] = useState("")
-  const [paymentMethod, setPaymentMethod] = useState("")
-  const [customerType, setCustomerType] = useState("")
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
+  const [cart, setCart] = useState([]);
+  const [sales, setSales] = useState(initialSales);
+  const [selectedMenuId, setSelectedMenuId] = useState("");
+  const [selectedBebidaId, setSelectedBebidaId] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [customerType, setCustomerType] = useState("");
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   const addToCart = (itemId, type = "menu") => {
     const item =
       type === "bebida"
         ? bebidas.find((b) => b.id === Number.parseInt(itemId))
-        : menus.find((m) => m.id === Number.parseInt(itemId))
+        : menus.find((m) => m.id === Number.parseInt(itemId));
 
-    if (!item) return
+    if (!item) return;
 
     setCart((prev) => {
-      const existing = prev.find((cartItem) => cartItem.id === item.id)
+      const existing = prev.find((cartItem) => cartItem.id === item.id);
       if (existing) {
         return prev.map((cartItem) =>
-          cartItem.id === item.id ? { ...cartItem, quantity: cartItem.quantity + 1 } : cartItem,
-        )
+          cartItem.id === item.id
+            ? { ...cartItem, quantity: cartItem.quantity + 1 }
+            : cartItem
+        );
       }
-      return [...prev, { ...item, quantity: 1 }]
-    })
+      return [...prev, { ...item, quantity: 1 }];
+    });
 
     if (type === "bebida") {
-      setSelectedBebidaId("")
+      setSelectedBebidaId("");
     } else {
-      setSelectedMenuId("")
+      setSelectedMenuId("");
     }
-  }
+  };
 
   const removeFromCart = (itemId) => {
     setCart((prev) => {
-      const existing = prev.find((item) => item.id === itemId)
+      const existing = prev.find((item) => item.id === itemId);
       if (existing && existing.quantity > 1) {
-        return prev.map((item) => (item.id === itemId ? { ...item, quantity: item.quantity - 1 } : item))
+        return prev.map((item) =>
+          item.id === itemId ? { ...item, quantity: item.quantity - 1 } : item
+        );
       }
-      return prev.filter((item) => item.id !== itemId)
-    })
-  }
+      return prev.filter((item) => item.id !== itemId);
+    });
+  };
 
   const clearCart = () => {
-    setCart([])
-  }
+    setCart([]);
+  };
 
   const getCartTotal = () => {
-    return cart.reduce((total, item) => total + item.price * item.quantity, 0)
-  }
+    return cart.reduce((total, item) => total + item.price * item.quantity, 0);
+  };
 
   const getTotalSales = () => {
-    return sales.reduce((total, sale) => total + sale.total, 0)
-  }
+    return sales.reduce((total, sale) => total + sale.total, 0);
+  };
 
   const processPayment = () => {
-    if (!paymentMethod || !customerType) return
+    if (!paymentMethod || !customerType) return;
 
     const newSale = {
       id: sales.length + 1,
@@ -263,22 +287,25 @@ export default function PuntoVentaPage() {
       })),
       total: getCartTotal(),
       paymentMethod,
-      time: new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }),
+      time: new Date().toLocaleTimeString("es-AR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
       customer: customerType,
-    }
+    };
 
-    setSales((prev) => [newSale, ...prev])
-    clearCart()
-    setPaymentMethod("")
-    setCustomerType("")
-    setIsCheckoutOpen(false)
+    setSales((prev) => [newSale, ...prev]);
+    clearCart();
+    setPaymentMethod("");
+    setCustomerType("");
+    setIsCheckoutOpen(false);
 
     // Aquí se actualizaría el stock automáticamente
-    console.log("Actualizando stock por venta:", newSale)
-  }
+    console.log("Actualizando stock por venta:", newSale);
+  };
 
-  const todaySales = getTotalSales()
-  const todayOrders = sales.length
+  const todaySales = getTotalSales();
+  const todayOrders = sales.length;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -292,12 +319,16 @@ export default function PuntoVentaPage() {
                   Volver
                 </Button>
               </Link>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Punto de Venta</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+                Punto de Venta
+              </h1>
             </div>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <div className="text-right">
                 <div className="text-sm text-gray-600">Ventas Hoy</div>
-                <div className="text-lg font-semibold">${todaySales.toLocaleString()}</div>
+                <div className="text-lg font-semibold">
+                  ${todaySales.toLocaleString()}
+                </div>
               </div>
               <div className="text-right">
                 <div className="text-sm text-gray-600">Órdenes</div>
@@ -317,12 +348,17 @@ export default function PuntoVentaPage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Agregar Menú</CardTitle>
-                  <CardDescription>Seleccione un menú para agregar al pedido</CardDescription>
+                  <CardDescription>
+                    Seleccione un menú para agregar al pedido
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <Label htmlFor="menu-select">Seleccionar Menú</Label>
-                    <Select value={selectedMenuId} onValueChange={setSelectedMenuId}>
+                    <Select
+                      value={selectedMenuId}
+                      onValueChange={setSelectedMenuId}
+                    >
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Elegir menú..." />
                       </SelectTrigger>
@@ -331,7 +367,9 @@ export default function PuntoVentaPage() {
                           <SelectItem key={menu.id} value={menu.id.toString()}>
                             <div className="flex justify-between items-center w-full">
                               <span>{menu.name}</span>
-                              <span className="ml-4 font-semibold">${menu.price}</span>
+                              <span className="ml-4 font-semibold">
+                                ${menu.price}
+                              </span>
                             </div>
                           </SelectItem>
                         ))}
@@ -356,7 +394,11 @@ export default function PuntoVentaPage() {
                           .find((m) => m.id === Number.parseInt(selectedMenuId))
                           ?.ingredients.map(
                             (ing) =>
-                              `${ing.name} (${ing.qty}${typeof ing.qty === "number" && ing.qty < 10 ? "u" : "g"})`,
+                              `${ing.name} (${ing.qty}${
+                                typeof ing.qty === "number" && ing.qty < 10
+                                  ? "u"
+                                  : "g"
+                              })`
                           )
                           .join(", ")}
                       </div>
@@ -369,21 +411,31 @@ export default function PuntoVentaPage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Agregar Bebida</CardTitle>
-                  <CardDescription>Seleccione una bebida para agregar al pedido</CardDescription>
+                  <CardDescription>
+                    Seleccione una bebida para agregar al pedido
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <Label htmlFor="bebida-select">Seleccionar Bebida</Label>
-                    <Select value={selectedBebidaId} onValueChange={setSelectedBebidaId}>
+                    <Select
+                      value={selectedBebidaId}
+                      onValueChange={setSelectedBebidaId}
+                    >
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Elegir bebida..." />
                       </SelectTrigger>
                       <SelectContent>
                         {bebidas.map((bebida) => (
-                          <SelectItem key={bebida.id} value={bebida.id.toString()}>
+                          <SelectItem
+                            key={bebida.id}
+                            value={bebida.id.toString()}
+                          >
                             <div className="flex justify-between items-center w-full">
                               <span>{bebida.name}</span>
-                              <span className="ml-4 font-semibold">${bebida.price}</span>
+                              <span className="ml-4 font-semibold">
+                                ${bebida.price}
+                              </span>
                             </div>
                           </SelectItem>
                         ))}
@@ -414,11 +466,16 @@ export default function PuntoVentaPage() {
                 </CardHeader>
                 <CardContent>
                   {cart.length === 0 ? (
-                    <div className="text-center text-gray-500 py-8">No hay items en el pedido</div>
+                    <div className="text-center text-gray-500 py-8">
+                      No hay items en el pedido
+                    </div>
                   ) : (
                     <div className="space-y-4">
                       {cart.map((item) => (
-                        <div key={item.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <div
+                          key={item.id}
+                          className="flex justify-between items-center p-3 bg-gray-50 rounded-lg"
+                        >
                           <div className="flex-1">
                             <div className="font-medium flex items-center gap-2">
                               {item.name}
@@ -428,22 +485,37 @@ export default function PuntoVentaPage() {
                                 </Badge>
                               )}
                             </div>
-                            <div className="text-sm text-gray-600">${item.price} c/u</div>
+                            <div className="text-sm text-gray-600">
+                              ${item.price} c/u
+                            </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Button size="sm" variant="outline" onClick={() => removeFromCart(item.id)}>
-                              <Minus className="h-3 w-3" />
-                            </Button>
-                            <span className="w-8 text-center">{item.quantity}</span>
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => addToCart(item.id.toString(), item.type || "menu")}
+                              onClick={() => removeFromCart(item.id)}
+                            >
+                              <Minus className="h-3 w-3" />
+                            </Button>
+                            <span className="w-8 text-center">
+                              {item.quantity}
+                            </span>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() =>
+                                addToCart(
+                                  item.id.toString(),
+                                  item.type || "menu"
+                                )
+                              }
                             >
                               <Plus className="h-3 w-3" />
                             </Button>
                           </div>
-                          <div className="ml-4 font-semibold">${(item.price * item.quantity).toLocaleString()}</div>
+                          <div className="ml-4 font-semibold">
+                            ${(item.price * item.quantity).toLocaleString()}
+                          </div>
                         </div>
                       ))}
 
@@ -455,11 +527,18 @@ export default function PuntoVentaPage() {
                       </div>
 
                       <div className="flex gap-2">
-                        <Button variant="outline" onClick={clearCart} className="flex-1">
+                        <Button
+                          variant="outline"
+                          onClick={clearCart}
+                          className="flex-1"
+                        >
                           Limpiar Pedido
                         </Button>
 
-                        <Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>
+                        <Dialog
+                          open={isCheckoutOpen}
+                          onOpenChange={setIsCheckoutOpen}
+                        >
                           <DialogTrigger asChild>
                             <Button className="flex-1">
                               <CreditCard className="h-4 w-4 mr-2" />
@@ -469,33 +548,54 @@ export default function PuntoVentaPage() {
                           <DialogContent>
                             <DialogHeader>
                               <DialogTitle>Procesar Pago</DialogTitle>
-                              <DialogDescription>Total a cobrar: ${getCartTotal().toLocaleString()}</DialogDescription>
+                              <DialogDescription>
+                                Total a cobrar: $
+                                {getCartTotal().toLocaleString()}
+                              </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4">
                               <div>
                                 <Label>Tipo de Cliente</Label>
-                                <Select value={customerType} onValueChange={setCustomerType}>
+                                <Select
+                                  value={customerType}
+                                  onValueChange={setCustomerType}
+                                >
                                   <SelectTrigger>
                                     <SelectValue placeholder="Seleccione tipo de cliente" />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="Empleado">Empleado</SelectItem>
-                                    <SelectItem value="Visitante">Visitante</SelectItem>
-                                    <SelectItem value="Proveedor">Proveedor</SelectItem>
+                                    <SelectItem value="Empleado">
+                                      Empleado
+                                    </SelectItem>
+                                    <SelectItem value="Visitante">
+                                      Visitante
+                                    </SelectItem>
+                                    <SelectItem value="Proveedor">
+                                      Proveedor
+                                    </SelectItem>
                                   </SelectContent>
                                 </Select>
                               </div>
 
                               <div>
                                 <Label>Método de Pago</Label>
-                                <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                                <Select
+                                  value={paymentMethod}
+                                  onValueChange={setPaymentMethod}
+                                >
                                   <SelectTrigger>
                                     <SelectValue placeholder="Seleccione método de pago" />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="Efectivo">Efectivo</SelectItem>
-                                    <SelectItem value="Tarjeta">Tarjeta de Débito/Crédito</SelectItem>
-                                    <SelectItem value="Transferencia">Transferencia</SelectItem>
+                                    <SelectItem value="Efectivo">
+                                      Efectivo
+                                    </SelectItem>
+                                    <SelectItem value="Tarjeta">
+                                      Tarjeta de Débito/Crédito
+                                    </SelectItem>
+                                    <SelectItem value="Transferencia">
+                                      Transferencia
+                                    </SelectItem>
                                   </SelectContent>
                                 </Select>
                               </div>
@@ -530,7 +630,10 @@ export default function PuntoVentaPage() {
             <CardContent>
               <div className="space-y-4">
                 {sales.map((sale) => (
-                  <div key={sale.id} className="border rounded-lg p-4 bg-gray-50">
+                  <div
+                    key={sale.id}
+                    className="border rounded-lg p-4 bg-gray-50"
+                  >
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <div className="font-medium">Venta #{sale.id}</div>
@@ -539,7 +642,9 @@ export default function PuntoVentaPage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-semibold">${sale.total.toLocaleString()}</div>
+                        <div className="font-semibold">
+                          ${sale.total.toLocaleString()}
+                        </div>
                         <Badge variant="outline">{sale.paymentMethod}</Badge>
                       </div>
                     </div>
@@ -559,11 +664,17 @@ export default function PuntoVentaPage() {
                   <div className="flex justify-between items-center bg-blue-50 p-4 rounded-lg">
                     <div>
                       <div className="font-semibold text-lg">Total del Día</div>
-                      <div className="text-sm text-gray-600">{sales.length} ventas realizadas</div>
+                      <div className="text-sm text-gray-600">
+                        {sales.length} ventas realizadas
+                      </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-blue-600">${todaySales.toLocaleString()}</div>
-                      <div className="text-sm text-gray-600">Ingresos totales</div>
+                      <div className="text-2xl font-bold text-blue-600">
+                        ${todaySales.toLocaleString()}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Ingresos totales
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -573,5 +684,5 @@ export default function PuntoVentaPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }

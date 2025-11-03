@@ -17,25 +17,14 @@ import { initialIngredients, suppliers } from "@/data/fakeData";
 import { Ingredient } from "@/types/types";
 import { InventoryTab } from "@/components/stockTabs/InventoryTab";
 import { SuppliersTab } from "@/components/stockTabs/SuppliersTab";
-import { ReportsTab } from "@/components/stockTabs/ReportsTab";
 import { AddIngredientForm } from "@/components/forms/AddIngredientForm";
-import MenuTab from "@/components/stockTabs/MenuTab";
 import StockPredictionsTab from "@/components/stockTabs/PredictionsTab";
 import SmartPredictionTab from "@/components/stockTabs/SmartPredictionsTab";
 import { ExpirationsTab } from "@/components/stockTabs/ExpirationsTab";
 import StockMovements from "@/components/stockTabs/StockMovements";
 
-type NewIngredient = Omit<Ingredient, "id" | "status">;
-
 export default function InventarioPage() {
-  const [ingredients, setIngredients] =
-    useState<Ingredient[]>(initialIngredients);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-
-  const updateStock = (id: number, newQuantity: number): void => {
-    console.log("Actualizando stock");
-    //EJECUTAR PUT CON NUEVO STOCK
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">

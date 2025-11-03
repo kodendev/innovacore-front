@@ -1,12 +1,15 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { useEffect, useMemo, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -14,228 +17,258 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Bed, User, Clock, ArrowLeft, Plus, ShoppingCart } from "lucide-react"
-import Link from "next/link"
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Bed, User, ArrowLeft, Plus, Divide, Delete } from "lucide-react";
+import Link from "next/link";
+import { useRooms } from "@/hooks/tanstack/camas/useBeds";
+import { CreateRoomForm } from "@/components/camas/CreateRoomForm";
 
-const menus = [
-  {
-    id: 1,
-    name: "Pastel de Papa",
-    ingredients: [
-      { name: "Carne", qty: 300 },
-      { name: "Papa", qty: 200 },
-      { name: "Queso", qty: 50 },
-    ],
-  },
-  {
-    id: 2,
-    name: "Pollo Grillado",
-    ingredients: [
-      { name: "Pollo", qty: 250 },
-      { name: "Arroz", qty: 150 },
-      { name: "Verduras", qty: 100 },
-    ],
-  },
-  {
-    id: 3,
-    name: "Pescado al Horno",
-    ingredients: [
-      { name: "Pescado", qty: 200 },
-      { name: "Papa", qty: 150 },
-      { name: "Limón", qty: 20 },
-    ],
-  },
-  {
-    id: 4,
-    name: "Ensalada César",
-    ingredients: [
-      { name: "Lechuga", qty: 100 },
-      { name: "Pollo", qty: 150 },
-      { name: "Queso", qty: 30 },
-    ],
-  },
-  {
-    id: 5,
-    name: "Milanesa",
-    ingredients: [
-      { name: "Carne", qty: 200 },
-      { name: "Pan rallado", qty: 50 },
-      { name: "Huevo", qty: 1 },
-    ],
-  },
-]
-
-const bebidas = [
-  { id: 101, name: "Agua Mineral" },
-  { id: 102, name: "Gaseosa 500ml" },
-  { id: 103, name: "Jugo Natural" },
-  { id: 104, name: "Café" },
-  { id: 105, name: "Té" },
-]
-
-const initialRooms = [
-  {
-    room: 101,
-    beds: [
-      { bed: 1, patient: "Juan Pérez", menu: "Pastel de Papa", time: "12:30", status: "servido" },
-      { bed: 2, patient: "María García", menu: "Pollo Grillado", time: "12:45", status: "pendiente" },
-    ],
-  },
-  {
-    room: 102,
-    beds: [
-      { bed: 1, patient: "Carlos López", menu: "Pescado al Horno", time: "13:00", status: "pendiente" },
-      { bed: 2, patient: null, menu: null, time: null, status: "libre" },
-    ],
-  },
-  {
-    room: 103,
-    beds: [
-      { bed: 1, patient: "Ana Martín", menu: "Ensalada César", time: "12:15", status: "servido" },
-      { bed: 2, patient: "Luis Rodríguez", menu: "Milanesa", time: "13:15", status: "pendiente" },
-    ],
-  },
-]
-
-const initialOrders = [
-  {
-    id: 1,
-    room: 101,
-    bed: 1,
-    patient: "Juan Pérez",
-    items: [
-      { name: "Pastel de Papa", qty: 1 },
-      { name: "Agua Mineral", qty: 1 },
-    ],
-    time: "12:30",
-    status: "servido",
-    type: "paciente",
-  },
-  {
-    id: 2,
-    room: 102,
-    bed: 1,
-    patient: "Carlos López",
-    items: [
-      { name: "Pescado al Horno", qty: 1 },
-      { name: "Té", qty: 1 },
-    ],
-    time: "13:00",
-    status: "pendiente",
-    type: "paciente",
-  },
-]
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@radix-ui/react-dropdown-menu";
+import { CreateBedForm } from "@/components/camas/beds/CreateBedForm";
+import { Room } from "@/types/camas/bedTypes";
+import { EditRoomForm } from "@/components/camas/EditRoomForm";
+import { GenericDialog } from "@/components/generals/GenericDialog";
+import BedEditModal from "@/components/camas/BedEditModal";
+import { useConsumeBedMenu } from "@/hooks/tanstack/camas/beds/useConsumeBed";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { useComponentView } from "@/hooks/useComponentView";
+import RoomsTable from "@/components/camas/RoomsTable";
+import DeleteRoomForm from "@/components/camas/DeleteRoomForm";
 
 export default function CamasPage() {
-  const [rooms, setRooms] = useState(initialRooms)
-  const [orders, setOrders] = useState(initialOrders)
-  const [selectedRoom, setSelectedRoom] = useState(null)
-  const [selectedBed, setSelectedBed] = useState(null)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false)
+  const [selectedRoom, setSelectedRoom] = useState<number | null>(null); // ID de la habitación seleccionada (para editar cama)
+  const [selectedBed, setSelectedBed] = useState<number | null>(null); // ID de la cama seleccionada (para editar cama)
 
-  const handleAssignMenu = (roomNum, bedNum, patientName, menuId, time) => {
-    const menu = menus.find((m) => m.id === Number.parseInt(menuId))
-    setRooms((prev) =>
-      prev.map((room) => {
-        if (room.room === roomNum) {
-          return {
-            ...room,
-            beds: room.beds.map((bed) => {
-              if (bed.bed === bedNum) {
-                return {
-                  ...bed,
-                  patient: patientName,
-                  menu: menu?.name,
-                  time: time,
-                  status: "pendiente",
-                }
-              }
-              return bed
-            }),
-          }
-        }
-        return room
-      }),
-    )
-    setIsDialogOpen(false)
-  }
+  const [isCreateRoomOpen, setIsCreateRoomOpen] = useState<boolean>(false); // crear habitación
+  const [isEditRoomOpen, setIsEditRoomOpen] = useState<boolean>(false); // editar habitación
+  const [isDeleteRoomOpen, setIsDeleteRoomOpen] = useState<boolean>(false); //eliminar habitación
 
-  const handleCreateOrder = (roomNum, bedNum, patientName, orderItems) => {
-    const newOrder = {
-      id: orders.length + 1,
-      room: roomNum,
-      bed: bedNum,
-      patient: patientName,
-      items: orderItems,
-      time: new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }),
-      status: "pendiente",
-      type: "paciente",
+  // Estados separados para camas
+  const [isCreateBedOpen, setIsCreateBedOpen] = useState<boolean>(false); // crear cama
+  const [isEditBedOpen, setIsEditBedOpen] = useState<boolean>(false); // editar/editar cama (BedEditModal)
+
+  const [servedBedIds, setServedBedIds] = useState<Set<number>>(new Set());
+
+  //Estados para diálogos de consumo de menú
+  const [activeRoom, setActiveRoom] = useState<Room | null>(null);
+  const [consumeConfirmOpen, setConsumeConfirmOpen] = useState(false);
+  const [consumeTarget, setConsumeTarget] = useState<{
+    bedId: number;
+    bedMenuId: number;
+    menuName: string;
+    patientName?: string | null;
+    quantity?: number;
+  } | null>(null);
+
+  const queryClient = useQueryClient();
+
+  const { data: beds } = useRooms();
+
+  const consumeMut = useConsumeBedMenu();
+
+  const { user } = useAuth();
+  const currentUserId = user?.user_id ?? 0;
+
+  const isConsuming = consumeMut.isPending;
+
+  const { componentView, toggleView } = useComponentView();
+
+  //abre el dialog de crear cama
+  const openBedRoomDialog = (room: Room) => {
+    setActiveRoom(room);
+    setIsEditBedOpen(false);
+    setSelectedRoom(null);
+    setSelectedBed(null);
+    setIsCreateBedOpen(true);
+  };
+
+  //edita la habitacion
+  const openEditRoomDialog = (room: Room) => {
+    setActiveRoom(room);
+    setIsEditRoomOpen(true);
+  };
+
+  const openDeleteRoomDialog = (room: Room) => {
+    setActiveRoom(room);
+    setIsDeleteRoomOpen(true);
+  };
+
+  const openConsumeConfirm = ({
+    bedId,
+    bedMenuId,
+    menuName,
+    patientName,
+    quantity = 1,
+  }: {
+    bedId: number;
+    bedMenuId: number;
+    menuName: string;
+    patientName?: string | null;
+    quantity?: number;
+  }) => {
+    setConsumeTarget({ bedId, bedMenuId, menuName, patientName, quantity });
+    setConsumeConfirmOpen(true);
+  };
+
+  const handleConfirmConsume = async () => {
+    if (!consumeTarget) return;
+    try {
+      const response = await consumeMut.mutateAsync({
+        bedMenuId: Number(consumeTarget.bedMenuId),
+        quantity: consumeTarget.quantity ?? 1,
+        userId: Number(currentUserId),
+        bedId: Number(consumeTarget.bedId),
+      });
+
+      const affectedBedId =
+        response && typeof (response as any).bedId === "number"
+          ? (response as any).bedId
+          : consumeTarget.bedId;
+      setServedBedIds((prev) => {
+        const next = new Set(prev);
+        if (typeof affectedBedId === "number") next.add(affectedBedId);
+        return next;
+      });
+      // cerrar modal
+      setConsumeConfirmOpen(false);
+      setConsumeTarget(null);
+      queryClient.invalidateQueries({ queryKey: ["rooms"] });
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { status?: number; data?: any } };
+      if (axiosErr?.response?.status === 409) {
+        toast.error(
+          axiosErr.response.data?.message ??
+            "El menú ya fue marcado como servido"
+        );
+        queryClient.invalidateQueries({ queryKey: ["rooms"] });
+        setConsumeConfirmOpen(false);
+        setConsumeTarget(null);
+        return;
+      }
+
+      console.error("Error consumiendo bedMenu:", err);
+      toast.error("Error al consumir menú");
+    }
+  };
+
+  const handleEditBed = (roomId: number, bedId: number) => {
+    console.log("Abriendo editor de habitacion");
+    const roomObj = (beds ?? []).find((r) => r.id === roomId);
+    if (!roomObj) {
+      console.warn("Room no encontrada para id", roomId);
+      return;
     }
 
-    setOrders((prev) => [newOrder, ...prev])
-    setIsOrderDialogOpen(false)
-  }
-
-  const markAsServed = (roomNum, bedNum) => {
-    setRooms((prev) =>
-      prev.map((room) => {
-        if (room.room === roomNum) {
-          return {
-            ...room,
-            beds: room.beds.map((bed) => {
-              if (bed.bed === bedNum) {
-                return { ...bed, status: "servido" }
-              }
-              return bed
-            }),
-          }
-        }
-        return room
-      }),
-    )
-
-    // También actualizar el estado de la orden
-    setOrders((prev) =>
-      prev.map((order) => {
-        if (order.room === roomNum && order.bed === bedNum && order.status === "pendiente") {
-          return { ...order, status: "servido" }
-        }
-        return order
-      }),
-    )
-  }
-
-  const markOrderAsServed = (orderId) => {
-    setOrders((prev) =>
-      prev.map((order) => {
-        if (order.id === orderId) {
-          return { ...order, status: "servido" }
-        }
-        return order
-      }),
-    )
-  }
-
-  const handleCreateNewOrder = (orderData) => {
-    const newOrder = {
-      id: orders.length + 1,
-      room: Number.parseInt(orderData.room),
-      bed: Number.parseInt(orderData.bed),
-      patient: orderData.patient,
-      items: orderData.items,
-      time: orderData.time,
-      status: "pendiente",
-      type: "paciente",
+    const bedObj = (roomObj.beds ?? []).find((b) => b.id === bedId);
+    if (!bedObj) {
+      console.warn("Bed no encontrada para id", bedId, "en room", roomId);
+      return;
     }
 
-    setOrders((prev) => [newOrder, ...prev])
-  }
+    // Asegurate de setear el selectedRoom también
+    setActiveRoom(roomObj);
+    setSelectedRoom(roomId); // <--- esta línea faltaba
+    setSelectedBed(bedId);
+    setIsCreateBedOpen(false);
+    setIsEditBedOpen(true);
+  };
+
+  const handleOpenConsumeConfirm = (payload: {
+    bedId: number;
+    bedMenuId: number;
+    menuName: string;
+    patientName?: string | null;
+    quantity?: number;
+  }) => {
+    openConsumeConfirm(payload); // tu función existente que setea consumeTarget y abre modal
+  };
+
+  useEffect(() => {
+    if (!beds || !Array.isArray(beds)) return;
+
+    const newServed = new Set<number>();
+    beds.forEach((room) => {
+      room.beds?.forEach((bed) => {
+        const current =
+          (bed as any).currentBedMenu ?? (bed as any).bedMenus?.[0] ?? null;
+
+        if (current?.consumed) {
+          newServed.add(bed.id);
+        }
+      });
+    });
+
+    setServedBedIds(newServed);
+  }, [beds]);
+
+  const bedToEdit = useMemo(() => {
+    if (!selectedRoom || !selectedBed) return null;
+    const roomObj = (beds ?? []).find((r) => r.id === selectedRoom);
+    return roomObj?.beds?.find((b) => b.id === selectedBed) ?? null;
+  }, [beds, selectedRoom, selectedBed]);
+
+  useEffect(() => {
+    console.log("Modal state debug:", {
+      isEditBedOpen,
+      selectedRoom,
+      selectedBed,
+      bedToEdit,
+    });
+  }, [isEditBedOpen, selectedRoom, selectedBed, bedToEdit]);
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Confirmación de consumo */}
+      <Dialog open={consumeConfirmOpen} onOpenChange={setConsumeConfirmOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirmar consumo de menú</DialogTitle>
+          </DialogHeader>
+
+          <div className="py-2">
+            <p className="text-sm text-muted-foreground">
+              ¿Confirmás consumir el siguiente menú y descontar stock?
+            </p>
+
+            <div className="mt-4">
+              <div className="text-sm font-medium">Menú</div>
+              <div className="text-base mb-2">
+                {consumeTarget?.menuName ?? "-"}
+              </div>
+
+              <div className="text-sm font-medium">Paciente</div>
+              <div className="text-base mb-2">
+                {consumeTarget?.patientName ?? "Paciente no disponible"}
+              </div>
+
+              <div className="text-sm font-medium">Cantidad</div>
+              <div className="text-base">{consumeTarget?.quantity ?? 1}</div>
+            </div>
+          </div>
+
+          <footer className="flex justify-end gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => setConsumeConfirmOpen(false)}
+              disabled={isConsuming}
+            >
+              Cancelar
+            </Button>
+            <Button onClick={handleConfirmConsume} disabled={isConsuming}>
+              {isConsuming ? "Consumiendo..." : "Confirmar y marcar servido"}
+            </Button>
+          </footer>
+        </DialogContent>
+      </Dialog>
+
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-6 gap-4">
@@ -246,8 +279,81 @@ export default function CamasPage() {
                   Volver
                 </Button>
               </Link>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Gestión de Camas</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+                Gestión de Camas
+              </h1>
             </div>
+
+            {/* Dialog de creacion de habitación */}
+            <GenericDialog
+              open={isCreateRoomOpen}
+              onOpenChange={(open) => setIsCreateRoomOpen(open)}
+              title="Crear Habitación"
+              description="Cree una nueva habitación o sala en el sistema"
+              trigger={
+                <Button onClick={() => setIsCreateRoomOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nueva Habitación
+                </Button>
+              }
+            >
+              <CreateRoomForm onClose={() => setIsCreateRoomOpen(false)} />
+            </GenericDialog>
+
+            {/* Dialog de edición de habitacion */}
+            <GenericDialog
+              open={isEditRoomOpen}
+              onOpenChange={setIsEditRoomOpen}
+              title={`Editar la habitación ${activeRoom?.name}`}
+            >
+              {activeRoom && (
+                <EditRoomForm
+                  roomId={activeRoom.id}
+                  roomName={activeRoom.name}
+                  floor={activeRoom.floor}
+                  onClose={() => setIsEditRoomOpen(false)}
+                />
+              )}
+            </GenericDialog>
+
+            {/* Crear cama y asignar a la habitacion */}
+            <GenericDialog
+              open={isCreateBedOpen}
+              onOpenChange={(open) => {
+                setIsCreateBedOpen(open);
+                if (!open) {
+                  // limpiar estado cuando se cierre el modal de crear cama
+                  setActiveRoom(null);
+                }
+              }}
+              title={`Crear Cama en ${activeRoom?.name ?? ""}`}
+            >
+              <CreateBedForm
+                roomId={activeRoom?.id ?? 0}
+                roomName={activeRoom?.name ?? ""}
+                onClose={() => {
+                  setIsCreateBedOpen(false);
+                  setActiveRoom(null);
+                }}
+              />
+            </GenericDialog>
+
+            {/*Eliminar habitacion por id*/}
+
+            <DeleteRoomForm
+              open={isDeleteRoomOpen}
+              onOpenChange={(open) => {
+                setIsDeleteRoomOpen(open);
+                if (!open) setActiveRoom(null);
+              }}
+              roomId={activeRoom?.id ?? 0}
+              roomName={activeRoom?.name}
+              onDeleted={() => {
+                setIsDeleteRoomOpen(false);
+                setActiveRoom(null);
+                // opcional: invalidate or refetch rooms if needed (though useDeleteRoom already invalidates)
+              }}
+            />
           </div>
         </div>
       </header>
@@ -255,606 +361,318 @@ export default function CamasPage() {
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <Tabs defaultValue="camas" className="space-y-6">
-            <TabsList>
-              <TabsTrigger value="camas">Gestión de Camas</TabsTrigger>
-              <TabsTrigger value="ordenes">Órdenes de Pacientes</TabsTrigger>
-            </TabsList>
-
+            <div className="flex flex-row justify-between w-full">
+              <TabsList>
+                <TabsTrigger value="camas">Gestión de Camas</TabsTrigger>
+                <TabsTrigger value="ordenes">Órdenes de Pacientes</TabsTrigger>
+              </TabsList>
+              <Button onClick={toggleView}>Cambiar vista</Button>
+            </div>
             <TabsContent value="camas">
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                {rooms.map((room) => (
-                  <Card key={room.room} className="hover:shadow-lg transition-shadow">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Bed className="h-5 w-5" />
-                        Habitación {room.room}
-                      </CardTitle>
-                      <CardDescription>
-                        {room.beds.filter((bed) => bed.patient).length} de {room.beds.length} camas ocupadas
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {room.beds.map((bed) => (
-                          <div
-                            key={bed.bed}
-                            className={`border rounded-lg p-4 transition-colors ${
-                              bed.status === "servido"
-                                ? "bg-green-50 border-green-200"
-                                : bed.status === "pendiente"
-                                  ? "bg-orange-50 border-orange-200"
-                                  : "bg-gray-50 border-gray-200"
-                            }`}
-                          >
-                            <div className="flex justify-between items-start mb-2">
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium">Cama {bed.bed}</span>
-                                <Badge
-                                  variant={
-                                    bed.status === "libre"
-                                      ? "secondary"
-                                      : bed.status === "servido"
-                                        ? "default"
-                                        : "destructive"
-                                  }
-                                  className={
-                                    bed.status === "servido"
-                                      ? "bg-green-100 text-green-800 border-green-200 hover:bg-green-100"
-                                      : bed.status === "pendiente"
-                                        ? "bg-orange-100 text-orange-800 border-orange-200 hover:bg-orange-100"
-                                        : "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-100"
-                                  }
-                                >
-                                  {bed.status === "libre"
-                                    ? "Libre"
-                                    : bed.status === "servido"
-                                      ? "✓ Servido"
-                                      : "⏳ Pendiente"}
-                                </Badge>
-                              </div>
-                              {bed.patient && bed.status === "pendiente" && (
-                                <Button size="sm" onClick={() => markAsServed(room.room, bed.bed)}>
-                                  Marcar Servido
-                                </Button>
-                              )}
-                            </div>
-
-                            {bed.patient ? (
-                              <div className="space-y-2">
-                                <div className="flex items-center gap-2 text-sm">
-                                  <User className="h-4 w-4" />
-                                  <span>{bed.patient}</span>
-                                </div>
-                                <div className="text-sm">
-                                  <strong>Menú:</strong> {bed.menu}
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                  <Clock className="h-4 w-4" />
-                                  <span>{bed.time}</span>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="text-sm text-gray-500">Cama libre</div>
-                            )}
-
-                            <div className="flex gap-2 mt-3">
-                              <Dialog
-                                open={isDialogOpen && selectedRoom === room.room && selectedBed === bed.bed}
-                                onOpenChange={setIsDialogOpen}
+              {!beds || beds.length === 0 ? (
+                <div className="rounded-md p-6 bg-yellow-50 border border-yellow-200 text-center">
+                  <p className="text-base font-medium text-yellow-800">
+                    No existen habitaciones o salas creadas.
+                  </p>
+                  <p className="mt-2 text-sm text-yellow-700">
+                    Crea una nueva habitación para empezar a gestionar camas.
+                  </p>
+                  <div className="mt-4">
+                    <Button onClick={() => setIsCreateRoomOpen(true)}>
+                      Crear habitación
+                    </Button>
+                  </div>
+                </div>
+              ) : componentView === "card" ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {beds?.map((room) => (
+                    <Card
+                      key={room.id}
+                      className="hover:shadow-lg transition-shadow"
+                    >
+                      <CardHeader>
+                        <CardTitle className="flex justify-between items-center gap-2">
+                          <div className="flex flex-1 items-center gap-2">
+                            <Bed className="h-5 w-5" />
+                            {room.name}
+                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                Acciones
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              align="end"
+                              className="bg-slate-200 mt-2 p-4 shadow-lg rounded-xl  text-sm gap-2 cursor-pointer font-medium"
+                            >
+                              <DropdownMenuItem
+                                className="px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 rounded-md cursor-pointer"
+                                onClick={() => openBedRoomDialog(room)}
                               >
-                                <DialogTrigger asChild>
+                                Asignar cama
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 rounded-md cursor-pointer"
+                                onClick={() => openEditRoomDialog(room)}
+                              >
+                                Editar habitación
+                              </DropdownMenuItem>
+
+                              <DropdownMenuItem
+                                className="px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 rounded-md cursor-pointer"
+                                onClick={() => openDeleteRoomDialog(room)}
+                              >
+                                Eliminar habitación
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </CardTitle>
+
+                        <CardDescription>
+                          {
+                            room.beds.filter(
+                              (b) => b.patients && b.patients.length > 0
+                            ).length
+                          }{" "}
+                          de {room.beds.length} camas ocupadas
+                        </CardDescription>
+                      </CardHeader>
+
+                      <CardContent>
+                        <div className="space-y-4">
+                          {room.beds.map((bed) => {
+                            const hasPatient = bed.patients?.length > 0;
+                            const patient = hasPatient ? bed.patients[0] : null;
+                            const bedMenu =
+                              bed.currentBedMenu ?? bed.bedMenus?.[0] ?? null;
+
+                            return (
+                              <div
+                                key={bed.id}
+                                className={`border rounded-lg p-4 transition-colors ${
+                                  hasPatient
+                                    ? "bg-orange-50 border-orange-200"
+                                    : "bg-gray-50 border-gray-200"
+                                }`}
+                              >
+                                <div className="flex justify-between items-start mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium">
+                                      {bed.name}
+                                    </span>
+                                    <Badge
+                                      className={
+                                        hasPatient
+                                          ? "bg-orange-100 text-orange-800 border-orange-200"
+                                          : "bg-gray-100 text-gray-800 border-gray-200"
+                                      }
+                                    >
+                                      {hasPatient ? "Ocupada" : "Libre"}
+                                    </Badge>
+                                  </div>
+
+                                  {patient?.needsReview && (
+                                    <Badge className="bg-amber-400 text-white">
+                                      Modificado
+                                    </Badge>
+                                  )}
+
+                                  {(servedBedIds.has(bed.id) ||
+                                    !!bed?.currentBedMenu?.consumed) && (
+                                    <Badge className="bg-green-500 text-white">
+                                      Servido
+                                    </Badge>
+                                  )}
+                                </div>
+
+                                {hasPatient ? (
+                                  <div className="space-y-2">
+                                    <div className="flex items-center gap-2 text-sm">
+                                      <User className="h-4 w-4" />
+                                      <span>{patient?.name}</span>
+                                    </div>
+
+                                    {patient?.currentStatus ? (
+                                      <div className="space-y-2 text-sm">
+                                        <div className="flex items-center gap-2">
+                                          <strong>Diagnóstico:</strong>
+                                          <Badge variant={"destructive"}>
+                                            {patient.diagnosis}
+                                          </Badge>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <strong>Estado:</strong>
+                                          <Badge
+                                            className={
+                                              patient.currentStatus
+                                                .statusType === "internacion"
+                                                ? "bg-blue-100 text-blue-800 border-blue-200"
+                                                : patient.currentStatus
+                                                    .statusType === "alta"
+                                                ? "bg-green-100 text-green-800 border-green-200"
+                                                : "bg-gray-100 text-gray-800 border-gray-200"
+                                            }
+                                          >
+                                            {patient.currentStatus.statusType.toUpperCase()}
+                                          </Badge>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <strong>Dieta:</strong>
+                                          <Badge
+                                            className={
+                                              patient.currentStatus.dietType ===
+                                              "liquida"
+                                                ? "bg-cyan-100 text-cyan-800 border-cyan-200"
+                                                : patient.currentStatus
+                                                    .dietType === "blanda"
+                                                ? "bg-amber-100 text-amber-800 border-amber-200"
+                                                : "bg-emerald-100 text-emerald-800 border-emerald-200"
+                                            }
+                                          >
+                                            {patient.currentStatus.dietType?.toUpperCase()}
+                                          </Badge>
+                                        </div>
+
+                                        {patient.currentStatus.notes &&
+                                        patient.currentStatus.notes !==
+                                          "string" ? (
+                                          <p className="text-gray-500 italic">
+                                            {patient.currentStatus.notes}
+                                          </p>
+                                        ) : (
+                                          <p className="text-gray-400 italic">
+                                            No hay notas del paciente
+                                          </p>
+                                        )}
+                                      </div>
+                                    ) : (
+                                      <div className="text-sm text-gray-500">
+                                        <span> Cama libre</span>
+                                      </div>
+                                    )}
+
+                                    {bedMenu ? (
+                                      <div className="text-sm">
+                                        <strong>Menú:</strong>{" "}
+                                        {bedMenu.menu?.name}
+                                      </div>
+                                    ) : (
+                                      <Button variant={"outline"}>
+                                        Asignar menú
+                                      </Button>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <div className="text-sm text-gray-500">
+                                    Cama libre
+                                  </div>
+                                )}
+
+                                {/* Botones para acciones */}
+                                {/* Botón Marcar Servido (si hay una asignación activa no consumida) */}
+                                {bedMenu && !bedMenu.consumed && (
                                   <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="flex-1"
-                                    onClick={() => {
-                                      setSelectedRoom(room.room)
-                                      setSelectedBed(bed.bed)
-                                      setIsDialogOpen(true)
+                                    className="flex-1 w-full mt-2"
+                                    onClick={() =>
+                                      openConsumeConfirm({
+                                        bedId: bed.id,
+                                        bedMenuId: Number(bedMenu.id),
+                                        menuName: bedMenu.menu?.name ?? "Menú",
+                                        patientName:
+                                          bed.patients?.[0]?.name ?? null,
+                                        quantity: bedMenu.quantity ?? 1,
+                                      })
+                                    }
+                                  >
+                                    Marcar Menú Servido
+                                  </Button>
+                                )}
+                                <div className="flex gap-2 mt-3">
+                                  <Dialog
+                                    open={
+                                      isEditBedOpen &&
+                                      selectedRoom === room.id &&
+                                      selectedBed === bed.id
+                                    }
+                                    onOpenChange={(open) => {
+                                      setIsEditBedOpen(open);
+                                      if (!open) {
+                                        // limpiar selección al cerrar el diálogo de edición de cama
+                                        setSelectedRoom(null);
+                                        setSelectedBed(null);
+                                      }
                                     }}
                                   >
-                                    {bed.patient ? "Modificar" : "Asignar Menú"}
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent className="max-w-md mx-4">
-                                  <DialogHeader>
-                                    <DialogTitle>
-                                      Asignar Menú - Habitación {room.room}, Cama {bed.bed}
-                                    </DialogTitle>
-                                    <DialogDescription>Selecciona el menú y horario para el paciente</DialogDescription>
-                                  </DialogHeader>
-                                  <AssignMenuForm
-                                    roomNum={room.room}
-                                    bedNum={bed.bed}
-                                    currentPatient={bed.patient}
-                                    onAssign={handleAssignMenu}
-                                  />
-                                </DialogContent>
-                              </Dialog>
+                                    <DialogTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="flex-1"
+                                        onClick={() => {
+                                          // al abrir edición, cerramos el modal de crear cama para evitar overlap
+                                          setIsCreateBedOpen(false);
+                                          setActiveRoom(null); // no necesitamos activeRoom cuando editamos una cama ya existente
+                                          setSelectedRoom(room.id);
+                                          setSelectedBed(bed.id);
+                                          setIsEditBedOpen(true);
+                                        }}
+                                      >
+                                        Editar Cama
+                                      </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-5xl w-[90vw] h-[85vh] flex flex-col mx-4">
+                                      <DialogHeader className="flex-shrink-0">
+                                        <DialogTitle>
+                                          Editar Cama y Paciente
+                                        </DialogTitle>
+                                        <DialogDescription>
+                                          Cama : {bed.name} - Paciente:{" "}
+                                          {patient?.name}
+                                        </DialogDescription>
+                                      </DialogHeader>
 
-                              {bed.patient && (
-                                <Dialog
-                                  open={isOrderDialogOpen && selectedRoom === room.room && selectedBed === bed.bed}
-                                  onOpenChange={setIsOrderDialogOpen}
-                                >
-                                  <DialogTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="flex-1"
-                                      onClick={() => {
-                                        setSelectedRoom(room.room)
-                                        setSelectedBed(bed.bed)
-                                        setIsOrderDialogOpen(true)
-                                      }}
-                                    >
-                                      <ShoppingCart className="h-3 w-3 mr-1" />
-                                      Nueva Orden
-                                    </Button>
-                                  </DialogTrigger>
-                                  <DialogContent className="max-w-md mx-4">
-                                    <DialogHeader>
-                                      <DialogTitle>
-                                        Nueva Orden - Habitación {room.room}, Cama {bed.bed}
-                                      </DialogTitle>
-                                      <DialogDescription>Crear orden adicional para {bed.patient}</DialogDescription>
-                                    </DialogHeader>
-                                    <CreateOrderForm
-                                      roomNum={room.room}
-                                      bedNum={bed.bed}
-                                      patientName={bed.patient}
-                                      onCreateOrder={handleCreateOrder}
-                                    />
-                                  </DialogContent>
-                                </Dialog>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="ordenes">
-              <Card>
-                <CardHeader>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <CardTitle>Órdenes de Pacientes</CardTitle>
-                      <CardDescription>
-                        Listado de todas las órdenes realizadas para pacientes internados
-                      </CardDescription>
-                    </div>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button>
-                          <Plus className="h-4 w-4 mr-2" />
-                          Nueva Orden
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-md mx-4">
-                        <DialogHeader>
-                          <DialogTitle>Crear Nueva Orden</DialogTitle>
-                          <DialogDescription>
-                            Complete los datos para crear una orden para un paciente
-                          </DialogDescription>
-                        </DialogHeader>
-                        <CreateNewOrderForm onCreateOrder={handleCreateNewOrder} />
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {orders.map((order) => (
-                      <div
-                        key={order.id}
-                        className={`border rounded-lg p-4 transition-colors ${
-                          order.status === "servido" ? "bg-green-50 border-green-200" : "bg-orange-50 border-orange-200"
-                        }`}
-                      >
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <div className="font-medium">
-                              Orden #{order.id} - Habitación {order.room}, Cama {order.bed}
-                            </div>
-                            <div className="text-sm text-gray-600">
-                              Paciente: {order.patient} • {order.time}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge
-                              variant={order.status === "servido" ? "default" : "destructive"}
-                              className={
-                                order.status === "servido"
-                                  ? "bg-green-100 text-green-800 border-green-200"
-                                  : "bg-orange-100 text-orange-800 border-orange-200"
-                              }
-                            >
-                              {order.status === "servido" ? "✓ Servido" : "⏳ Pendiente"}
-                            </Badge>
-                            {order.status === "pendiente" && (
-                              <Button size="sm" onClick={() => markOrderAsServed(order.id)}>
-                                Marcar Servido
-                              </Button>
-                            )}
-                          </div>
+                                      <div className="flex-1 overflow-y-auto">
+                                        <BedEditModal
+                                          currentUserId={Number(currentUserId)}
+                                          bed={bed}
+                                          roomName={room.name}
+                                          onClose={() => {
+                                            setIsEditBedOpen(false);
+                                            setSelectedRoom(null);
+                                            setSelectedBed(null);
+                                          }}
+                                          isOpen={
+                                            isEditBedOpen &&
+                                            selectedRoom === room.id &&
+                                            selectedBed === bed.id
+                                          }
+                                        />
+                                      </div>
+                                    </DialogContent>
+                                  </Dialog>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
-                        <div className="text-sm">
-                          <strong>Items:</strong>{" "}
-                          {order.items.map((item, index) => (
-                            <span key={index}>
-                              {item.name} x{item.qty}
-                              {index < order.items.length - 1 ? ", " : ""}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <RoomsTable
+                  rooms={beds ?? []}
+                  servedBedIds={servedBedIds}
+                  onOpenConsumeConfirm={handleOpenConsumeConfirm as any}
+                  onAssignBed={(r) => openBedRoomDialog(r as unknown as Room)}
+                  onEditRoom={(r) => openEditRoomDialog(r as unknown as Room)}
+                />
+              )}
             </TabsContent>
           </Tabs>
         </div>
       </main>
     </div>
-  )
-}
-
-function AssignMenuForm({ roomNum, bedNum, currentPatient, onAssign }) {
-  const [patientName, setPatientName] = useState(currentPatient || "")
-  const [selectedMenu, setSelectedMenu] = useState("")
-  const [time, setTime] = useState("12:00")
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    if (patientName && selectedMenu && time) {
-      onAssign(roomNum, bedNum, patientName, selectedMenu, time)
-    }
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <Label htmlFor="patient">Nombre del Paciente</Label>
-        <Input
-          id="patient"
-          value={patientName}
-          onChange={(e) => setPatientName(e.target.value)}
-          placeholder="Ingrese el nombre del paciente"
-          required
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="menu">Menú</Label>
-        <Select value={selectedMenu} onValueChange={setSelectedMenu} required>
-          <SelectTrigger>
-            <SelectValue placeholder="Seleccione un menú" />
-          </SelectTrigger>
-          <SelectContent>
-            {menus.map((menu) => (
-              <SelectItem key={menu.id} value={menu.id.toString()}>
-                {menu.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div>
-        <Label htmlFor="time">Horario</Label>
-        <Input id="time" type="time" value={time} onChange={(e) => setTime(e.target.value)} required />
-      </div>
-
-      <Button type="submit" className="w-full">
-        Asignar Menú
-      </Button>
-    </form>
-  )
-}
-
-function CreateOrderForm({ roomNum, bedNum, patientName, onCreateOrder }) {
-  const [orderItems, setOrderItems] = useState([])
-  const [selectedMenuId, setSelectedMenuId] = useState("")
-  const [selectedBebidaId, setSelectedBebidaId] = useState("")
-
-  const addMenuItem = () => {
-    if (!selectedMenuId) return
-    const menu = menus.find((m) => m.id === Number.parseInt(selectedMenuId))
-    if (menu) {
-      const existing = orderItems.find((item) => item.name === menu.name)
-      if (existing) {
-        setOrderItems((prev) => prev.map((item) => (item.name === menu.name ? { ...item, qty: item.qty + 1 } : item)))
-      } else {
-        setOrderItems((prev) => [...prev, { name: menu.name, qty: 1, type: "menu" }])
-      }
-      setSelectedMenuId("")
-    }
-  }
-
-  const addBebida = () => {
-    if (!selectedBebidaId) return
-    const bebida = bebidas.find((b) => b.id === Number.parseInt(selectedBebidaId))
-    if (bebida) {
-      const existing = orderItems.find((item) => item.name === bebida.name)
-      if (existing) {
-        setOrderItems((prev) => prev.map((item) => (item.name === bebida.name ? { ...item, qty: item.qty + 1 } : item)))
-      } else {
-        setOrderItems((prev) => [...prev, { name: bebida.name, qty: 1, type: "bebida" }])
-      }
-      setSelectedBebidaId("")
-    }
-  }
-
-  const removeItem = (itemName) => {
-    setOrderItems((prev) => prev.filter((item) => item.name !== itemName))
-  }
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    if (orderItems.length > 0) {
-      onCreateOrder(roomNum, bedNum, patientName, orderItems)
-    }
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <Label>Agregar Menú</Label>
-        <div className="flex gap-2">
-          <Select value={selectedMenuId} onValueChange={setSelectedMenuId}>
-            <SelectTrigger className="flex-1">
-              <SelectValue placeholder="Seleccionar menú..." />
-            </SelectTrigger>
-            <SelectContent>
-              {menus.map((menu) => (
-                <SelectItem key={menu.id} value={menu.id.toString()}>
-                  {menu.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button type="button" onClick={addMenuItem} disabled={!selectedMenuId}>
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      <div>
-        <Label>Agregar Bebida</Label>
-        <div className="flex gap-2">
-          <Select value={selectedBebidaId} onValueChange={setSelectedBebidaId}>
-            <SelectTrigger className="flex-1">
-              <SelectValue placeholder="Seleccionar bebida..." />
-            </SelectTrigger>
-            <SelectContent>
-              {bebidas.map((bebida) => (
-                <SelectItem key={bebida.id} value={bebida.id.toString()}>
-                  {bebida.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button type="button" onClick={addBebida} disabled={!selectedBebidaId}>
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      {orderItems.length > 0 && (
-        <div>
-          <Label>Items de la Orden</Label>
-          <div className="space-y-2 mt-2">
-            {orderItems.map((item, index) => (
-              <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                <span>
-                  {item.name} x{item.qty}
-                  {item.type === "bebida" && (
-                    <Badge variant="outline" className="ml-2 text-xs">
-                      Bebida
-                    </Badge>
-                  )}
-                </span>
-                <Button type="button" variant="destructive" size="sm" onClick={() => removeItem(item.name)}>
-                  ×
-                </Button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <Button type="submit" className="w-full" disabled={orderItems.length === 0}>
-        Crear Orden
-      </Button>
-    </form>
-  )
-}
-
-function CreateNewOrderForm({ onCreateOrder }) {
-  const [formData, setFormData] = useState({
-    patient: "",
-    room: "",
-    bed: "",
-    time: new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }),
-  })
-  const [orderItems, setOrderItems] = useState([])
-  const [selectedMenuId, setSelectedMenuId] = useState("")
-  const [selectedBebidaId, setSelectedBebidaId] = useState("")
-
-  const addMenuItem = () => {
-    if (!selectedMenuId) return
-    const menu = menus.find((m) => m.id === Number.parseInt(selectedMenuId))
-    if (menu) {
-      const existing = orderItems.find((item) => item.name === menu.name)
-      if (existing) {
-        setOrderItems((prev) => prev.map((item) => (item.name === menu.name ? { ...item, qty: item.qty + 1 } : item)))
-      } else {
-        setOrderItems((prev) => [...prev, { name: menu.name, qty: 1, type: "menu" }])
-      }
-      setSelectedMenuId("")
-    }
-  }
-
-  const addBebida = () => {
-    if (!selectedBebidaId) return
-    const bebida = bebidas.find((b) => b.id === Number.parseInt(selectedBebidaId))
-    if (bebida) {
-      const existing = orderItems.find((item) => item.name === bebida.name)
-      if (existing) {
-        setOrderItems((prev) => prev.map((item) => (item.name === bebida.name ? { ...item, qty: item.qty + 1 } : item)))
-      } else {
-        setOrderItems((prev) => [...prev, { name: bebida.name, qty: 1, type: "bebida" }])
-      }
-      setSelectedBebidaId("")
-    }
-  }
-
-  const removeItem = (itemName) => {
-    setOrderItems((prev) => prev.filter((item) => item.name !== itemName))
-  }
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    if (formData.patient && formData.room && formData.bed && formData.time && orderItems.length > 0) {
-      onCreateOrder({
-        ...formData,
-        items: orderItems,
-      })
-      // Reset form
-      setFormData({
-        patient: "",
-        room: "",
-        bed: "",
-        time: new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }),
-      })
-      setOrderItems([])
-    }
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="patient">Nombre del Paciente</Label>
-          <Input
-            id="patient"
-            value={formData.patient}
-            onChange={(e) => setFormData((prev) => ({ ...prev, patient: e.target.value }))}
-            placeholder="Nombre completo"
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="time">Horario</Label>
-          <Input
-            id="time"
-            type="time"
-            value={formData.time}
-            onChange={(e) => setFormData((prev) => ({ ...prev, time: e.target.value }))}
-            required
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="room">Habitación</Label>
-          <Input
-            id="room"
-            type="number"
-            value={formData.room}
-            onChange={(e) => setFormData((prev) => ({ ...prev, room: e.target.value }))}
-            placeholder="101"
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="bed">Cama</Label>
-          <Input
-            id="bed"
-            type="number"
-            value={formData.bed}
-            onChange={(e) => setFormData((prev) => ({ ...prev, bed: e.target.value }))}
-            placeholder="1"
-            required
-          />
-        </div>
-      </div>
-
-      <div>
-        <Label>Agregar Menú</Label>
-        <div className="flex gap-2">
-          <Select value={selectedMenuId} onValueChange={setSelectedMenuId}>
-            <SelectTrigger className="flex-1">
-              <SelectValue placeholder="Seleccionar menú..." />
-            </SelectTrigger>
-            <SelectContent>
-              {menus.map((menu) => (
-                <SelectItem key={menu.id} value={menu.id.toString()}>
-                  {menu.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button type="button" onClick={addMenuItem} disabled={!selectedMenuId}>
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      <div>
-        <Label>Agregar Bebida</Label>
-        <div className="flex gap-2">
-          <Select value={selectedBebidaId} onValueChange={setSelectedBebidaId}>
-            <SelectTrigger className="flex-1">
-              <SelectValue placeholder="Seleccionar bebida..." />
-            </SelectTrigger>
-            <SelectContent>
-              {bebidas.map((bebida) => (
-                <SelectItem key={bebida.id} value={bebida.id.toString()}>
-                  {bebida.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button type="button" onClick={addBebida} disabled={!selectedBebidaId}>
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      {orderItems.length > 0 && (
-        <div>
-          <Label>Items de la Orden</Label>
-          <div className="space-y-2 mt-2">
-            {orderItems.map((item, index) => (
-              <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                <span>
-                  {item.name} x{item.qty}
-                  {item.type === "bebida" && (
-                    <Badge variant="outline" className="ml-2 text-xs">
-                      Bebida
-                    </Badge>
-                  )}
-                </span>
-                <Button type="button" variant="destructive" size="sm" onClick={() => removeItem(item.name)}>
-                  ×
-                </Button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <Button type="submit" className="w-full" disabled={orderItems.length === 0}>
-        Crear Orden
-      </Button>
-    </form>
-  )
+  );
 }
