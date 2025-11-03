@@ -19,7 +19,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bed, User, ArrowLeft, Plus, Divide } from "lucide-react";
+import { Bed, User, ArrowLeft, Plus, Divide, Delete } from "lucide-react";
 import Link from "next/link";
 import { useRooms } from "@/hooks/tanstack/camas/useBeds";
 import { CreateRoomForm } from "@/components/camas/CreateRoomForm";
@@ -41,6 +41,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useComponentView } from "@/hooks/useComponentView";
 import RoomsTable from "@/components/camas/RoomsTable";
+import DeleteRoomForm from "@/components/camas/DeleteRoomForm";
 
 export default function CamasPage() {
   const [selectedRoom, setSelectedRoom] = useState<number | null>(null); // ID de la habitación seleccionada (para editar cama)
@@ -48,6 +49,7 @@ export default function CamasPage() {
 
   const [isCreateRoomOpen, setIsCreateRoomOpen] = useState<boolean>(false); // crear habitación
   const [isEditRoomOpen, setIsEditRoomOpen] = useState<boolean>(false); // editar habitación
+  const [isDeleteRoomOpen, setIsDeleteRoomOpen] = useState<boolean>(false); //eliminar habitación
 
   // Estados separados para camas
   const [isCreateBedOpen, setIsCreateBedOpen] = useState<boolean>(false); // crear cama
@@ -80,7 +82,7 @@ export default function CamasPage() {
   const { componentView, toggleView } = useComponentView();
 
   //abre el dialog de crear cama
-  const openBedDialog = (room: Room) => {
+  const openBedRoomDialog = (room: Room) => {
     setActiveRoom(room);
     setIsEditBedOpen(false);
     setSelectedRoom(null);
@@ -89,9 +91,14 @@ export default function CamasPage() {
   };
 
   //edita la habitacion
-  const openEditDialog = (room: Room) => {
+  const openEditRoomDialog = (room: Room) => {
     setActiveRoom(room);
     setIsEditRoomOpen(true);
+  };
+
+  const openDeleteRoomDialog = (room: Room) => {
+    setActiveRoom(room);
+    setIsDeleteRoomOpen(true);
   };
 
   const openConsumeConfirm = ({
@@ -330,6 +337,23 @@ export default function CamasPage() {
                 }}
               />
             </GenericDialog>
+
+            {/*Eliminar habitacion por id*/}
+
+            <DeleteRoomForm
+              open={isDeleteRoomOpen}
+              onOpenChange={(open) => {
+                setIsDeleteRoomOpen(open);
+                if (!open) setActiveRoom(null);
+              }}
+              roomId={activeRoom?.id ?? 0}
+              roomName={activeRoom?.name}
+              onDeleted={() => {
+                setIsDeleteRoomOpen(false);
+                setActiveRoom(null);
+                // opcional: invalidate or refetch rooms if needed (though useDeleteRoom already invalidates)
+              }}
+            />
           </div>
         </div>
       </header>
@@ -367,9 +391,11 @@ export default function CamasPage() {
                       className="hover:shadow-lg transition-shadow"
                     >
                       <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Bed className="h-5 w-5" />
-                          {room.name}
+                        <CardTitle className="flex justify-between items-center gap-2">
+                          <div className="flex flex-1 items-center gap-2">
+                            <Bed className="h-5 w-5" />
+                            {room.name}
+                          </div>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="outline" size="sm">
@@ -382,15 +408,22 @@ export default function CamasPage() {
                             >
                               <DropdownMenuItem
                                 className="px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 rounded-md cursor-pointer"
-                                onClick={() => openBedDialog(room)}
+                                onClick={() => openBedRoomDialog(room)}
                               >
                                 Asignar cama
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 rounded-md cursor-pointer"
-                                onClick={() => openEditDialog(room)}
+                                onClick={() => openEditRoomDialog(room)}
                               >
                                 Editar habitación
+                              </DropdownMenuItem>
+
+                              <DropdownMenuItem
+                                className="px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 rounded-md cursor-pointer"
+                                onClick={() => openDeleteRoomDialog(room)}
+                              >
+                                Eliminar habitación
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -588,8 +621,8 @@ export default function CamasPage() {
                                         Editar Cama
                                       </Button>
                                     </DialogTrigger>
-                                    <DialogContent className="max-w-md mx-4">
-                                      <DialogHeader>
+                                    <DialogContent className="max-w-5xl w-[90vw] h-[85vh] flex flex-col mx-4">
+                                      <DialogHeader className="flex-shrink-0">
                                         <DialogTitle>
                                           Editar Cama y Paciente
                                         </DialogTitle>
@@ -599,7 +632,7 @@ export default function CamasPage() {
                                         </DialogDescription>
                                       </DialogHeader>
 
-                                      <div className="mt-4">
+                                      <div className="flex-1 overflow-y-auto">
                                         <BedEditModal
                                           currentUserId={Number(currentUserId)}
                                           bed={bed}
@@ -631,9 +664,9 @@ export default function CamasPage() {
                 <RoomsTable
                   rooms={beds ?? []}
                   servedBedIds={servedBedIds}
-                  onOpenConsumeConfirm={handleOpenConsumeConfirm} // espera payload
-                  onAssignBed={(r) => openBedDialog(r as unknown as Room)}
-                  onEditRoom={(r) => openEditDialog(r as unknown as Room)}
+                  onOpenConsumeConfirm={handleOpenConsumeConfirm as any}
+                  onAssignBed={(r) => openBedRoomDialog(r as unknown as Room)}
+                  onEditRoom={(r) => openEditRoomDialog(r as unknown as Room)}
                 />
               )}
             </TabsContent>

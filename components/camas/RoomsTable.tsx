@@ -92,7 +92,7 @@ type RoomsTableProps = {
   onOpenConsumeConfirm?: (payload: {
     bedId: number;
     bedMenuId: number;
-    menuName?: string | null;
+    menuName?: string;
     patientName?: string | null;
     quantity?: number;
   }) => void;

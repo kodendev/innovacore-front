@@ -152,8 +152,8 @@ export default function BedEditModal({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-backdrop">
-      <div className="modal max-w-4xl w-full max-h-[95vh] overflow-visible bg-white rounded shadow-lg">
+    <div className="w-full">
+      <div className="w-full">
         <div className="px-6 py-2">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* SECCIÓN: CAMA */}
@@ -431,7 +431,7 @@ export default function BedEditModal({
           </form>
         </div>
 
-        <footer className="px-6 py-4 border-t flex justify-end gap-3 bg-white">
+        <footer className="sticky bottom-0 px-6 py-4 border-t flex justify-end gap-3 bg-white">
           <Button
             variant="secondary"
             type="button"
