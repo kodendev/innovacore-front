@@ -20,8 +20,16 @@ import { useMenuType } from "@/hooks/tanstack/menus/useMenuType";
 import { useComponentView } from "@/hooks/useComponentView";
 import MenusTable from "@/components/tables/MenuTable";
 import { useUpdateMenuStatus } from "@/hooks/tanstack/menus/useUpdateMenuStatus";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type statusTypes = 'all' | 'active' | 'inactive';
+
+const statusOptions = [
+  { value: 'all', label: 'Todos los estados' },
+  { value: 'active', label: 'Activos' },
+  { value: 'inactive', label: 'Inactivos' }
+];
 
 export default function MenusPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -100,33 +108,41 @@ export default function MenusPage() {
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
               />
-              <select
-              className="bg-slate-200 p-2 rounded"
-              aria-label="Filtrar por tipo de menú"
-              value={selectedType}
-              onChange={(e) =>
-                setSelectedType(e.target.value ? Number(e.target.value) : 0)
-              }
-            >
-              <option value={0}>Todos los tipos</option>
-              {menuType?.map((type) => (
-                <option key={type.id} value={type.id}>
-                  {type.name}
-                </option>
-              ))}
-            </select>
-            <select
-              className="bg-slate-200 p-2 rounded"
-              aria-label="Filtrar por estado"
-              value={selectedStatus}
-              onChange={(e) =>
-                setSelectedStatus(e.target.value as statusTypes)
-              }
-            >
-              <option value="all">Todos los estados</option>
-              <option value="active">Activos</option>
-              <option value="inactive">Inactivos</option>
-            </select>
+              <Select
+                value={selectedType.toString()}
+                onValueChange={(val: string) => setSelectedType(Number(val))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Elegir menú..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">
+                    <span>Todos los tipos</span>
+                  </SelectItem>
+                  {menuType?.map((type) => (
+                    <SelectItem key={type.id} value={type.id.toString()}>
+                      <span>{type.name}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={String(selectedStatus)}
+                onValueChange={(val: string) => setSelectedStatus(val as statusTypes)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Elegir estado..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {statusOptions.map((status) => (
+                    <SelectItem key={status.value} value={status.value}>
+                      <div className="flex justify-between items-center w-full">
+                        <span>{status.label}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <Button variant={"default"} onClick={toggleView}>
               Cambiar vista
