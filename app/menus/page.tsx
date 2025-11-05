@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -18,24 +19,33 @@ import { useMenus } from "@/hooks/tanstack/menus/useMenus";
 import { useMenuType } from "@/hooks/tanstack/menus/useMenuType";
 import { useComponentView } from "@/hooks/useComponentView";
 import MenusTable from "@/components/tables/MenuTable";
+import { useUpdateMenuStatus } from "@/hooks/tanstack/menus/useUpdateMenuStatus";
+
+type statusTypes = 'all' | 'active' | 'inactive';
 
 export default function MenusPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingMenu, setEditingMenu] = useState(null);
   const [selectedType, setSelectedType] = useState<number | 0>(0);
+  const [selectedStatus, setSelectedStatus] = useState<statusTypes>("all");
+  const [searchText, setSearchText] = useState("");
 
   const { data: menus, isLoading, error, isPending } = useMenus();
   const { data: menuType } = useMenuType();
 
   const { componentView, toggleView } = useComponentView();
+  const updateMenuMutation = useUpdateMenuStatus();
 
-  const filteredMenus =
-    selectedType === 0
-      ? menus ?? []
-      : menus?.filter((menu) => menu.menuTypeId === selectedType) ?? [];
+  const filteredMenus = menus?.filter((menu) => {
+    const matchesType = selectedType === 0 || menu.menuTypeId === selectedType;
+    const matchesStatus = selectedStatus === "all" || menu.active === (selectedStatus === "active");
+    const matchesSearch = !searchText || menu.name.toLowerCase().includes(searchText.toLowerCase());
+    
+    return matchesType && matchesStatus && matchesSearch;
+  }) ?? [];
 
   const toggleMenuStatus = (menuId: number) => {
-    console.log("Cambiando estado del menú con ID:", menuId);
+    updateMenuMutation.mutate(menuId);
   };
 
   const deleteMenu = (menuId: any) => {
@@ -82,7 +92,15 @@ export default function MenusPage() {
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="flex flex-row items-center w-full justify-between gap-4">
-            <select
+            <div className="flex gap-2">
+              <Input
+                type="text"
+                placeholder="Buscar menú..."
+                className="w-64"
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+              />
+              <select
               className="bg-slate-200 p-2 rounded"
               aria-label="Filtrar por tipo de menú"
               value={selectedType}
@@ -97,6 +115,19 @@ export default function MenusPage() {
                 </option>
               ))}
             </select>
+            <select
+              className="bg-slate-200 p-2 rounded"
+              aria-label="Filtrar por estado"
+              value={selectedStatus}
+              onChange={(e) =>
+                setSelectedStatus(e.target.value as statusTypes)
+              }
+            >
+              <option value="all">Todos los estados</option>
+              <option value="active">Activos</option>
+              <option value="inactive">Inactivos</option>
+            </select>
+            </div>
             <Button variant={"default"} onClick={toggleView}>
               Cambiar vista
             </Button>
@@ -120,11 +151,12 @@ export default function MenusPage() {
                           key={menu.id}
                           menu={menu}
                           deleteMenu={deleteMenu}
+                          toggleMenuStatus={toggleMenuStatus}
                         />
                       ))}
                   </div>
                 ) : (
-                  <MenusTable isPending={isPending} data={filteredMenus} />
+                  <MenusTable isPending={isPending} data={filteredMenus} toggleMenuStatus={toggleMenuStatus} />
                 )}
               </>
             )}
