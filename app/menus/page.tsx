@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -18,24 +19,41 @@ import { useMenus } from "@/hooks/tanstack/menus/useMenus";
 import { useMenuType } from "@/hooks/tanstack/menus/useMenuType";
 import { useComponentView } from "@/hooks/useComponentView";
 import MenusTable from "@/components/tables/MenuTable";
+import { useUpdateMenuStatus } from "@/hooks/tanstack/menus/useUpdateMenuStatus";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+type statusTypes = 'all' | 'active' | 'inactive';
+
+const statusOptions = [
+  { value: 'all', label: 'Todos los estados' },
+  { value: 'active', label: 'Activos' },
+  { value: 'inactive', label: 'Inactivos' }
+];
 
 export default function MenusPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingMenu, setEditingMenu] = useState(null);
   const [selectedType, setSelectedType] = useState<number | 0>(0);
+  const [selectedStatus, setSelectedStatus] = useState<statusTypes>("all");
+  const [searchText, setSearchText] = useState("");
 
   const { data: menus, isLoading, error, isPending } = useMenus();
   const { data: menuType } = useMenuType();
 
   const { componentView, toggleView } = useComponentView();
+  const updateMenuMutation = useUpdateMenuStatus();
 
-  const filteredMenus =
-    selectedType === 0
-      ? menus ?? []
-      : menus?.filter((menu) => menu.menuTypeId === selectedType) ?? [];
+  const filteredMenus = menus?.filter((menu) => {
+    const matchesType = selectedType === 0 || menu.menuTypeId === selectedType;
+    const matchesStatus = selectedStatus === "all" || menu.active === (selectedStatus === "active");
+    const matchesSearch = !searchText || menu.name.toLowerCase().includes(searchText.toLowerCase());
+    
+    return matchesType && matchesStatus && matchesSearch;
+  }) ?? [];
 
   const toggleMenuStatus = (menuId: number) => {
-    console.log("Cambiando estado del menú con ID:", menuId);
+    updateMenuMutation.mutate(menuId);
   };
 
   const deleteMenu = (menuId: any) => {
@@ -82,21 +100,50 @@ export default function MenusPage() {
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="flex flex-row items-center w-full justify-between gap-4">
-            <select
-              className="bg-slate-200 p-2 rounded"
-              aria-label="Filtrar por tipo de menú"
-              value={selectedType}
-              onChange={(e) =>
-                setSelectedType(e.target.value ? Number(e.target.value) : 0)
-              }
-            >
-              <option value={0}>Todos los tipos</option>
-              {menuType?.map((type) => (
-                <option key={type.id} value={type.id}>
-                  {type.name}
-                </option>
-              ))}
-            </select>
+            <div className="flex gap-2">
+              <Input
+                type="text"
+                placeholder="Buscar menú..."
+                className="w-64"
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+              />
+              <Select
+                value={selectedType.toString()}
+                onValueChange={(val: string) => setSelectedType(Number(val))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Elegir menú..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">
+                    <span>Todos los tipos</span>
+                  </SelectItem>
+                  {menuType?.map((type) => (
+                    <SelectItem key={type.id} value={type.id.toString()}>
+                      <span>{type.name}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={String(selectedStatus)}
+                onValueChange={(val: string) => setSelectedStatus(val as statusTypes)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Elegir estado..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {statusOptions.map((status) => (
+                    <SelectItem key={status.value} value={status.value}>
+                      <div className="flex justify-between items-center w-full">
+                        <span>{status.label}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <Button variant={"default"} onClick={toggleView}>
               Cambiar vista
             </Button>
@@ -120,11 +167,12 @@ export default function MenusPage() {
                           key={menu.id}
                           menu={menu}
                           deleteMenu={deleteMenu}
+                          toggleMenuStatus={toggleMenuStatus}
                         />
                       ))}
                   </div>
                 ) : (
-                  <MenusTable isPending={isPending} data={filteredMenus} />
+                  <MenusTable isPending={isPending} data={filteredMenus} toggleMenuStatus={toggleMenuStatus} />
                 )}
               </>
             )}

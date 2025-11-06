@@ -16,8 +16,9 @@ import { getBadgeLabel, getBadgeVariant } from "@/utils/badge_variants";
 interface Props {
   data: Menu[] | undefined;
   isPending?: boolean;
+  toggleMenuStatus: (menuId: number) => void;
 }
-const MenusTable = ({ data, isPending }: Props) => {
+const MenusTable = ({ data, isPending, toggleMenuStatus }: Props) => {
   if (isPending) return <p>Cargando menús...</p>;
 
   return (
@@ -55,6 +56,7 @@ const MenusTable = ({ data, isPending }: Props) => {
                   variant={getBadgeVariant(
                     row.active === true ? "Activo" : "Inactivo"
                   )}
+                  onClick={() => toggleMenuStatus(row.id)}
                 >
                   {getBadgeLabel(row.active === true ? "Activo" : "Inactivo")}
                 </Badge>

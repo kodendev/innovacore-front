@@ -12,27 +12,31 @@ import { Badge } from "../ui/badge";
 interface Props {
   menu: Menu;
   deleteMenu: (menuId: number) => void;
+  toggleMenuStatus: (menuId: number) => void;
 }
 
-const MenuCards = ({ menu, deleteMenu }: Props) => {
+const MenuCards = ({ menu, deleteMenu, toggleMenuStatus }: Props) => {
+  const { id, name, active, menuProducts } = menu;
+
   return (
     <div>
       <Card
-        key={menu.id}
+        key={id}
         className={`hover:shadow-lg transition-shadow  ${
-          !menu.name ? "opacity-60" : ""
+          !name ? "opacity-60" : ""
         }`}
       >
         <CardHeader>
           <CardTitle className="flex flex-row items-start h-10 gap-2 justify-between">
-            <span>{menu.name}</span>
+            <span>{name}</span>
 
             <Badge
               variant={getBadgeVariant(
-                menu.active === true ? "Activo" : "Inactivo"
+                active === true ? "Activo" : "Inactivo"
               )}
+              onClick={() => toggleMenuStatus(id)}
             >
-              {getBadgeLabel(menu.active === true ? "Activo" : "Inactivo")}
+              {getBadgeLabel(active === true ? "Activo" : "Inactivo")}
             </Badge>
           </CardTitle>
         </CardHeader>
@@ -41,7 +45,7 @@ const MenuCards = ({ menu, deleteMenu }: Props) => {
             <div className="max-h-32 min-h-[72px] overflow-y-auto pr-1">
               <h4 className="font-medium mb-2">Ingredientes:</h4>
               <div className="space-y-1">
-                {menu?.menuProducts?.slice(0, 2).map((ingredient, index) => (
+                {menuProducts?.slice(0, 2).map((ingredient, index) => (
                   <div key={index} className="flex justify-between text-sm">
                     <span>
                       {ingredient?.product?.name || "Producto no disponible"}
@@ -49,9 +53,9 @@ const MenuCards = ({ menu, deleteMenu }: Props) => {
                     <span>{ingredient.quantity || "No disponible"}</span>
                   </div>
                 ))}
-                {menu?.menuProducts && menu.menuProducts.length > 3 && (
+                {menuProducts && menuProducts.length > 3 && (
                   <div className="text-sm text-slate-500">
-                    +{menu.menuProducts.length - 2} más
+                    +{menuProducts.length - 2} más
                   </div>
                 )}
               </div>
@@ -63,7 +67,7 @@ const MenuCards = ({ menu, deleteMenu }: Props) => {
             <Button
               variant="destructive"
               size="sm"
-              onClick={() => deleteMenu(menu.id)}
+              onClick={() => deleteMenu(id)}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
