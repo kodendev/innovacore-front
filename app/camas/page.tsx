@@ -42,6 +42,17 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useComponentView } from "@/hooks/useComponentView";
 import RoomsTable from "@/components/camas/RoomsTable";
 import DeleteRoomForm from "@/components/camas/DeleteRoomForm";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useRoomFilters } from "@/hooks/filters/useRoomFilters";
+import { Loading } from "@/components/ui/Loading";
+import { getBedStatusDisplay } from "@/helpers/getBedStatusDisplay";
 
 export default function CamasPage() {
   const [selectedRoom, setSelectedRoom] = useState<number | null>(null); // ID de la habitación seleccionada (para editar cama)
@@ -70,7 +81,13 @@ export default function CamasPage() {
 
   const queryClient = useQueryClient();
 
-  const { data: beds } = useRooms();
+  const { filters, updateFilter, clearFilters, hasActiveFilters } =
+    useRoomFilters();
+
+  const { data: beds, isFetching, isLoading } = useRooms(filters);
+
+  //repetimos la ejecucion para obtener todos los pisos disponibles
+  const { data: allRooms } = useRooms();
 
   const consumeMut = useConsumeBedMenu();
 
@@ -159,28 +176,6 @@ export default function CamasPage() {
     }
   };
 
-  const handleEditBed = (roomId: number, bedId: number) => {
-    console.log("Abriendo editor de habitacion");
-    const roomObj = (beds ?? []).find((r) => r.id === roomId);
-    if (!roomObj) {
-      console.warn("Room no encontrada para id", roomId);
-      return;
-    }
-
-    const bedObj = (roomObj.beds ?? []).find((b) => b.id === bedId);
-    if (!bedObj) {
-      console.warn("Bed no encontrada para id", bedId, "en room", roomId);
-      return;
-    }
-
-    // Asegurate de setear el selectedRoom también
-    setActiveRoom(roomObj);
-    setSelectedRoom(roomId); // <--- esta línea faltaba
-    setSelectedBed(bedId);
-    setIsCreateBedOpen(false);
-    setIsEditBedOpen(true);
-  };
-
   const handleOpenConsumeConfirm = (payload: {
     bedId: number;
     bedMenuId: number;
@@ -209,20 +204,16 @@ export default function CamasPage() {
     setServedBedIds(newServed);
   }, [beds]);
 
-  const bedToEdit = useMemo(() => {
-    if (!selectedRoom || !selectedBed) return null;
-    const roomObj = (beds ?? []).find((r) => r.id === selectedRoom);
-    return roomObj?.beds?.find((b) => b.id === selectedBed) ?? null;
-  }, [beds, selectedRoom, selectedBed]);
+  const availableFloors = useMemo(() => {
+    if (!allRooms) return [];
 
-  useEffect(() => {
-    console.log("Modal state debug:", {
-      isEditBedOpen,
-      selectedRoom,
-      selectedBed,
-      bedToEdit,
-    });
-  }, [isEditBedOpen, selectedRoom, selectedBed, bedToEdit]);
+    const floors = allRooms
+      .map((room) => room.floor)
+      .filter((floor) => floor !== null && floor !== undefined)
+      .sort((a, b) => a - b);
+
+    return [...new Set(floors)];
+  }, [allRooms]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -368,8 +359,126 @@ export default function CamasPage() {
               </TabsList>
               <Button onClick={toggleView}>Cambiar vista</Button>
             </div>
+
+            <div className="flex flex-row items-center justify-start">
+              <Input
+                className="w-200"
+                placeholder="Buscar habitación..."
+                value={filters.name || ""}
+                onChange={(e) => updateFilter("name", e.target.value)}
+              />
+              {/* Estado de habitación */}
+              <Select
+                value={filters.roomStatus || "all"}
+                onValueChange={(value) => {
+                  updateFilter(
+                    "roomStatus",
+                    value === "all" ? undefined : value
+                  );
+                }}
+              >
+                <SelectTrigger className="w-[180px] ml-4">
+                  <SelectValue placeholder="Filtrar por estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los estados</SelectItem>
+                  <SelectItem value="active">Activa</SelectItem>
+                  <SelectItem value="inactive">Inactiva</SelectItem>
+                </SelectContent>
+              </Select>
+              {/* Piso */}
+              <Select
+                value={filters.floor?.toString() || "all"}
+                onValueChange={(value) => {
+                  updateFilter(
+                    "floor",
+                    value === "all" ? undefined : parseInt(value)
+                  );
+                }}
+              >
+                <SelectTrigger className="w-[180px] ml-4">
+                  <SelectValue placeholder="Filtrar por piso" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los pisos</SelectItem>
+                  {availableFloors.map((floor) => (
+                    <SelectItem key={floor} value={floor.toString()}>
+                      Piso {floor}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {/* Estado de cama */}
+              <Select
+                value={filters.bedStatus || "all"}
+                onValueChange={(value) => {
+                  updateFilter(
+                    "bedStatus",
+                    value === "all" ? undefined : value
+                  );
+                }}
+              >
+                <SelectTrigger className="w-[180px] ml-4">
+                  <SelectValue placeholder="Filtrar por cama" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas las camas</SelectItem>
+                  <SelectItem value="disponible">Disponible</SelectItem>
+                  <SelectItem value="ocupada">Ocupada</SelectItem>
+                  <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
+                </SelectContent>
+              </Select>
+              {/* Menu servido */}
+              <Select
+                value={
+                  filters.menuConsumed !== undefined
+                    ? filters.menuConsumed.toString()
+                    : "all"
+                }
+                onValueChange={(value) => {
+                  if (value === "all") {
+                    updateFilter("menuConsumed", undefined); // Eliminar el filtro
+                  } else {
+                    updateFilter("menuConsumed", value === "true");
+                  }
+                }}
+              >
+                <SelectTrigger className="w-[180px] ml-4">
+                  <SelectValue placeholder="Filtrar por menú servido" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los menús</SelectItem>
+                  <SelectItem value="true">Servido</SelectItem>
+                  <SelectItem value="false">No servido</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {hasActiveFilters && (
+                <Button
+                  variant="default"
+                  className="ml-4 bg-green-400"
+                  onClick={clearFilters}
+                >
+                  Limpiar filtros
+                </Button>
+              )}
+
+              {isFetching && !isLoading && (
+                <div className="ml-4">
+                  <Loading size="sm" variant="spinner" />
+                </div>
+              )}
+            </div>
+
             <TabsContent value="camas">
-              {!beds || beds.length === 0 ? (
+              {isLoading ? (
+                <Loading
+                  size="lg"
+                  text="Cargando habitaciones..."
+                  className="min-h-[400px]"
+                  variant="spinner"
+                />
+              ) : !beds || beds.length === 0 ? (
                 <div className="rounded-md p-6 bg-yellow-50 border border-yellow-200 text-center">
                   <p className="text-base font-medium text-yellow-800">
                     No existen habitaciones o salas creadas.
@@ -443,6 +552,10 @@ export default function CamasPage() {
                         <div className="space-y-4">
                           {room.beds.map((bed) => {
                             const hasPatient = bed.patients?.length > 0;
+                            const bedStatus = getBedStatusDisplay(
+                              bed,
+                              hasPatient
+                            );
                             const patient = hasPatient ? bed.patients[0] : null;
                             const bedMenu =
                               bed.currentBedMenu ?? bed.bedMenus?.[0] ?? null;
@@ -461,14 +574,8 @@ export default function CamasPage() {
                                     <span className="font-medium">
                                       {bed.name}
                                     </span>
-                                    <Badge
-                                      className={
-                                        hasPatient
-                                          ? "bg-orange-100 text-orange-800 border-orange-200"
-                                          : "bg-gray-100 text-gray-800 border-gray-200"
-                                      }
-                                    >
-                                      {hasPatient ? "Ocupada" : "Libre"}
+                                    <Badge className={bedStatus.className}>
+                                      {bedStatus.text}
                                     </Badge>
                                   </div>
 
