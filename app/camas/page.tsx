@@ -362,7 +362,7 @@ export default function CamasPage() {
 
             <div className="flex flex-row items-center justify-start">
               <Input
-                className="w-200"
+                className="w-[200px]"
                 placeholder="Buscar habitación..."
                 value={filters.name || ""}
                 onChange={(e) => updateFilter("name", e.target.value)}
