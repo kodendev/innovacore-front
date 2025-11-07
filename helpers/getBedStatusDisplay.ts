@@ -1,4 +1,6 @@
-export const getBedStatusDisplay = (bed: any, hasPatient: boolean) => {
+import type { Bed } from "../types/bed";
+
+export const getBedStatusDisplay = (bed: Bed, hasPatient: boolean) => {
   // ⬅️ PRIORIDAD 1: Estado de mantenimiento (más importante)
   if (bed.status === "mantenimiento") {
     return {
