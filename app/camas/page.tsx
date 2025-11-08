@@ -53,6 +53,7 @@ import {
 import { useRoomFilters } from "@/hooks/filters/useRoomFilters";
 import { Loading } from "@/components/ui/Loading";
 import { getBedStatusDisplay } from "@/helpers/getBedStatusDisplay";
+import PatientsTable from "@/components/patients/PatientsTable";
 
 export default function CamasPage() {
   const [selectedRoom, setSelectedRoom] = useState<number | null>(null); // ID de la habitación seleccionada (para editar cama)
@@ -356,6 +357,7 @@ export default function CamasPage() {
               <TabsList>
                 <TabsTrigger value="camas">Gestión de Camas</TabsTrigger>
                 <TabsTrigger value="ordenes">Órdenes de Pacientes</TabsTrigger>
+                <TabsTrigger value="patients">Pacientes</TabsTrigger>
               </TabsList>
               <Button onClick={toggleView}>Cambiar vista</Button>
             </div>
@@ -776,6 +778,10 @@ export default function CamasPage() {
                   onEditRoom={(r) => openEditRoomDialog(r as unknown as Room)}
                 />
               )}
+            </TabsContent>
+
+            <TabsContent value="patients">
+              <PatientsTable />
             </TabsContent>
           </Tabs>
         </div>

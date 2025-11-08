@@ -1,23 +1,7 @@
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { BASE_URL } from "@/lib/utils";
-
-export type Patient = {
-  id: number;
-  name: string;
-  dni?: string | null;
-  age?: number | null;
-  gender?: string | null;
-  diagnosis?: string | null;
-  needsReview?: boolean | null;
-  currentStatus?: {
-    id: number;
-    statusType: string;
-    dietType?: string | null;
-    notes?: string | null;
-  } | null;
-  // agrega otros campos que tu API devuelva
-};
+import { Patient } from "@/types/camas/bedTypes";
 
 /**
  * getPatients - helper que llama al endpoint GET /patients
