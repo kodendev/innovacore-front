@@ -10,10 +10,14 @@ import {
   Select,
   SelectContent,
   SelectItem,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
 import { useCategories } from "@/hooks/tanstack/products/useCategories";
+import { Plus } from "lucide-react";
+import { DialogDescription, DialogHeader, DialogTitle, Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import AddCategoryForm from "./AddCategoryForm";
 
 export type NewIngredient = Omit<Ingredient, "id" | "status">;
 
@@ -22,6 +26,7 @@ interface Props {
 }
 
 export const AddIngredientForm = ({ onClose }: Props) => {
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState<boolean>(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -70,11 +75,12 @@ export const AddIngredientForm = ({ onClose }: Props) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <Label htmlFor="name">Nombre del Ingrediente</Label>
-        <Input
-          placeholder="Ej: Tomate, Lechuga, Queso"
+    <>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <Label htmlFor="name">Nombre del Ingrediente</Label>
+          <Input
+            placeholder="Ej: Tomate, Lechuga, Queso"
           id="name"
           value={formData.name}
           onChange={(e) =>
@@ -103,17 +109,28 @@ export const AddIngredientForm = ({ onClose }: Props) => {
         <Label htmlFor="name">Categoría</Label>
         <Select
           value={formData.categoryId}
-          onValueChange={(value) =>
+          onValueChange={(value) => {
+            if (value === "create-new") {
+              setIsAddDialogOpen(true);
+              return;
+            }
             setFormData((prev) => ({
               ...prev,
               categoryId: value,
-            }))
-          }
+            }));
+          }}
         >
           <SelectTrigger className="w-[120px]">
             <SelectValue placeholder="Seleccionar Categoría" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="create-new" className="font-semibold text-primary cursor-pointer bg-secondary">
+              <div className="flex items-center">
+                <Plus className="h-4 w-4" />
+                <span>Crear</span>
+              </div>
+            </SelectItem>
+            <SelectSeparator />
             {categories?.map((categories) => (
               <SelectItem key={categories.id} value={categories.id.toString()}>
                 {categories.name}
@@ -260,5 +277,19 @@ export const AddIngredientForm = ({ onClose }: Props) => {
         Agregar Producto
       </Button>
     </form>
+    <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+      <DialogTrigger asChild>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
+        <DialogHeader>
+          <DialogTitle>Agregar nueva categoria</DialogTitle>
+          <DialogDescription>
+            Ingrese el nombre de la nueva categoria
+          </DialogDescription>
+        </DialogHeader>
+        <AddCategoryForm onClose={() => setIsAddDialogOpen(false)} />
+      </DialogContent>
+    </Dialog>
+  </>
   );
 };
