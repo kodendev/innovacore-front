@@ -185,7 +185,7 @@ export const InventoryTab = () => {
                     className={
                       ingredient.isStockMin ? "text-red-500 font-bold" : ""
                     }
-                    label="Stock mínimo:"
+                    label="Punto de compra:"
                     value={`${ingredient?.minStock} kg`}
                   />
 
