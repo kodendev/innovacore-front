@@ -1,6 +1,9 @@
 import React from "react";
 import { usePatients } from "@/hooks/tanstack/camas/patients/getPatients";
-import { useCreatePatient } from "@/hooks/tanstack/camas/patients/useCreatePatients";
+import {
+  CreatedPatient,
+  useCreatePatient,
+} from "@/hooks/tanstack/camas/patients/useCreatePatients";
 import { useState } from "react";
 import {
   Table,
@@ -17,16 +20,27 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Plus } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loading } from "@/components/ui/Loading";
 import { MoreHorizontal, Edit, Eye, UserX, AlertTriangle } from "lucide-react";
 import { PatientResponse } from "@/types/camas/bedTypes";
+import PatientCreateForm from "./PatientCreateForm";
 
 const PatientsTable = () => {
   const [selectedPatient, setSelectedPatient] =
     useState<PatientResponse | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const { data: patients, isLoading } = usePatients();
   const { mutate: createPatient } = useCreatePatient();
@@ -129,6 +143,12 @@ const PatientsTable = () => {
     );
   }
 
+  const handlePatientCreated = (newPatient: CreatedPatient) => {
+    console.log("Paciente creado:", newPatient);
+    setIsCreateModalOpen(false);
+    // La invalidación de queries se maneja en el hook useCreatePatient
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -138,7 +158,23 @@ const PatientsTable = () => {
             Total de pacientes: {patients.length}
           </p>
         </div>
-        <Button>Nuevo Paciente</Button>
+        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Nuevo Paciente
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Nuevo Paciente</DialogTitle>
+            </DialogHeader>
+            <PatientCreateForm
+              onClose={() => setIsCreateModalOpen(false)}
+              onCreated={handlePatientCreated}
+            />
+          </DialogContent>
+        </Dialog>
       </CardHeader>
       <CardContent>
         <Table>
