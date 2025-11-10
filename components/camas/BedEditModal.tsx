@@ -17,7 +17,6 @@ import { useUpdateBed } from "@/hooks/tanstack/camas/beds/useUpdateBed";
 import { useAssignBedMenu } from "@/hooks/tanstack/camas/beds/useAssignMenuToBed";
 import { useAssignPatientToBed } from "@/hooks/tanstack/camas/beds/useAssignPatientToBed";
 import { usePatients } from "@/hooks/tanstack/camas/patients/getPatients";
-import { Badge } from "../ui/badge";
 import { useQueryClient } from "@tanstack/react-query";
 
 export type BedProps = {
@@ -51,8 +50,6 @@ export default function BedEditModal({
   const [isAssignPatientOpen, setIsAssignPatientOpen] = useState(false);
   const [selectedAssignPatient, setSelectedAssignPatient] =
     useState<string>("none");
-  const [isCreatePatientOpen, setIsCreatePatientOpen] = useState(false);
-
   const { data: patients, isLoading: patientsLoading } = usePatients();
   const assignPatientMut = useAssignPatientToBed();
 

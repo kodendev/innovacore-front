@@ -36,14 +36,26 @@ import { Loading } from "@/components/ui/Loading";
 import { MoreHorizontal, Edit, Eye, UserX, AlertTriangle } from "lucide-react";
 import { PatientResponse } from "@/types/camas/bedTypes";
 import PatientCreateForm from "./PatientCreateForm";
+import { useUpdatePatient } from "@/hooks/tanstack/camas/patients/useEditPatients";
+import { getStatusBadge } from "@/utils/badge_variants";
+import EditPatientForm from "../forms/EditPatientForm";
 
 const PatientsTable = () => {
   const [selectedPatient, setSelectedPatient] =
     useState<PatientResponse | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const { data: patients, isLoading } = usePatients();
-  const { mutate: createPatient } = useCreatePatient();
+
+  //Nuevo hook para actualizar paciente
+  const { mutate: updatePatient, isPending } = useUpdatePatient();
+
+  const handlePatientUpdated = (updatedPatient: any) => {
+    console.log("Paciente actualizado:", updatedPatient);
+    setIsEditModalOpen(false);
+    setSelectedPatient(null);
+  };
 
   const getCurrentStatus = (statuses?: PatientResponse["statuses"]) => {
     if (!statuses || statuses.length === 0) return null;
@@ -58,25 +70,6 @@ const PatientsTable = () => {
     return sortedStatuses[0];
   };
 
-  const getStatusBadge = (status?: string) => {
-    switch (status?.toLowerCase()) {
-      case "activo":
-      case "internacion":
-        return { text: status, className: "bg-green-100 text-green-800" };
-      case "alta":
-        return { text: status, className: "bg-blue-100 text-blue-800" };
-      case "critico":
-        return { text: status, className: "bg-red-100 text-red-800" };
-      case "observacion":
-        return { text: status, className: "bg-yellow-100 text-yellow-800" };
-      default:
-        return {
-          text: status || "Sin estado",
-          className: "bg-gray-100 text-gray-800",
-        };
-    }
-  };
-
   const handleAction = (action: string, patient: PatientResponse) => {
     switch (action) {
       case "view":
@@ -84,9 +77,8 @@ const PatientsTable = () => {
         // TODO: Implementar modal de vista
         break;
       case "edit":
-        console.log("Editar paciente:", patient);
         setSelectedPatient(patient);
-        // TODO: Implementar modal de edición
+        setIsEditModalOpen(true); // ⬅️ Abrir el modal
         break;
       case "deactivate":
         console.log("Desactivar paciente:", patient);
@@ -158,6 +150,17 @@ const PatientsTable = () => {
             Total de pacientes: {patients.length}
           </p>
         </div>
+        <EditPatientForm
+          patient={selectedPatient}
+          open={isEditModalOpen}
+          onOpenChange={(open) => {
+            setIsEditModalOpen(open);
+            if (!open) {
+              setSelectedPatient(null);
+            }
+          }}
+          onSuccess={handlePatientUpdated}
+        />
         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
           <DialogTrigger asChild>
             <Button>
@@ -232,7 +235,7 @@ const PatientsTable = () => {
                           onClick={() => handleAction("edit", patient)}
                         >
                           <Edit className="mr-2 h-4 w-4" />
-                          Editar
+                          Editar Paciente
                         </DropdownMenuItem>
                         {patient.needsReview && (
                           <>
@@ -241,7 +244,7 @@ const PatientsTable = () => {
                               onClick={() => handleAction("review", patient)}
                             >
                               <AlertTriangle className="mr-2 h-4 w-4" />
-                              Marcar como revisado
+                              Eliminar
                             </DropdownMenuItem>
                           </>
                         )}
