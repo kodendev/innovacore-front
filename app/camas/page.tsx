@@ -362,117 +362,116 @@ export default function CamasPage() {
               <Button onClick={toggleView}>Cambiar vista</Button>
             </div>
 
-            <div className="flex flex-row items-center justify-start">
-              <Input
-                className="w-[200px]"
-                placeholder="Buscar habitación..."
-                value={filters.name || ""}
-                onChange={(e) => updateFilter("name", e.target.value)}
-              />
-              {/* Estado de habitación */}
-              <Select
-                value={filters.roomStatus || "all"}
-                onValueChange={(value) => {
-                  updateFilter(
-                    "roomStatus",
-                    value === "all" ? undefined : value
-                  );
-                }}
-              >
-                <SelectTrigger className="w-[180px] ml-4">
-                  <SelectValue placeholder="Filtrar por estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los estados</SelectItem>
-                  <SelectItem value="active">Activa</SelectItem>
-                  <SelectItem value="inactive">Inactiva</SelectItem>
-                </SelectContent>
-              </Select>
-              {/* Piso */}
-              <Select
-                value={filters.floor?.toString() || "all"}
-                onValueChange={(value) => {
-                  updateFilter(
-                    "floor",
-                    value === "all" ? undefined : parseInt(value)
-                  );
-                }}
-              >
-                <SelectTrigger className="w-[180px] ml-4">
-                  <SelectValue placeholder="Filtrar por piso" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los pisos</SelectItem>
-                  {availableFloors.map((floor) => (
-                    <SelectItem key={floor} value={floor.toString()}>
-                      Piso {floor}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {/* Estado de cama */}
-              <Select
-                value={filters.bedStatus || "all"}
-                onValueChange={(value) => {
-                  updateFilter(
-                    "bedStatus",
-                    value === "all" ? undefined : value
-                  );
-                }}
-              >
-                <SelectTrigger className="w-[180px] ml-4">
-                  <SelectValue placeholder="Filtrar por cama" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas las camas</SelectItem>
-                  <SelectItem value="disponible">Disponible</SelectItem>
-                  <SelectItem value="ocupada">Ocupada</SelectItem>
-                  <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
-                </SelectContent>
-              </Select>
-              {/* Menu servido */}
-              <Select
-                value={
-                  filters.menuConsumed !== undefined
-                    ? filters.menuConsumed.toString()
-                    : "all"
-                }
-                onValueChange={(value) => {
-                  if (value === "all") {
-                    updateFilter("menuConsumed", undefined); // Eliminar el filtro
-                  } else {
-                    updateFilter("menuConsumed", value === "true");
-                  }
-                }}
-              >
-                <SelectTrigger className="w-[180px] ml-4">
-                  <SelectValue placeholder="Filtrar por menú servido" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los menús</SelectItem>
-                  <SelectItem value="true">Servido</SelectItem>
-                  <SelectItem value="false">No servido</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {hasActiveFilters && (
-                <Button
-                  variant="default"
-                  className="ml-4 bg-green-400"
-                  onClick={clearFilters}
-                >
-                  Limpiar filtros
-                </Button>
-              )}
-
-              {isFetching && !isLoading && (
-                <div className="ml-4">
-                  <Loading size="sm" variant="spinner" />
-                </div>
-              )}
-            </div>
-
             <TabsContent value="camas">
+              <div className="flex flex-row items-center justify-start">
+                <Input
+                  className="w-[200px]"
+                  placeholder="Buscar habitación..."
+                  value={filters.name || ""}
+                  onChange={(e) => updateFilter("name", e.target.value)}
+                />
+                {/* Estado de habitación */}
+                <Select
+                  value={filters.roomStatus || "all"}
+                  onValueChange={(value) => {
+                    updateFilter(
+                      "roomStatus",
+                      value === "all" ? undefined : value
+                    );
+                  }}
+                >
+                  <SelectTrigger className="w-[180px] ml-4">
+                    <SelectValue placeholder="Filtrar por estado" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos los estados</SelectItem>
+                    <SelectItem value="active">Activa</SelectItem>
+                    <SelectItem value="inactive">Inactiva</SelectItem>
+                  </SelectContent>
+                </Select>
+                {/* Piso */}
+                <Select
+                  value={filters.floor?.toString() || "all"}
+                  onValueChange={(value) => {
+                    updateFilter(
+                      "floor",
+                      value === "all" ? undefined : parseInt(value)
+                    );
+                  }}
+                >
+                  <SelectTrigger className="w-[180px] ml-4">
+                    <SelectValue placeholder="Filtrar por piso" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos los pisos</SelectItem>
+                    {availableFloors.map((floor) => (
+                      <SelectItem key={floor} value={floor.toString()}>
+                        Piso {floor}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {/* Estado de cama */}
+                <Select
+                  value={filters.bedStatus || "all"}
+                  onValueChange={(value) => {
+                    updateFilter(
+                      "bedStatus",
+                      value === "all" ? undefined : value
+                    );
+                  }}
+                >
+                  <SelectTrigger className="w-[180px] ml-4">
+                    <SelectValue placeholder="Filtrar por cama" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas las camas</SelectItem>
+                    <SelectItem value="disponible">Disponible</SelectItem>
+                    <SelectItem value="ocupada">Ocupada</SelectItem>
+                    <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
+                  </SelectContent>
+                </Select>
+                {/* Menu servido */}
+                <Select
+                  value={
+                    filters.menuConsumed !== undefined
+                      ? filters.menuConsumed.toString()
+                      : "all"
+                  }
+                  onValueChange={(value) => {
+                    if (value === "all") {
+                      updateFilter("menuConsumed", undefined); // Eliminar el filtro
+                    } else {
+                      updateFilter("menuConsumed", value === "true");
+                    }
+                  }}
+                >
+                  <SelectTrigger className="w-[180px] ml-4">
+                    <SelectValue placeholder="Filtrar por menú servido" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos los menús</SelectItem>
+                    <SelectItem value="true">Servido</SelectItem>
+                    <SelectItem value="false">No servido</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {hasActiveFilters && (
+                  <Button
+                    variant="default"
+                    className="ml-4 bg-green-400"
+                    onClick={clearFilters}
+                  >
+                    Limpiar filtros
+                  </Button>
+                )}
+
+                {isFetching && !isLoading && (
+                  <div className="ml-4">
+                    <Loading size="sm" variant="spinner" />
+                  </div>
+                )}
+              </div>
               {isLoading ? (
                 <Loading
                   size="lg"
@@ -481,7 +480,7 @@ export default function CamasPage() {
                   variant="spinner"
                 />
               ) : !beds || beds.length === 0 ? (
-                <div className="rounded-md p-6 bg-yellow-50 border border-yellow-200 text-center">
+                <div className="rounded-md p-6  bg-yellow-50 border border-yellow-200 text-center">
                   <p className="text-base font-medium text-yellow-800">
                     No existen habitaciones o salas creadas.
                   </p>
@@ -495,7 +494,7 @@ export default function CamasPage() {
                   </div>
                 </div>
               ) : componentView === "card" ? (
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid mt-4 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                   {beds?.map((room) => (
                     <Card
                       key={room.id}
@@ -770,13 +769,15 @@ export default function CamasPage() {
                   ))}
                 </div>
               ) : (
-                <RoomsTable
-                  rooms={beds ?? []}
-                  servedBedIds={servedBedIds}
-                  onOpenConsumeConfirm={handleOpenConsumeConfirm as any}
-                  onAssignBed={(r) => openBedRoomDialog(r as unknown as Room)}
-                  onEditRoom={(r) => openEditRoomDialog(r as unknown as Room)}
-                />
+                <div className="mt-4">
+                  <RoomsTable
+                    rooms={beds ?? []}
+                    servedBedIds={servedBedIds}
+                    onOpenConsumeConfirm={handleOpenConsumeConfirm as any}
+                    onAssignBed={(r) => openBedRoomDialog(r as unknown as Room)}
+                    onEditRoom={(r) => openEditRoomDialog(r as unknown as Room)}
+                  />
+                </div>
               )}
             </TabsContent>
 
