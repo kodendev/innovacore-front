@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { ZodType, ZodTypeAny } from "zod";
@@ -20,7 +20,7 @@ type GenericFormDialogProps<T> = {
   onOpenChange: (open: boolean) => void;
   title?: string;
   description?: string;
-  schema?: ZodType<T, ZodTypeAny>;
+  schema?: ZodSchema<T>;
   defaultValues?: Partial<T>;
   submitLabel?: string;
   cancelLabel?: string;
@@ -52,6 +52,12 @@ export function GenericFormDialog<T = any>({
     reset,
     formState: { isSubmitting },
   } = methods;
+
+  useEffect(() => {
+    if (open && defaultValues) {
+      reset(defaultValues as any);
+    }
+  }, [open, defaultValues, reset]);
 
   const handleClose = () => {
     onOpenChange(false);

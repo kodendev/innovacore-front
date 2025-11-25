@@ -21,7 +21,7 @@ export default function PatientCreateForm({
   onCreated,
   defaultBedId = null,
 }: Props) {
-  const { register, handleSubmit, reset, formState } =
+  const { register, handleSubmit, reset, formState, watch } =
     useForm<CreatePatientPayload>({
       defaultValues: {
         name: "",

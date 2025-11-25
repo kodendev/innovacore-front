@@ -15,6 +15,32 @@ export interface Patient {
   needsReview?: boolean | null;
 }
 
+export interface PatientResponse {
+  id: number;
+  name: string;
+  documentNumber?: string; // ⬅️ CAMBIO: era dni
+  age?: number | null;
+  diagnosis?: string | null;
+  active?: boolean;
+  needsReview?: boolean | null;
+  bedId?: number;
+  bed?: {
+    id: number;
+    name: string;
+    status: string;
+    roomId: number;
+  };
+  statuses?: Array<{
+    // ⬅️ CAMBIO: era currentStatus
+    id: number;
+    statusType: string;
+    dietType?: string | null;
+    notes?: string | null;
+    createdAt: string;
+    updatedBy?: string | null;
+  }>;
+}
+
 export interface Menu {
   id: number;
   quantity: number;
