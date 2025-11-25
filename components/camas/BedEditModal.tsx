@@ -18,20 +18,14 @@ import { useAssignBedMenu } from "@/hooks/tanstack/camas/beds/useAssignMenuToBed
 import { useAssignPatientToBed } from "@/hooks/tanstack/camas/beds/useAssignPatientToBed";
 import { usePatients } from "@/hooks/tanstack/camas/patients/getPatients";
 import { useQueryClient } from "@tanstack/react-query";
+import { Bed } from "@/types/camas/bedTypes";
 
-export type BedProps = {
-  id: number;
-  name?: string;
-  roomId?: number | null;
-  status?: "disponible" | "ocupada" | "mantenimiento" | string;
-  patients?: Array<{ id: number; name?: string }>;
-  bedMenus?: Array<{ id: number; menu: { id: number; name: string } }>;
-};
+export type BedEditProps = Bed;
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  bed: BedProps;
+  bed: BedEditProps;
   roomName?: string;
   currentUserId?: number;
   onSuccess?: () => void;
@@ -55,6 +49,13 @@ export default function BedEditModal({
 
   const queryClient = useQueryClient();
 
+  const updateBedMut = useUpdateBed();
+  const addPatientStatusMut = useAddPatientStatus();
+  const assignBedMenuMut = useAssignBedMenu();
+
+  const hasPatient = !!(bed.patients && bed.patients.length > 0);
+  const patient = hasPatient ? bed.patients![0] : null;
+
   const {
     register,
     control,
@@ -68,7 +69,7 @@ export default function BedEditModal({
       statusType: "none",
       dietType: "none",
       description: "",
-      menuId: bed.bedMenus?.[0]?.menu?.id?.toString() ?? "none",
+      menuId: "none",
       quantity: 1,
       userId: currentUserId ?? null,
     },
@@ -76,24 +77,35 @@ export default function BedEditModal({
 
   React.useEffect(() => {
     if (isOpen) {
-      reset({
+      // ⬅️ Acceso más seguro a las propiedades
+      const currentStatus = patient?.currentStatus;
+      const currentMenu = bed.currentBedMenu;
+
+      const formValues = {
         name: bed.name ?? "",
         status: bed.status ?? "disponible",
-        statusType: "",
-        dietType: "",
-        description: "",
-        menuId: bed.bedMenus?.[0]?.menu?.id?.toString() ?? "",
-        quantity: 1,
-      });
+        statusType: currentStatus?.statusType ?? "none",
+        dietType: currentStatus?.dietType ?? "none",
+        description: currentStatus?.notes ?? "",
+        menuId: currentMenu?.menu?.id?.toString() ?? "none",
+        quantity: currentMenu?.quantity ?? 1,
+      };
+
+      // ⬅️ FORZAR el reset con setTimeout para asegurar que se ejecute
+      setTimeout(() => {
+        reset(formValues);
+      }, 100);
     }
-  }, [isOpen, bed]);
-
-  const updateBedMut = useUpdateBed();
-  const addPatientStatusMut = useAddPatientStatus();
-  const assignBedMenuMut = useAssignBedMenu();
-
-  const hasPatient = !!(bed.patients && bed.patients.length > 0);
-  const patient = hasPatient ? bed.patients![0] : null;
+  }, [
+    isOpen,
+    bed.id,
+    bed.name,
+    bed.status,
+    patient?.name,
+    patient?.currentStatus,
+    bed.currentBedMenu,
+    reset,
+  ]);
 
   const isSaving =
     isSubmitting ||
@@ -207,7 +219,9 @@ export default function BedEditModal({
                       <Controller
                         control={control}
                         name="statusType"
-                        defaultValue="none"
+                        defaultValue={
+                          patient?.currentStatus?.statusType || "none"
+                        }
                         render={({ field }) => (
                           <Select
                             value={field.value}
@@ -238,7 +252,9 @@ export default function BedEditModal({
                       <Controller
                         control={control}
                         name="dietType"
-                        defaultValue="none"
+                        defaultValue={
+                          patient?.currentStatus?.dietType ?? "none"
+                        }
                         render={({ field }) => (
                           <Select
                             value={field.value}
@@ -379,7 +395,7 @@ export default function BedEditModal({
                     control={control}
                     name="menuId"
                     defaultValue={
-                      bed.bedMenus?.[0]?.menu?.id?.toString() ?? "none"
+                      bed.currentBedMenu?.menu?.id?.toString() ?? "none"
                     }
                     render={({ field }) => (
                       <Select
