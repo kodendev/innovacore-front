@@ -1,30 +1,22 @@
-# Sanatorio kitchen app
+# Next.js App
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
+Este es un proyecto creado con [Next.js](https://nextjs.org/) utilizando la configuración por defecto.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/leasabus-projects/v0-sanatorio-kitchen-app)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/mqVSQSTMc05)
+## 🚀 Comenzar
 
-## Overview
+Primero, instalá las dependencias del proyecto:
 
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
+```bash
+npm install
+# o
+yarn install
+# o
+pnpm install
 
-## Deployment
+Luego, iniciá el servidor de desarrollo:
 
-Your project is live at:
-
-**[https://vercel.com/leasabus-projects/v0-sanatorio-kitchen-app](https://vercel.com/leasabus-projects/v0-sanatorio-kitchen-app)**
-
-## Build your app
-
-Continue building your app on:
-
-**[https://v0.dev/chat/projects/mqVSQSTMc05](https://v0.dev/chat/projects/mqVSQSTMc05)**
-
-## How It Works
-
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+npm run dev
+# o
+yarn dev
+# o
+pnpm dev
