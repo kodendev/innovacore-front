@@ -287,7 +287,7 @@ Para soporte y preguntas, contactar al equipo de desarrollo.
 ---
 
 **Versión**: 0.1.0  
-**Última actualización**: 2026  
+**Última actualización**: Enero 2026  
 **Framework**: Next.js 15.2.4  
 **React**: 19
 
