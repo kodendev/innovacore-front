@@ -15,9 +15,7 @@ Aplicación desarrollada con [Next.js](https://nextjs.org/), diseñada para ser 
 
 INSTALAR PAQUETES
 npm install
-# o
 yarn install
-# o
 pnpm install
 
 BUILD LOCAL PARA DESARROLLO
