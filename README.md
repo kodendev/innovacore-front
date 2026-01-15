@@ -21,8 +21,8 @@ InnovaCore Front es una aplicación web moderna diseñada para optimizar y digit
 ### Core
 - **[Next.js 15.2.4](https://nextjs.org/)** - Framework de React con SSR/SSG
 - **[React 19](https://reactjs.org/)** - Librería para interfaces de usuario
-- **[TypeScript 5](https://www.typescriptlang.org/)** - JavaScript con tipado estático
-- **[TailwindCSS 3.4](https://tailwindcss.com/)** - Framework CSS utility-first
+- **[TypeScript ^5](https://www.typescriptlang.org/)** - JavaScript con tipado estático
+- **[TailwindCSS 3.4.17](https://tailwindcss.com/)** - Framework CSS utility-first
 
 ### UI Components
 - **[Radix UI](https://www.radix-ui.com/)** - Componentes accesibles y sin estilo
